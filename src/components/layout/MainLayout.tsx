@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
-import { AppSidebar } from './AppSidebar';
-import { AppHeader } from './AppHeader';
+import { TopNavbar } from './TopNavbar';
+import { MobileHeader } from './MobileHeader';
+import { MobileBottomNav } from './MobileBottomNav';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -17,16 +17,24 @@ export function MainLayout({ children }: MainLayoutProps) {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <SidebarInset className="flex flex-col flex-1">
-          <AppHeader />
-          <main className="flex-1 overflow-auto p-6">
-            {children}
-          </main>
-        </SidebarInset>
+    <div className="min-h-screen bg-background">
+      {/* Desktop: Top Navigation */}
+      <div className="hidden lg:block">
+        <TopNavbar />
       </div>
-    </SidebarProvider>
+
+      {/* Mobile/Tablet: Compact Header */}
+      <MobileHeader />
+
+      {/* Main Content */}
+      <main className="pb-20 lg:pb-6">
+        <div className="p-4 lg:p-6">
+          {children}
+        </div>
+      </main>
+
+      {/* Mobile/Tablet: Bottom Navigation */}
+      <MobileBottomNav />
+    </div>
   );
 }
