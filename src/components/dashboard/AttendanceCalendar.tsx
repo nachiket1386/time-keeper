@@ -1,226 +1,270 @@
 import { useState, useMemo } from 'react';
-import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Search, CalendarDays } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { attendanceRecords, employees } from '@/data/mockData';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface AttendanceCalendarProps {
   companyId?: string;
 }
 
+type AttendanceStatus = 'Present' | 'Absent' | 'Partial Day' | 'On Leave' | 'Holiday';
+
+const statusConfig: Record<AttendanceStatus, { label: string; shortLabel: string; bg: string; text: string; border: string }> = {
+  'Present': { label: 'Present', shortLabel: 'P', bg: 'bg-emerald-500', text: 'text-white', border: 'border-emerald-500' },
+  'Absent': { label: 'Absent', shortLabel: 'A', bg: 'bg-red-500', text: 'text-white', border: 'border-red-500' },
+  'Partial Day': { label: 'Half', shortLabel: '½', bg: 'bg-amber-400', text: 'text-amber-900', border: 'border-amber-400' },
+  'On Leave': { label: 'Leave', shortLabel: 'L', bg: 'bg-violet-500', text: 'text-white', border: 'border-violet-500' },
+  'Holiday': { label: 'Holiday', shortLabel: 'H', bg: 'bg-blue-400', text: 'text-white', border: 'border-blue-400' },
+};
+
+const months = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
 export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth();
+  const [search, setSearch] = useState('');
+  const [selectedEP, setSelectedEP] = useState<string>('');
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
-  const [selectedEp, setSelectedEp] = useState<string>('');
-  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
+  // Filter employees by company
   const filteredEmployees = useMemo(() => {
-    return employees
-      .filter((e) => !companyId || e.companyId === companyId)
-      .filter((e) => 
-        searchQuery === '' ||
-        e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        e.epNumber.toLowerCase().includes(searchQuery.toLowerCase())
+    return employees.filter(e => !companyId || e.companyId === companyId);
+  }, [companyId]);
+
+  // Search employees
+  const searchedEmployees = useMemo(() => {
+    if (!search) return filteredEmployees;
+    const searchLower = search.toLowerCase();
+    return filteredEmployees.filter(
+      e => e.name.toLowerCase().includes(searchLower) || 
+           e.epNumber.toLowerCase().includes(searchLower)
+    );
+  }, [filteredEmployees, search]);
+
+  // Get selected employee
+  const selectedEmployee = useMemo(() => {
+    return filteredEmployees.find(e => e.epNumber === selectedEP) || filteredEmployees[0];
+  }, [filteredEmployees, selectedEP]);
+
+  // Generate calendar data
+  const calendarData = useMemo(() => {
+    if (!selectedEmployee) return { days: [], firstDayOffset: 0 };
+    
+    const year = selectedYear;
+    const month = selectedMonth;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    
+    const days: { day: number; status: AttendanceStatus | null; mandays: number }[] = [];
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const record = attendanceRecords.find(
+        r => r.epNumber === selectedEmployee.epNumber && r.date === dateStr
       );
-  }, [companyId, searchQuery]);
+      
+      days.push({
+        day,
+        status: record ? (record.status as AttendanceStatus) : null,
+        mandays: record?.mandays || 0
+      });
+    }
+    
+    return { days, firstDayOffset: firstDay };
+  }, [selectedEmployee, selectedMonth, selectedYear]);
 
-  const selectedEmployee = employees.find((e) => e.epNumber === selectedEp);
+  // Generate years for dropdown
+  const years = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
+  }, []);
 
-  const employeeAttendance = useMemo(() => {
-    if (!selectedEp) return [];
-    return attendanceRecords.filter((r) => r.epNumber === selectedEp);
-  }, [selectedEp]);
-
-  const calendarDate = new Date(selectedYear, selectedMonth, 1);
-
-  const getStatusForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    const record = employeeAttendance.find((r) => r.date === dateStr);
-    return record?.status;
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(prev => prev - 1);
+    } else {
+      setSelectedMonth(prev => prev - 1);
+    }
   };
 
-  const statusColors: Record<string, string> = {
-    'Present': 'bg-success text-success-foreground',
-    'Absent': 'bg-destructive text-destructive-foreground',
-    'Partial Day': 'bg-warning text-warning-foreground',
-    'On Leave': 'bg-info text-info-foreground',
-    'Holiday': 'bg-muted text-muted-foreground',
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(prev => prev + 1);
+    } else {
+      setSelectedMonth(prev => prev + 1);
+    }
   };
-
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
-
-  // Calculate attendance summary for selected employee and month
-  const attendanceSummary = useMemo(() => {
-    if (!selectedEp) return null;
-
-    const monthRecords = employeeAttendance.filter((r) => {
-      const recordDate = new Date(r.date);
-      return recordDate.getMonth() === selectedMonth && recordDate.getFullYear() === selectedYear;
-    });
-
-    return {
-      present: monthRecords.filter((r) => r.status === 'Present').length,
-      absent: monthRecords.filter((r) => r.status === 'Absent').length,
-      partial: monthRecords.filter((r) => r.status === 'Partial Day').length,
-      leave: monthRecords.filter((r) => r.status === 'On Leave').length,
-      holiday: monthRecords.filter((r) => r.status === 'Holiday').length,
-      totalMandays: monthRecords.reduce((sum, r) => sum + r.mandays, 0),
-    };
-  }, [selectedEp, selectedMonth, selectedYear, employeeAttendance]);
 
   return (
-    <Card className="col-span-full">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
-            Attendance Calendar
-          </CardTitle>
-        </div>
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-4 bg-gradient-to-r from-muted/50 to-transparent">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <CalendarIcon className="h-5 w-5 text-primary" />
+          Attendance Calendar
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          {/* EP Search */}
-          <div className="relative sm:col-span-2 lg:col-span-1">
+      <CardContent className="p-4 md:p-6">
+        {/* Search and EP Selection */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search EP..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
           </div>
-
-          {/* EP Select */}
-          <Select value={selectedEp} onValueChange={setSelectedEp}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Employee" />
+          <Select 
+            value={selectedEP || selectedEmployee?.epNumber} 
+            onValueChange={setSelectedEP}
+          >
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder="Select EP" />
             </SelectTrigger>
             <SelectContent>
-              {filteredEmployees.map((emp) => (
+              {searchedEmployees.map((emp) => (
                 <SelectItem key={emp.epNumber} value={emp.epNumber}>
-                  {emp.epNumber} - {emp.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Month Select */}
-          <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Month" />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map((month, idx) => (
-                <SelectItem key={month} value={String(idx)}>
-                  {month}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Year Select */}
-          <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {years.map((year) => (
-                <SelectItem key={year} value={String(year)}>
-                  {year}
+                  {emp.epNumber.replace('EP-2024-', 'EP')}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {selectedEmployee ? (
-          <div className="space-y-6">
-            {/* Employee Info */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="font-semibold text-lg">{selectedEmployee.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedEmployee.epNumber} • {selectedEmployee.contractor} • {selectedEmployee.trade}
-                  </p>
-                </div>
-                {attendanceSummary && (
-                  <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-success/10 text-success border-success/20">
-                      {attendanceSummary.present} Present
-                    </Badge>
-                    <Badge className="bg-destructive/10 text-destructive border-destructive/20">
-                      {attendanceSummary.absent} Absent
-                    </Badge>
-                    <Badge className="bg-warning/10 text-warning border-warning/20">
-                      {attendanceSummary.partial} Partial
-                    </Badge>
-                    <Badge className="bg-info/10 text-info border-info/20">
-                      {attendanceSummary.totalMandays.toFixed(1)} Mandays
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
+        {/* Month/Year Navigation */}
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
+            <SelectTrigger className="w-[80px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map((month, idx) => (
+                <SelectItem key={month} value={String(idx)}>{month}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
+            <SelectTrigger className="w-[80px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((year) => (
+                <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
 
-            {/* Calendar */}
-            <div className="flex justify-center overflow-x-auto">
-              <Calendar
-                mode="single"
-                month={calendarDate}
-                onMonthChange={(date) => {
-                  setSelectedMonth(date.getMonth());
-                  setSelectedYear(date.getFullYear());
-                }}
-                className="rounded-xl border shadow-sm"
-                modifiers={{
-                  present: (date) => getStatusForDate(date) === 'Present',
-                  absent: (date) => getStatusForDate(date) === 'Absent',
-                  partial: (date) => getStatusForDate(date) === 'Partial Day',
-                  leave: (date) => getStatusForDate(date) === 'On Leave',
-                  holiday: (date) => getStatusForDate(date) === 'Holiday',
-                }}
-                modifiersClassNames={{
-                  present: 'bg-success text-success-foreground hover:bg-success/90',
-                  absent: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-                  partial: 'bg-warning text-warning-foreground hover:bg-warning/90',
-                  leave: 'bg-info text-info-foreground hover:bg-info/90',
-                  holiday: 'bg-muted text-muted-foreground',
-                }}
-              />
+        {/* Employee Info */}
+        {selectedEmployee && (
+          <div className="flex items-center gap-3 mb-4 p-3 bg-muted/30 rounded-lg border border-border/50">
+            <Avatar className="h-10 w-10 bg-primary/10 border-2 border-primary/20">
+              <AvatarFallback className="text-primary font-semibold text-sm">
+                {selectedEmployee.name.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-sm truncate">{selectedEmployee.name}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {selectedEmployee.trade} • {selectedEmployee.contractor}
+              </p>
             </div>
+          </div>
+        )}
 
-            {/* Legend */}
-            <div className="flex flex-wrap justify-center gap-4 pt-2">
-              {Object.entries(statusColors).map(([status, color]) => (
-                <div key={status} className="flex items-center gap-2">
-                  <div className={cn('w-4 h-4 rounded', color)} />
-                  <span className="text-xs text-muted-foreground">{status}</span>
+        {/* Calendar Grid */}
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="min-w-[300px]">
+            {/* Week Headers */}
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {weekDays.map((day, idx) => (
+                <div 
+                  key={idx} 
+                  className={cn(
+                    "text-center text-xs font-semibold py-2",
+                    idx === 0 || idx === 6 ? "text-muted-foreground" : "text-foreground"
+                  )}
+                >
+                  {day}
                 </div>
               ))}
             </div>
+
+            {/* Calendar Days */}
+            <div className="grid grid-cols-7 gap-1">
+              {/* Empty cells for offset */}
+              {Array.from({ length: calendarData.firstDayOffset }).map((_, idx) => (
+                <div key={`empty-${idx}`} className="aspect-square" />
+              ))}
+              
+              {/* Day cells */}
+              {calendarData.days.map(({ day, status, mandays }) => {
+                const config = status ? statusConfig[status] : null;
+                const isWeekend = (calendarData.firstDayOffset + day - 1) % 7 === 0 || 
+                                  (calendarData.firstDayOffset + day - 1) % 7 === 6;
+                
+                return (
+                  <div
+                    key={day}
+                    className={cn(
+                      "aspect-square rounded-lg flex flex-col items-center justify-center relative transition-all",
+                      "text-xs md:text-sm font-medium",
+                      config 
+                        ? cn(config.bg, config.text, "shadow-sm hover:shadow-md cursor-pointer hover:scale-105") 
+                        : cn(
+                            "bg-muted/20 border border-dashed border-border/50 text-muted-foreground",
+                            isWeekend && "bg-muted/40"
+                          )
+                    )}
+                    title={status ? `${status} - ${mandays} mandays` : 'No data'}
+                  >
+                    <span className="text-[10px] md:text-xs opacity-70 absolute top-0.5 left-1 md:top-1 md:left-1.5">
+                      {day}
+                    </span>
+                    {config && (
+                      <span className="font-bold text-sm md:text-base mt-1">
+                        {config.shortLabel}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-            <CalendarDays className="h-12 w-12 mb-4 opacity-50" />
-            <p className="text-lg font-medium">Select an Employee</p>
-            <p className="text-sm">Choose an employee to view their attendance calendar</p>
-          </div>
-        )}
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-4 pt-4 border-t border-border/50">
+          {Object.entries(statusConfig).map(([key, config]) => (
+            <div key={key} className="flex items-center gap-1.5">
+              <div className={cn(
+                "w-5 h-5 md:w-6 md:h-6 rounded flex items-center justify-center text-[10px] md:text-xs font-bold",
+                config.bg, config.text
+              )}>
+                {config.shortLabel}
+              </div>
+              <span className="text-xs text-muted-foreground">{config.label}</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
