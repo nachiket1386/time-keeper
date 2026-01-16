@@ -12,8 +12,8 @@ import {
   UserCog,
   History,
   LogOut,
-  ChevronRight,
   Bell,
+  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -21,25 +21,26 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
+
+const mainMenuItems = [
+  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, color: 'bg-blue-500' },
+  { title: 'Attendance', href: '/attendance', icon: Clock, color: 'bg-green-500' },
+  { title: 'Import Data', href: '/import', icon: Upload, color: 'bg-purple-500' },
+  { title: 'Settings', href: '/settings', icon: Settings, color: 'bg-gray-500' },
+];
 
 const reportsItems = [
-  { title: 'ARC Summary', href: '/reports/arc-summary', icon: FileSpreadsheet },
-  { title: 'Overtime Report', href: '/reports/overtime', icon: Clock },
-  { title: 'Partial Day Report', href: '/reports/partial-day', icon: FileText },
-  { title: 'Regularization', href: '/reports/regularization', icon: ClipboardList },
-  { title: 'Comprehensive', href: '/reports/comprehensive', icon: FileText },
+  { title: 'ARC Summary', href: '/reports/arc-summary', icon: FileSpreadsheet, color: 'bg-orange-500' },
+  { title: 'Overtime', href: '/reports/overtime', icon: Clock, color: 'bg-cyan-500' },
+  { title: 'Partial Day', href: '/reports/partial-day', icon: FileText, color: 'bg-amber-500' },
+  { title: 'Regularization', href: '/reports/regularization', icon: ClipboardList, color: 'bg-indigo-500' },
+  { title: 'Comprehensive', href: '/reports/comprehensive', icon: TrendingUp, color: 'bg-pink-500' },
 ];
 
 const managementItems = [
-  { title: 'Users', href: '/users', icon: Users },
-  { title: 'Companies', href: '/companies', icon: Building2, rootOnly: true },
-  { title: 'Employees', href: '/employees', icon: UserCog },
+  { title: 'Users', href: '/users', icon: Users, color: 'bg-teal-500' },
+  { title: 'Companies', href: '/companies', icon: Building2, color: 'bg-red-500', rootOnly: true },
+  { title: 'Employees', href: '/employees', icon: UserCog, color: 'bg-emerald-500' },
 ];
 
 export function MobileMenu() {
@@ -56,36 +57,43 @@ export function MobileMenu() {
 
   const isActive = (href: string) => location.pathname === href;
 
-  const MenuItem = ({ href, icon: Icon, title }: { href: string; icon: any; title: string }) => (
+  const MenuCard = ({ href, icon: Icon, title, color }: { href: string; icon: any; title: string; color: string }) => (
     <Link
       to={href}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+        'flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all duration-200 border-2',
         isActive(href)
-          ? 'bg-primary/10 text-primary'
-          : 'text-foreground hover:bg-muted'
+          ? 'bg-primary text-primary-foreground border-primary shadow-lg scale-105'
+          : 'bg-card hover:bg-muted border-border hover:border-primary/50 hover:shadow-md'
       )}
     >
-      <Icon className="h-5 w-5" />
-      <span className="flex-1 font-medium">{title}</span>
-      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      <div className={cn(
+        'p-3 rounded-xl',
+        isActive(href) ? 'bg-primary-foreground/20' : color
+      )}>
+        <Icon className={cn('h-6 w-6', isActive(href) ? 'text-primary-foreground' : 'text-white')} />
+      </div>
+      <span className={cn(
+        'text-xs font-medium text-center leading-tight',
+        isActive(href) ? 'text-primary-foreground' : 'text-foreground'
+      )}>{title}</span>
     </Link>
   );
 
   return (
-    <ScrollArea className="h-full py-4">
-      {/* User Profile Section */}
-      <div className="px-4 pb-4">
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50">
-          <Avatar className="h-12 w-12">
-            <AvatarFallback className="bg-primary text-primary-foreground">
+    <ScrollArea className="h-full">
+      <div className="p-4 space-y-6">
+        {/* User Profile Section */}
+        <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
+          <Avatar className="h-14 w-14 ring-2 ring-primary/20">
+            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
               {userInitials}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <p className="font-semibold">{user.name}</p>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs capitalize">
+            <p className="font-semibold text-lg">{user.name}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge variant="secondary" className="text-xs capitalize bg-primary/10 text-primary border-primary/20">
                 {user.role}
               </Badge>
               {user.company && (
@@ -94,141 +102,100 @@ export function MobileMenu() {
             </div>
           </div>
         </div>
-      </div>
 
-      <Separator className="mb-4" />
-
-      {/* Quick Actions */}
-      <div className="px-4 pb-4">
+        {/* Role Switch */}
         <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={() => switchRole('root')}
-            className={cn(
-              'flex flex-col items-center gap-1 p-3 rounded-lg text-xs transition-colors',
-              user.role === 'root' ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
-            )}
-          >
-            <Users className="h-4 w-4" />
-            Root
-          </button>
-          <button
-            onClick={() => switchRole('admin')}
-            className={cn(
-              'flex flex-col items-center gap-1 p-3 rounded-lg text-xs transition-colors',
-              user.role === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
-            )}
-          >
-            <Building2 className="h-4 w-4" />
-            Admin
-          </button>
-          <button
-            onClick={() => switchRole('user1')}
-            className={cn(
-              'flex flex-col items-center gap-1 p-3 rounded-lg text-xs transition-colors',
-              user.role === 'user1' ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80'
-            )}
-          >
-            <UserCog className="h-4 w-4" />
-            User1
-          </button>
+          {['root', 'admin', 'user1'].map((role) => (
+            <button
+              key={role}
+              onClick={() => switchRole(role as 'root' | 'admin' | 'user1')}
+              className={cn(
+                'flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition-all border-2',
+                user.role === role 
+                  ? 'bg-primary text-primary-foreground border-primary shadow-md' 
+                  : 'bg-card border-border hover:border-primary/50 hover:bg-muted'
+              )}
+            >
+              {role === 'root' && <Users className="h-4 w-4" />}
+              {role === 'admin' && <Building2 className="h-4 w-4" />}
+              {role === 'user1' && <UserCog className="h-4 w-4" />}
+              <span className="capitalize">{role}</span>
+            </button>
+          ))}
         </div>
-      </div>
 
-      <Separator className="mb-4" />
+        <Separator />
 
-      {/* Navigation */}
-      <div className="px-4 space-y-1">
-        <MenuItem href="/dashboard" icon={LayoutDashboard} title="Dashboard" />
-        <MenuItem href="/attendance" icon={Clock} title="Attendance" />
-        <MenuItem href="/import" icon={Upload} title="Import Data" />
+        {/* Main Navigation Grid */}
+        <div>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+            Main Menu
+          </h3>
+          <div className="grid grid-cols-4 gap-3">
+            {mainMenuItems.map((item) => (
+              <MenuCard key={item.href} {...item} />
+            ))}
+          </div>
+        </div>
 
-        {/* Reports Accordion */}
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="reports" className="border-none">
-            <AccordionTrigger className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted hover:no-underline">
-              <FileText className="h-5 w-5" />
-              <span className="flex-1 text-left font-medium">Reports</span>
-            </AccordionTrigger>
-            <AccordionContent className="pl-6 space-y-1 pb-0">
-              {reportsItems.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm',
-                    isActive(item.href)
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </Link>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
+        {/* Reports Grid */}
+        <div>
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+            Reports
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            {reportsItems.map((item) => (
+              <MenuCard key={item.href} {...item} />
+            ))}
+          </div>
+        </div>
 
-          {/* Management Accordion (Admin/Root only) */}
-          {(user.role === 'root' || user.role === 'admin') && (
-            <AccordionItem value="management" className="border-none">
-              <AccordionTrigger className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted hover:no-underline">
-                <Users className="h-5 w-5" />
-                <span className="flex-1 text-left font-medium">Management</span>
-              </AccordionTrigger>
-              <AccordionContent className="pl-6 space-y-1 pb-0">
-                {managementItems
-                  .filter((item) => !item.rootOnly || user.role === 'root')
-                  .map((item) => (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      className={cn(
-                        'flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm',
-                        isActive(item.href)
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {item.title}
-                    </Link>
-                  ))}
-              </AccordionContent>
-            </AccordionItem>
-          )}
-        </Accordion>
-
-        {/* Audit Logs (Root only) */}
-        {user.role === 'root' && (
-          <MenuItem href="/audit-logs" icon={History} title="Audit Logs" />
+        {/* Management Grid (Admin/Root only) */}
+        {(user.role === 'root' || user.role === 'admin') && (
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+              Management
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              {managementItems
+                .filter((item) => !item.rootOnly || user.role === 'root')
+                .map((item) => (
+                  <MenuCard key={item.href} {...item} />
+                ))}
+              {user.role === 'root' && (
+                <MenuCard 
+                  href="/audit-logs" 
+                  icon={History} 
+                  title="Audit Logs" 
+                  color="bg-slate-600" 
+                />
+              )}
+            </div>
+          </div>
         )}
 
-        <MenuItem href="/settings" icon={Settings} title="Settings" />
-      </div>
+        <Separator />
 
-      <Separator className="my-4" />
-
-      {/* Notifications */}
-      <div className="px-4">
+        {/* Notifications */}
         <Link
           to="/notifications"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted transition-colors"
+          className="flex items-center gap-3 p-4 rounded-xl bg-card border-2 border-border hover:border-primary/50 hover:bg-muted transition-all"
         >
-          <Bell className="h-5 w-5" />
+          <div className="p-3 rounded-xl bg-yellow-500">
+            <Bell className="h-5 w-5 text-white" />
+          </div>
           <span className="flex-1 font-medium">Notifications</span>
           <Badge variant="destructive" className="text-xs">3</Badge>
         </Link>
-      </div>
 
-      <Separator className="my-4" />
-
-      {/* Logout */}
-      <div className="px-4">
+        {/* Logout */}
         <button
           onClick={logout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-destructive hover:bg-destructive/10 transition-colors"
+          className="flex items-center gap-3 p-4 rounded-xl w-full bg-destructive/5 border-2 border-destructive/20 text-destructive hover:bg-destructive/10 transition-all"
         >
-          <LogOut className="h-5 w-5" />
+          <div className="p-3 rounded-xl bg-destructive/20">
+            <LogOut className="h-5 w-5" />
+          </div>
           <span className="font-medium">Sign Out</span>
         </button>
       </div>
