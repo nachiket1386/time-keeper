@@ -16,10 +16,10 @@ const typeConfig: Record<string, { title: string; icon: LucideIcon; color: strin
 };
 
 const statusOrder = ['approved', 'pending', 'rejected'] as const;
-const statusLabels: Record<string, string> = {
-  approved: 'Approved',
-  pending: 'Pending',
-  rejected: 'Rejected',
+const statusLabels: Record<string, { full: string; short: string }> = {
+  approved: { full: 'Approved', short: 'App' },
+  pending: { full: 'Pending', short: 'Pnd' },
+  rejected: { full: 'Rejected', short: 'Rej' },
 };
 
 const statusColors: Record<string, { header: string; cell: string }> = {
@@ -125,27 +125,28 @@ export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps)
           {config.title}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto -mx-6 px-6">
-          <table className="w-full min-w-[400px] text-sm">
+      <CardContent className="p-3 sm:p-6">
+        <div className="w-full">
+          <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b-2 border-border">
-                <th className="text-left p-3 font-semibold bg-muted/50 rounded-tl-lg sticky left-0 z-10 min-w-[120px]">
-                  EIC Code
+                <th className="text-left p-2 sm:p-3 font-semibold bg-muted/50 rounded-tl-lg">
+                  EIC
                 </th>
                 {statusOrder.map((status) => (
                   <th 
                     key={status} 
                     className={cn(
-                      'text-center p-3 font-semibold min-w-[90px]',
+                      'text-center p-2 sm:p-3 font-semibold',
                       statusColors[status].header
                     )}
                   >
-                    {statusLabels[status]}
+                    <span className="hidden sm:inline">{statusLabels[status].full}</span>
+                    <span className="sm:hidden">{statusLabels[status].short}</span>
                   </th>
                 ))}
-                <th className="text-center p-3 font-semibold bg-muted/70 rounded-tr-lg min-w-[70px]">
-                  Total
+                <th className="text-center p-2 sm:p-3 font-semibold bg-muted/70 rounded-tr-lg">
+                  Tot
                 </th>
               </tr>
             </thead>
@@ -158,7 +159,7 @@ export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps)
                     idx % 2 === 0 ? 'bg-card' : 'bg-muted/5'
                   )}
                 >
-                  <td className="p-3 font-medium sticky left-0 bg-inherit z-10 border-r border-border/30">
+                  <td className="p-2 sm:p-3 font-medium truncate max-w-[80px] sm:max-w-none">
                     {eic}
                   </td>
                   {statusOrder.map((status) => {
@@ -167,7 +168,7 @@ export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps)
                       <td 
                         key={status} 
                         className={cn(
-                          'text-center p-3 transition-colors',
+                          'text-center p-2 sm:p-3 transition-colors',
                           value > 0 ? statusColors[status].cell : 'text-muted-foreground'
                         )}
                       >
@@ -175,25 +176,25 @@ export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps)
                       </td>
                     );
                   })}
-                  <td className="text-center p-3 font-semibold bg-muted/30">
+                  <td className="text-center p-2 sm:p-3 font-semibold bg-muted/30">
                     {summaryData.eicTotals[eic]}
                   </td>
                 </tr>
               ))}
               {/* Totals Row */}
               <tr className="bg-muted/50 font-semibold border-t-2 border-border">
-                <td className="p-3 sticky left-0 bg-muted/50 z-10 rounded-bl-lg">
+                <td className="p-2 sm:p-3 rounded-bl-lg">
                   Total
                 </td>
                 {statusOrder.map((status) => (
                   <td 
                     key={status} 
-                    className={cn('text-center p-3', statusColors[status].cell)}
+                    className={cn('text-center p-2 sm:p-3', statusColors[status].cell)}
                   >
                     {summaryData.statusTotals[status]}
                   </td>
                 ))}
-                <td className="text-center p-3 bg-primary text-primary-foreground rounded-br-lg">
+                <td className="text-center p-2 sm:p-3 bg-primary text-primary-foreground rounded-br-lg">
                   {summaryData.grandTotal}
                 </td>
               </tr>
