@@ -47,14 +47,14 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Attendance Calendar */}
-      <AttendanceCalendar companyId={user?.companyId} />
+      {/* Calendar + ARC Summary Side by Side on Desktop */}
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+        <AttendanceCalendar companyId={user?.companyId} />
+        <ARCSummaryTable companyId={user?.companyId} />
+      </div>
 
-      {/* ARC Summary Table */}
-      <ARCSummaryTable companyId={user?.companyId} />
-
-      {/* Status Summary Tables - Each card takes full width of its column */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+      {/* Status Summary Tables */}
+      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         <StatusSummaryTable companyId={user?.companyId} type="overtime" />
         <StatusSummaryTable companyId={user?.companyId} type="regularization" />
         <StatusSummaryTable companyId={user?.companyId} type="partialday" />
