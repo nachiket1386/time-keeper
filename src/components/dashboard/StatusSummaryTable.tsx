@@ -22,20 +22,22 @@ const statusLabels: Record<string, { full: string; short: string }> = {
   rejected: { full: 'Rejected', short: 'Rej' },
 };
 
+// Adjusted colors with better contrast
 const statusColors: Record<string, { header: string; cell: string }> = {
   approved: { 
-    header: 'bg-success/20 text-success', 
-    cell: 'bg-success/10 text-success font-semibold' 
+    header: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', 
+    cell: 'bg-emerald-50 text-emerald-600 font-semibold dark:bg-emerald-900/20 dark:text-emerald-400' 
   },
   pending: { 
-    header: 'bg-warning/20 text-warning', 
-    cell: 'bg-warning/10 text-warning font-semibold' 
+    header: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', 
+    cell: 'bg-amber-50 text-amber-600 font-semibold dark:bg-amber-900/20 dark:text-amber-400' 
   },
   rejected: { 
-    header: 'bg-destructive/20 text-destructive', 
-    cell: 'bg-destructive/10 text-destructive font-semibold' 
+    header: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', 
+    cell: 'bg-red-50 text-red-600 font-semibold dark:bg-red-900/20 dark:text-red-400' 
   },
 };
+
 
 export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps) {
   const config = typeConfig[type];
