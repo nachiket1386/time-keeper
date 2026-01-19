@@ -97,29 +97,27 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
 
   return (
     <Card className="overflow-hidden h-full">
-      <CardHeader className="py-2 px-3 bg-muted/30">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <CardTitle className="text-sm font-medium flex items-center gap-1.5">
-            <CalendarIcon className="h-4 w-4 text-primary" />
-            Attendance Calendar
+      <CardHeader className="py-1.5 px-2 bg-muted/30">
+        <div className="flex items-center justify-between gap-1">
+          <CardTitle className="text-xs font-medium flex items-center gap-1">
+            <CalendarIcon className="h-3 w-3 text-primary" />
+            Calendar
           </CardTitle>
-          
-          {/* Search and EP Selection */}
-          <div className="flex items-center gap-1.5 flex-1 max-w-xs">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+          <div className="flex items-center gap-1">
+            <div className="relative">
+              <Search className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-muted-foreground" />
               <Input
-                placeholder="Search..."
+                placeholder="Search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-6 h-6 text-xs"
+                className="pl-5 h-5 text-[10px] w-20"
               />
             </div>
             <Select 
               value={selectedEP || selectedEmployee?.epNumber} 
               onValueChange={setSelectedEP}
             >
-              <SelectTrigger className="w-[80px] h-6 text-xs">
+              <SelectTrigger className="w-16 h-5 text-[10px] px-1">
                 <SelectValue placeholder="EP" />
               </SelectTrigger>
               <SelectContent>
@@ -134,30 +132,29 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
         </div>
       </CardHeader>
       
-      <CardContent className="p-2">
+      <CardContent className="p-1.5">
         {/* Employee Info + Month Navigation */}
-        <div className="flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-border/50">
+        <div className="flex items-center justify-between gap-1 mb-1 pb-1 border-b border-border/40">
           {selectedEmployee && (
-            <div className="flex items-center gap-1.5 min-w-0">
-              <div className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <span className="text-primary font-semibold text-[10px]">
+            <div className="flex items-center gap-1 min-w-0">
+              <div className="h-5 w-5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <span className="text-primary font-semibold text-[8px]">
                   {selectedEmployee.name.charAt(0)}
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-xs truncate">{selectedEmployee.name}</p>
-                <p className="text-[9px] text-muted-foreground truncate">{selectedEmployee.trade}</p>
+                <p className="font-medium text-[10px] truncate leading-tight">{selectedEmployee.name}</p>
+                <p className="text-[8px] text-muted-foreground truncate leading-tight">{selectedEmployee.trade}</p>
               </div>
             </div>
           )}
           
-          {/* Month/Year Navigation */}
-          <div className="flex items-center gap-0.5">
-            <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-5 w-5">
-              <ChevronLeft className="h-3 w-3" />
+          <div className="flex items-center gap-0">
+            <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-4 w-4">
+              <ChevronLeft className="h-2.5 w-2.5" />
             </Button>
             <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
-              <SelectTrigger className="w-[50px] h-5 text-[10px] px-1.5">
+              <SelectTrigger className="w-10 h-4 text-[9px] px-1 border-0 bg-transparent">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -167,7 +164,7 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
               </SelectContent>
             </Select>
             <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
-              <SelectTrigger className="w-[55px] h-5 text-[10px] px-1.5">
+              <SelectTrigger className="w-11 h-4 text-[9px] px-1 border-0 bg-transparent">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -176,21 +173,20 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-5 w-5">
-              <ChevronRight className="h-3 w-3" />
+            <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-4 w-4">
+              <ChevronRight className="h-2.5 w-2.5" />
             </Button>
           </div>
         </div>
 
         {/* Compact Calendar Grid */}
-        <div className="max-w-[280px] mx-auto">
-          {/* Week Headers */}
-          <div className="grid grid-cols-7 gap-px mb-0.5">
+        <div className="max-w-[220px] mx-auto">
+          <div className="grid grid-cols-7 gap-0.5">
             {weekDays.map((day, idx) => (
               <div 
                 key={idx} 
                 className={cn(
-                  "text-center text-[9px] font-medium py-0.5",
+                  "text-center text-[8px] font-medium",
                   idx === 0 || idx === 6 ? "text-muted-foreground" : "text-foreground"
                 )}
               >
@@ -198,29 +194,22 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
               </div>
             ))}
           </div>
-
-          {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-px">
+          <div className="grid grid-cols-7 gap-0.5 mt-0.5">
             {Array.from({ length: calendarData.firstDayOffset }).map((_, idx) => (
               <div key={`empty-${idx}`} className="aspect-square" />
             ))}
-            
             {calendarData.days.map(({ day, status, mandays }) => {
               const config = status ? statusConfig[status] : null;
               const isWeekend = (calendarData.firstDayOffset + day - 1) % 7 === 0 || 
                                 (calendarData.firstDayOffset + day - 1) % 7 === 6;
-              
               return (
                 <div
                   key={day}
                   className={cn(
-                    "aspect-square rounded-sm flex items-center justify-center text-[9px] font-medium transition-all cursor-pointer",
+                    "aspect-square rounded-[2px] flex items-center justify-center text-[8px] font-medium cursor-pointer",
                     config 
                       ? cn(config.bg, config.text, "hover:opacity-90") 
-                      : cn(
-                          "bg-muted/30 text-muted-foreground border border-dashed border-border/40",
-                          isWeekend && "bg-muted/50"
-                        )
+                      : cn("bg-muted/30 text-muted-foreground", isWeekend && "bg-muted/50")
                   )}
                   title={status ? `Day ${day}: ${status} - ${mandays} mandays` : `Day ${day}: No data`}
                 >
@@ -232,16 +221,16 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
         </div>
 
         {/* Compact Legend */}
-        <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2 pt-1.5 border-t border-border/30">
+        <div className="flex flex-wrap items-center justify-center gap-1 mt-1 pt-1 border-t border-border/30">
           {Object.entries(statusConfig).map(([key, config]) => (
             <div key={key} className="flex items-center gap-0.5">
               <div className={cn(
-                "w-3.5 h-3.5 rounded-sm flex items-center justify-center text-[7px] font-bold",
+                "w-3 h-3 rounded-[2px] flex items-center justify-center text-[6px] font-bold",
                 config.bg, config.text
               )}>
                 {config.shortLabel}
               </div>
-              <span className="text-[9px] text-muted-foreground">{config.label}</span>
+              <span className="text-[8px] text-muted-foreground">{config.label}</span>
             </div>
           ))}
         </div>
