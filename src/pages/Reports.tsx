@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Clock,
   FileSpreadsheet,
@@ -12,7 +12,6 @@ import {
   FilterX,
   ArrowUpAZ,
   ArrowDownAZ,
-  X,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -50,11 +49,11 @@ type SortDirection = 'asc' | 'desc' | null;
 
 interface ColumnFilter {
   selectedValues: Set<string>;
-  searchText: string;
 }
 
 interface FilterDropdownProps {
   column: string;
+  label: string;
   allValues: string[];
   filter: ColumnFilter;
   onFilterChange: (filter: ColumnFilter) => void;
@@ -66,6 +65,7 @@ interface FilterDropdownProps {
 
 function FilterDropdown({ 
   column, 
+  label,
   allValues, 
   filter, 
   onFilterChange, 
@@ -82,7 +82,7 @@ function FilterDropdown({
     v.toLowerCase().includes(searchText.toLowerCase())
   );
   
-  const allSelected = filteredValues.every(v => tempSelected.has(v));
+  const allSelected = filteredValues.length > 0 && filteredValues.every(v => tempSelected.has(v));
   
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -107,7 +107,7 @@ function FilterDropdown({
   };
   
   const handleOk = () => {
-    onFilterChange({ selectedValues: tempSelected, searchText: '' });
+    onFilterChange({ selectedValues: tempSelected });
     setOpen(false);
   };
   
@@ -120,7 +120,7 @@ function FilterDropdown({
   const handleClearFilter = () => {
     const allSet = new Set(allValues);
     setTempSelected(allSet);
-    onFilterChange({ selectedValues: allSet, searchText: '' });
+    onFilterChange({ selectedValues: allSet });
   };
   
   const isFiltered = filter.selectedValues.size < allValues.length && filter.selectedValues.size > 0;
@@ -137,7 +137,7 @@ function FilterDropdown({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button className={cn(
-          "flex items-center gap-0.5 ml-1 p-0.5 rounded hover:bg-primary-foreground/20",
+          "flex items-center gap-0.5 ml-1 p-0.5 rounded hover:bg-white/20",
           (isFiltered || isSorted) && "text-yellow-300"
         )}>
           <ChevronDown className="h-3 w-3" />
@@ -169,7 +169,7 @@ function FilterDropdown({
               onClick={() => { handleClearFilter(); onClearSort(); }}
             >
               <FilterX className="h-3.5 w-3.5" />
-              Clear Filter from "{column}"
+              Clear Filter from "{label}"
             </button>
           )}
         </div>
@@ -220,6 +220,21 @@ function FilterDropdown({
   );
 }
 
+// Column definitions
+const columns = [
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const },
+  { key: 'employeeName', label: 'EP NAME', align: 'center' as const },
+  { key: 'shift', label: 'SHIFT', align: 'center' as const },
+  { key: 'date', label: 'PUNCHDATE', align: 'center' as const },
+  { key: 'punch1', label: 'PUNCH1', align: 'center' as const },
+  { key: 'punch2', label: 'PUNCH2 OUT', align: 'center' as const },
+  { key: 'hrs', label: 'HRS', align: 'center' as const },
+  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const },
+  { key: 'status', label: 'STATUS', align: 'left' as const },
+  { key: 'ot', label: 'OT', align: 'center' as const },
+  { key: 'otDays', label: 'OT DAYS', align: 'center' as const },
+];
+
 export default function Reports() {
   const [activeTab, setActiveTab] = useState<ReportTab>('attendance');
   const [currentPage, setCurrentPage] = useState(1);
@@ -227,45 +242,58 @@ export default function Reports() {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
-  // Build enriched records with employee names
+  // Build enriched records with all displayable values
   const enrichedRecords = useMemo(() => {
     return attendanceRecords.map(record => {
       const employee = employees.find(e => e.epNumber === record.epNumber);
       return {
-        ...record,
+        epNumber: record.epNumber,
         employeeName: employee?.name || '-',
         shift: record.punchIn && record.punchOut ? `${record.punchIn}-${record.punchOut}` : '-',
-        timePair: record.punchIn && record.punchOut ? `${record.punchIn}-${record.punchOut}` : '-',
+        date: record.date,
+        punch1: record.punchIn || '-',
+        punch2: record.punchOut || '-',
         hrs: record.punchIn && record.punchOut ? '8.0' : '-',
-        overstayDisplay: '-',
-        otDisplay: record.overtime?.toString() || '-',
+        overstay: '-',
+        status: record.status,
+        ot: record.overtime?.toString() || '-',
         otDays: record.mandays?.toFixed(1) || '0.0',
       };
     });
   }, []);
 
   // Get unique values for each column
-  const uniqueValues = useMemo(() => ({
-    epNumber: [...new Set(enrichedRecords.map(r => r.epNumber))].sort(),
-    employeeName: [...new Set(enrichedRecords.map(r => r.employeeName))].sort(),
-    date: [...new Set(enrichedRecords.map(r => r.date))].sort(),
-    shift: [...new Set(enrichedRecords.map(r => r.shift))].sort(),
-    status: [...new Set(enrichedRecords.map(r => r.status))].sort(),
-    otDisplay: [...new Set(enrichedRecords.map(r => r.otDisplay))].sort(),
-    otDays: [...new Set(enrichedRecords.map(r => r.otDays))].sort(),
-  }), [enrichedRecords]);
+  const uniqueValues = useMemo(() => {
+    const values: Record<string, string[]> = {};
+    columns.forEach(col => {
+      values[col.key] = [...new Set(enrichedRecords.map(r => r[col.key as keyof typeof r]))].sort();
+    });
+    return values;
+  }, [enrichedRecords]);
 
-  // Column filters
+  // Column filters - initialize with all values selected
   const [filters, setFilters] = useState<Record<string, ColumnFilter>>(() => {
     const initial: Record<string, ColumnFilter> = {};
-    Object.keys(uniqueValues).forEach(key => {
-      initial[key] = { 
-        selectedValues: new Set(uniqueValues[key as keyof typeof uniqueValues]), 
-        searchText: '' 
-      };
+    columns.forEach(col => {
+      initial[col.key] = { selectedValues: new Set(uniqueValues[col.key] || []) };
     });
     return initial;
   });
+
+  // Update filters when uniqueValues change
+  useEffect(() => {
+    setFilters(prev => {
+      const updated: Record<string, ColumnFilter> = {};
+      columns.forEach(col => {
+        if (prev[col.key]) {
+          updated[col.key] = prev[col.key];
+        } else {
+          updated[col.key] = { selectedValues: new Set(uniqueValues[col.key] || []) };
+        }
+      });
+      return updated;
+    });
+  }, [uniqueValues]);
 
   const updateFilter = (column: string, filter: ColumnFilter) => {
     setFilters(prev => ({ ...prev, [column]: filter }));
@@ -286,11 +314,8 @@ export default function Reports() {
 
   const clearAllFilters = () => {
     const reset: Record<string, ColumnFilter> = {};
-    Object.keys(uniqueValues).forEach(key => {
-      reset[key] = { 
-        selectedValues: new Set(uniqueValues[key as keyof typeof uniqueValues]), 
-        searchText: '' 
-      };
+    columns.forEach(col => {
+      reset[col.key] = { selectedValues: new Set(uniqueValues[col.key] || []) };
     });
     setFilters(reset);
     setSortColumn(null);
@@ -298,18 +323,20 @@ export default function Reports() {
     setCurrentPage(1);
   };
 
-  // Filter and sort records
+  // Filter records
   const filteredRecords = useMemo(() => {
     return enrichedRecords.filter(record => {
-      if (!filters.epNumber.selectedValues.has(record.epNumber)) return false;
-      if (!filters.employeeName.selectedValues.has(record.employeeName)) return false;
-      if (!filters.date.selectedValues.has(record.date)) return false;
-      if (!filters.shift.selectedValues.has(record.shift)) return false;
-      if (!filters.status.selectedValues.has(record.status)) return false;
+      for (const col of columns) {
+        const filter = filters[col.key];
+        if (filter && !filter.selectedValues.has(record[col.key as keyof typeof record])) {
+          return false;
+        }
+      }
       return true;
     });
   }, [enrichedRecords, filters]);
 
+  // Sort records
   const sortedRecords = useMemo(() => {
     if (!sortColumn || !sortDirection) return filteredRecords;
     
@@ -330,7 +357,7 @@ export default function Reports() {
   const paginatedRecords = sortedRecords.slice(startIndex, startIndex + pageSize);
 
   const hasActiveFilters = Object.entries(filters).some(([key, filter]) => {
-    const allVals = uniqueValues[key as keyof typeof uniqueValues];
+    const allVals = uniqueValues[key] || [];
     return filter.selectedValues.size < allVals.length;
   }) || sortColumn !== null;
 
@@ -349,6 +376,14 @@ export default function Reports() {
     );
   };
 
+  const renderCell = (record: typeof enrichedRecords[0], colKey: string) => {
+    const value = record[colKey as keyof typeof record];
+    if (colKey === 'status') {
+      return getStatusBadge(value);
+    }
+    return value;
+  };
+
   return (
     <div className="animate-fade-in space-y-3 pb-6">
       <PageHeader
@@ -359,26 +394,29 @@ export default function Reports() {
       {/* Report Type Tabs + Actions */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap gap-1.5">
-          {reportTabs.map((tab) => (
-            <Button
-              key={tab.id}
-              variant={activeTab === tab.id ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setActiveTab(tab.id);
-                setCurrentPage(1);
-              }}
-              className={cn(
-                'gap-1.5 rounded-full px-3 h-7 text-xs transition-all font-medium',
-                activeTab === tab.id 
-                  ? 'bg-primary text-primary-foreground shadow-md' 
-                  : 'bg-card hover:bg-muted border-border'
-              )}
-            >
-              <tab.icon className="h-3 w-3" />
-              {tab.label}
-            </Button>
-          ))}
+          {reportTabs.map((tab) => {
+            const IconComponent = tab.icon;
+            return (
+              <Button
+                key={tab.id}
+                variant={activeTab === tab.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  'gap-1.5 rounded-full px-3 h-7 text-xs transition-all font-medium',
+                  activeTab === tab.id 
+                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    : 'bg-card hover:bg-muted border-border'
+                )}
+              >
+                <IconComponent className="h-3 w-3" />
+                {tab.label}
+              </Button>
+            );
+          })}
         </div>
         <div className="flex items-center gap-2">
           {hasActiveFilters && (
@@ -406,93 +444,41 @@ export default function Reports() {
           <table className="w-full text-xs border-collapse min-w-[1100px]">
             <thead>
               <tr className="bg-[#1a4480] text-white">
-                <th className="border-r border-white/20 px-2 py-2 text-left font-semibold whitespace-nowrap">
-                  <div className="flex items-center">
-                    EP NO
-                    <FilterDropdown
-                      column="epNumber"
-                      allValues={uniqueValues.epNumber}
-                      filter={filters.epNumber}
-                      onFilterChange={(f) => updateFilter('epNumber', f)}
-                      sortColumn={sortColumn}
-                      sortDirection={sortDirection}
-                      onSort={(dir) => handleSort('epNumber', dir)}
-                      onClearSort={() => handleClearSort('epNumber')}
-                    />
-                  </div>
-                </th>
-                <th className="border-r border-white/20 px-2 py-2 text-left font-semibold whitespace-nowrap">
-                  <div className="flex items-center">
-                    EP NAME
-                    <FilterDropdown
-                      column="employeeName"
-                      allValues={uniqueValues.employeeName}
-                      filter={filters.employeeName}
-                      onFilterChange={(f) => updateFilter('employeeName', f)}
-                      sortColumn={sortColumn}
-                      sortDirection={sortDirection}
-                      onSort={(dir) => handleSort('employeeName', dir)}
-                      onClearSort={() => handleClearSort('employeeName')}
-                    />
-                  </div>
-                </th>
-                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">
-                  <div className="flex items-center justify-center">
-                    SHIFT
-                    <FilterDropdown
-                      column="shift"
-                      allValues={uniqueValues.shift}
-                      filter={filters.shift}
-                      onFilterChange={(f) => updateFilter('shift', f)}
-                      sortColumn={sortColumn}
-                      sortDirection={sortDirection}
-                      onSort={(dir) => handleSort('shift', dir)}
-                      onClearSort={() => handleClearSort('shift')}
-                    />
-                  </div>
-                </th>
-                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">
-                  <div className="flex items-center justify-center">
-                    PUNCHDATE
-                    <FilterDropdown
-                      column="date"
-                      allValues={uniqueValues.date}
-                      filter={filters.date}
-                      onFilterChange={(f) => updateFilter('date', f)}
-                      sortColumn={sortColumn}
-                      sortDirection={sortDirection}
-                      onSort={(dir) => handleSort('date', dir)}
-                      onClearSort={() => handleClearSort('date')}
-                    />
-                  </div>
-                </th>
-                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">PUNCH1</th>
-                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">PUNCH2 OUT</th>
-                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">HRS</th>
-                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OVERSTAY</th>
-                <th className="border-r border-white/20 px-2 py-2 text-left font-semibold whitespace-nowrap">
-                  <div className="flex items-center">
-                    STATUS
-                    <FilterDropdown
-                      column="status"
-                      allValues={uniqueValues.status}
-                      filter={filters.status}
-                      onFilterChange={(f) => updateFilter('status', f)}
-                      sortColumn={sortColumn}
-                      sortDirection={sortDirection}
-                      onSort={(dir) => handleSort('status', dir)}
-                      onClearSort={() => handleClearSort('status')}
-                    />
-                  </div>
-                </th>
-                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OT</th>
-                <th className="px-2 py-2 text-center font-semibold whitespace-nowrap">OT DAYS</th>
+                {columns.map((col, idx) => (
+                  <th 
+                    key={col.key}
+                    className={cn(
+                      "px-2 py-2 font-semibold whitespace-nowrap",
+                      idx < columns.length - 1 && "border-r border-white/20",
+                      col.align === 'center' && "text-center",
+                      col.align === 'left' && "text-left"
+                    )}
+                  >
+                    <div className={cn(
+                      "flex items-center",
+                      col.align === 'center' && "justify-center"
+                    )}>
+                      {col.label}
+                      <FilterDropdown
+                        column={col.key}
+                        label={col.label}
+                        allValues={uniqueValues[col.key] || []}
+                        filter={filters[col.key] || { selectedValues: new Set() }}
+                        onFilterChange={(f) => updateFilter(col.key, f)}
+                        sortColumn={sortColumn}
+                        sortDirection={sortDirection}
+                        onSort={(dir) => handleSort(col.key, dir)}
+                        onClearSort={() => handleClearSort(col.key)}
+                      />
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {paginatedRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="text-center py-8 text-muted-foreground">
+                  <td colSpan={columns.length} className="text-center py-8 text-muted-foreground">
                     No records found
                   </td>
                 </tr>
@@ -507,17 +493,19 @@ export default function Reports() {
                         isEven ? 'bg-white' : 'bg-slate-50'
                       )}
                     >
-                      <td className="border-r border-border/50 px-2 py-1.5 font-medium whitespace-nowrap">{record.epNumber}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 whitespace-nowrap text-center">{record.employeeName}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.shift}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.date}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.punchIn || '-'}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.punchOut || '-'}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.hrs}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.overstayDisplay}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 whitespace-nowrap">{getStatusBadge(record.status)}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.otDisplay}</td>
-                      <td className="px-2 py-1.5 text-center whitespace-nowrap">{record.otDays}</td>
+                      {columns.map((col, idx) => (
+                        <td 
+                          key={col.key}
+                          className={cn(
+                            "px-2 py-1.5 whitespace-nowrap",
+                            idx < columns.length - 1 && "border-r border-border/50",
+                            col.align === 'center' && "text-center",
+                            col.key === 'epNumber' && "font-medium"
+                          )}
+                        >
+                          {renderCell(record, col.key)}
+                        </td>
+                      ))}
                     </tr>
                   );
                 })
