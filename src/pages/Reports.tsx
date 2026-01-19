@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import {
   Clock,
@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ChevronDown,
   Eye,
+  FilterX,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,14 +37,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
@@ -61,14 +54,33 @@ const reportTabs = [
 
 type SortDirection = 'asc' | 'desc' | null;
 
+interface ColumnFilters {
+  epNumber: string;
+  name: string;
+  date: string;
+  shift: string;
+  status: string;
+  ot: string;
+  otDays: string;
+}
+
 export default function Reports() {
   const [activeTab, setActiveTab] = useState<ReportTab>('attendance');
-  const [epSearch, setEpSearch] = useState('');
   const [fromDate, setFromDate] = useState<Date | undefined>(new Date());
   const [toDate, setToDate] = useState<Date | undefined>(new Date());
-  const [status, setStatus] = useState('all');
   const [overstay, setOverstay] = useState('all');
   const [records, setRecords] = useState('complete');
+  
+  // Column filters
+  const [columnFilters, setColumnFilters] = useState<ColumnFilters>({
+    epNumber: '',
+    name: '',
+    date: '',
+    shift: '',
+    status: '',
+    ot: '',
+    otDays: '',
+  });
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,39 +90,62 @@ export default function Reports() {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
-  // Filter records based on search
-  const filteredRecords = attendanceRecords.filter((record) => {
-    const employee = employees.find((e) => e.epNumber === record.epNumber);
-    if (epSearch && employee) {
-      const searchLower = epSearch.toLowerCase();
-      if (!employee.epNumber.toLowerCase().includes(searchLower) && 
-          !employee.name.toLowerCase().includes(searchLower)) {
+  // Get unique values for dropdown filters
+  const uniqueStatuses = useMemo(() => 
+    [...new Set(attendanceRecords.map(r => r.status))].sort(),
+    []
+  );
+
+  // Filter records based on column filters
+  const filteredRecords = useMemo(() => {
+    return attendanceRecords.filter((record) => {
+      const employee = employees.find((e) => e.epNumber === record.epNumber);
+      
+      // EP Number filter
+      if (columnFilters.epNumber && !record.epNumber.toLowerCase().includes(columnFilters.epNumber.toLowerCase())) {
         return false;
       }
-    }
-    if (status !== 'all' && record.status !== status) return false;
-    return true;
-  });
+      
+      // Name filter
+      if (columnFilters.name && employee && !employee.name.toLowerCase().includes(columnFilters.name.toLowerCase())) {
+        return false;
+      }
+      
+      // Date filter
+      if (columnFilters.date && !record.date.includes(columnFilters.date)) {
+        return false;
+      }
+      
+      // Status filter
+      if (columnFilters.status && columnFilters.status !== 'all' && record.status !== columnFilters.status) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [columnFilters]);
 
   // Sort records
-  const sortedRecords = [...filteredRecords].sort((a, b) => {
-    if (!sortColumn || !sortDirection) return 0;
-    
-    let aVal: any = a[sortColumn as keyof typeof a];
-    let bVal: any = b[sortColumn as keyof typeof b];
-    
-    // Handle employee name lookup
-    if (sortColumn === 'employeeName') {
-      const empA = employees.find((e) => e.epNumber === a.epNumber);
-      const empB = employees.find((e) => e.epNumber === b.epNumber);
-      aVal = empA?.name || '';
-      bVal = empB?.name || '';
-    }
-    
-    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-    return 0;
-  });
+  const sortedRecords = useMemo(() => {
+    return [...filteredRecords].sort((a, b) => {
+      if (!sortColumn || !sortDirection) return 0;
+      
+      let aVal: any = a[sortColumn as keyof typeof a];
+      let bVal: any = b[sortColumn as keyof typeof b];
+      
+      // Handle employee name lookup
+      if (sortColumn === 'name') {
+        const empA = employees.find((e) => e.epNumber === a.epNumber);
+        const empB = employees.find((e) => e.epNumber === b.epNumber);
+        aVal = empA?.name || '';
+        bVal = empB?.name || '';
+      }
+      
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [filteredRecords, sortColumn, sortDirection]);
 
   // Pagination
   const totalRecords = sortedRecords.length;
@@ -132,24 +167,38 @@ export default function Reports() {
     }
   };
 
-  const handleClear = () => {
-    setEpSearch('');
+  const handleColumnFilterChange = (column: keyof ColumnFilters, value: string) => {
+    setColumnFilters(prev => ({ ...prev, [column]: value }));
+    setCurrentPage(1);
+  };
+
+  const handleClearAllFilters = () => {
+    setColumnFilters({
+      epNumber: '',
+      name: '',
+      date: '',
+      shift: '',
+      status: '',
+      ot: '',
+      otDays: '',
+    });
     setFromDate(new Date());
     setToDate(new Date());
-    setStatus('all');
     setOverstay('all');
     setRecords('complete');
     setCurrentPage(1);
   };
 
+  const hasActiveFilters = Object.values(columnFilters).some(v => v !== '' && v !== 'all');
+
   const getSortIcon = (column: string) => {
     if (sortColumn !== column) {
-      return <ChevronsUpDown className="h-3.5 w-3.5 opacity-50" />;
+      return <ChevronsUpDown className="h-3 w-3 opacity-40" />;
     }
     if (sortDirection === 'asc') {
-      return <ChevronUp className="h-3.5 w-3.5" />;
+      return <ChevronUp className="h-3 w-3" />;
     }
-    return <ChevronDown className="h-3.5 w-3.5" />;
+    return <ChevronDown className="h-3 w-3" />;
   };
 
   const getStatusBadge = (status: string) => {
@@ -161,14 +210,14 @@ export default function Reports() {
       'Holiday': 'bg-blue-500 text-white hover:bg-blue-500',
     };
     return (
-      <Badge className={cn('font-medium text-xs px-2.5 py-0.5', styles[status] || '')}>
+      <Badge className={cn('font-medium text-[10px] px-1.5 py-0', styles[status] || '')}>
         {status}
       </Badge>
     );
   };
 
   return (
-    <div className="animate-fade-in space-y-4 pb-6">
+    <div className="animate-fade-in space-y-3 pb-6">
       <PageHeader
         title="Attendance Data"
         description="View and manage attendance records."
@@ -186,49 +235,32 @@ export default function Reports() {
               setCurrentPage(1);
             }}
             className={cn(
-              'gap-2 rounded-full px-4 transition-all font-medium',
+              'gap-1.5 rounded-full px-3 h-8 text-xs transition-all font-medium',
               activeTab === tab.id 
                 ? 'bg-primary text-primary-foreground shadow-md' 
                 : 'bg-card hover:bg-muted border-border'
             )}
           >
-            <tab.icon className="h-4 w-4" />
+            <tab.icon className="h-3.5 w-3.5" />
             {tab.label}
           </Button>
         ))}
       </div>
 
-      {/* Filters Card */}
+      {/* Compact Filters Row */}
       <Card className="border-border shadow-sm">
-        <CardContent className="p-4 pt-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {/* Employee Number Search */}
-            <div className="space-y-1">
-              <Label className="text-xs font-medium text-muted-foreground">Employee Number</Label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search EP NO..."
-                  value={epSearch}
-                  onChange={(e) => {
-                    setEpSearch(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-9 h-9 text-sm"
-                />
-              </div>
-            </div>
-
+        <CardContent className="p-3">
+          <div className="flex flex-wrap items-end gap-3">
             {/* From Date */}
             <div className="space-y-1">
-              <Label className="text-xs font-medium text-muted-foreground">From Date</Label>
+              <Label className="text-[10px] font-medium text-muted-foreground uppercase">From</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal h-9 text-sm"
+                    className="w-[120px] justify-start text-left font-normal h-8 text-xs"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <CalendarIcon className="mr-1.5 h-3 w-3 text-muted-foreground" />
                     {fromDate ? format(fromDate, 'dd-MM-yyyy') : 'Select'}
                   </Button>
                 </PopoverTrigger>
@@ -246,14 +278,14 @@ export default function Reports() {
 
             {/* To Date */}
             <div className="space-y-1">
-              <Label className="text-xs font-medium text-muted-foreground">To Date</Label>
+              <Label className="text-[10px] font-medium text-muted-foreground uppercase">To</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal h-9 text-sm"
+                    className="w-[120px] justify-start text-left font-normal h-8 text-xs"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <CalendarIcon className="mr-1.5 h-3 w-3 text-muted-foreground" />
                     {toDate ? format(toDate, 'dd-MM-yyyy') : 'Select'}
                   </Button>
                 </PopoverTrigger>
@@ -269,33 +301,15 @@ export default function Reports() {
               </Popover>
             </div>
 
-            {/* Status */}
-            <div className="space-y-1">
-              <Label className="text-xs font-medium text-muted-foreground">Status</Label>
-              <Select value={status} onValueChange={(v) => { setStatus(v); setCurrentPage(1); }}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Present">Present</SelectItem>
-                  <SelectItem value="Absent">Absent</SelectItem>
-                  <SelectItem value="Partial Day">Partial Day</SelectItem>
-                  <SelectItem value="On Leave">On Leave</SelectItem>
-                  <SelectItem value="Holiday">Holiday</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Overstay */}
             <div className="space-y-1">
-              <Label className="text-xs font-medium text-muted-foreground">Overstay</Label>
+              <Label className="text-[10px] font-medium text-muted-foreground uppercase">Overstay</Label>
               <Select value={overstay} onValueChange={setOverstay}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="All Overstay" />
+                <SelectTrigger className="h-8 w-[100px] text-xs">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
-                  <SelectItem value="all">All Overstay</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
                   <SelectItem value="yes">Yes</SelectItem>
                   <SelectItem value="no">No</SelectItem>
                 </SelectContent>
@@ -304,152 +318,204 @@ export default function Reports() {
 
             {/* Records */}
             <div className="space-y-1">
-              <Label className="text-xs font-medium text-muted-foreground">Records</Label>
+              <Label className="text-[10px] font-medium text-muted-foreground uppercase">Records</Label>
               <Select value={records} onValueChange={setRecords}>
-                <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="Complete Only" />
+                <SelectTrigger className="h-8 w-[110px] text-xs">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
-                  <SelectItem value="complete">Complete Only</SelectItem>
+                  <SelectItem value="complete">Complete</SelectItem>
                   <SelectItem value="incomplete">Incomplete</SelectItem>
-                  <SelectItem value="all">All Records</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Button size="sm" className="gap-2 h-8">
-              <Filter className="h-3.5 w-3.5" />
-              Filter
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleClear} className="gap-2 h-8">
-              <X className="h-3.5 w-3.5" />
-              Clear
-            </Button>
-            <Button size="sm" className="gap-2 h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
-              <Download className="h-3.5 w-3.5" />
-              Export
-            </Button>
+            <div className="flex gap-2 ml-auto">
+              <Button size="sm" className="gap-1.5 h-8 text-xs">
+                <Filter className="h-3 w-3" />
+                Apply
+              </Button>
+              {hasActiveFilters && (
+                <Button size="sm" variant="outline" onClick={handleClearAllFilters} className="gap-1.5 h-8 text-xs">
+                  <FilterX className="h-3 w-3" />
+                  Clear All
+                </Button>
+              )}
+              <Button size="sm" className="gap-1.5 h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Download className="h-3 w-3" />
+                Export
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Records Count */}
-      <p className="text-sm text-muted-foreground">
-        {totalRecords} records ({paginatedRecords.length} shown)
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">{totalRecords}</span> records found
+          {hasActiveFilters && <span className="text-primary ml-1">(filtered)</span>}
+        </p>
+      </div>
 
-      {/* Data Table - Excel Style */}
+      {/* Excel-Like Data Table */}
       <Card className="border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-primary hover:bg-primary border-b-0">
-                <TableHead 
-                  className="text-primary-foreground font-semibold text-xs cursor-pointer select-none whitespace-nowrap"
-                  onClick={() => handleSort('epNumber')}
-                >
-                  <div className="flex items-center gap-1">
-                    EP NO {getSortIcon('epNumber')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="text-primary-foreground font-semibold text-xs cursor-pointer select-none whitespace-nowrap"
-                  onClick={() => handleSort('employeeName')}
-                >
-                  <div className="flex items-center gap-1">
-                    NAME {getSortIcon('employeeName')}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="text-primary-foreground font-semibold text-xs cursor-pointer select-none whitespace-nowrap"
-                  onClick={() => handleSort('date')}
-                >
-                  <div className="flex items-center gap-1">
-                    DATE {getSortIcon('date')}
-                  </div>
-                </TableHead>
-                <TableHead className="text-primary-foreground font-semibold text-xs whitespace-nowrap">SHIFT</TableHead>
-                <TableHead className="text-primary-foreground font-semibold text-xs whitespace-nowrap text-center">TIME PAIRS</TableHead>
-                <TableHead className="text-primary-foreground font-semibold text-xs whitespace-nowrap text-center">HRS</TableHead>
-                <TableHead className="text-primary-foreground font-semibold text-xs whitespace-nowrap text-center">OVERSTAY</TableHead>
-                <TableHead 
-                  className="text-primary-foreground font-semibold text-xs cursor-pointer select-none whitespace-nowrap"
-                  onClick={() => handleSort('status')}
-                >
-                  <div className="flex items-center gap-1">
-                    STATUS {getSortIcon('status')}
-                  </div>
-                </TableHead>
-                <TableHead className="text-primary-foreground font-semibold text-xs whitespace-nowrap text-center">OT</TableHead>
-                <TableHead className="text-primary-foreground font-semibold text-xs whitespace-nowrap text-center">OT DAYS</TableHead>
-                <TableHead className="text-primary-foreground font-semibold text-xs whitespace-nowrap text-center">ACTIONS</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <table className="w-full text-xs border-collapse">
+            {/* Header Row with Sort */}
+            <thead>
+              <tr className="bg-primary text-primary-foreground">
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('epNumber')}>
+                  <div className="flex items-center gap-1">EP NO {getSortIcon('epNumber')}</div>
+                </th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('name')}>
+                  <div className="flex items-center gap-1">NAME {getSortIcon('name')}</div>
+                </th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('date')}>
+                  <div className="flex items-center gap-1">DATE {getSortIcon('date')}</div>
+                </th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">SHIFT</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">TIME PAIRS</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">HRS</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OVERSTAY</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('status')}>
+                  <div className="flex items-center gap-1">STATUS {getSortIcon('status')}</div>
+                </th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OT</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OT DAYS</th>
+                <th className="px-2 py-2 text-center font-semibold whitespace-nowrap">ACTIONS</th>
+              </tr>
+              {/* Filter Row */}
+              <tr className="bg-muted/70 border-b border-border">
+                <td className="border-r border-border p-1">
+                  <Input
+                    placeholder="Filter..."
+                    value={columnFilters.epNumber}
+                    onChange={(e) => handleColumnFilterChange('epNumber', e.target.value)}
+                    className="h-6 text-[10px] px-1.5 bg-background"
+                  />
+                </td>
+                <td className="border-r border-border p-1">
+                  <Input
+                    placeholder="Filter..."
+                    value={columnFilters.name}
+                    onChange={(e) => handleColumnFilterChange('name', e.target.value)}
+                    className="h-6 text-[10px] px-1.5 bg-background"
+                  />
+                </td>
+                <td className="border-r border-border p-1">
+                  <Input
+                    placeholder="Filter..."
+                    value={columnFilters.date}
+                    onChange={(e) => handleColumnFilterChange('date', e.target.value)}
+                    className="h-6 text-[10px] px-1.5 bg-background"
+                  />
+                </td>
+                <td className="border-r border-border p-1">
+                  <Input
+                    placeholder="Filter..."
+                    value={columnFilters.shift}
+                    onChange={(e) => handleColumnFilterChange('shift', e.target.value)}
+                    className="h-6 text-[10px] px-1.5 bg-background"
+                  />
+                </td>
+                <td className="border-r border-border p-1"></td>
+                <td className="border-r border-border p-1"></td>
+                <td className="border-r border-border p-1"></td>
+                <td className="border-r border-border p-1">
+                  <Select value={columnFilters.status || 'all'} onValueChange={(v) => handleColumnFilterChange('status', v)}>
+                    <SelectTrigger className="h-6 text-[10px] px-1.5 bg-background">
+                      <SelectValue placeholder="All" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover z-50">
+                      <SelectItem value="all">All</SelectItem>
+                      {uniqueStatuses.map(s => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </td>
+                <td className="border-r border-border p-1">
+                  <Input
+                    placeholder="Filter..."
+                    value={columnFilters.ot}
+                    onChange={(e) => handleColumnFilterChange('ot', e.target.value)}
+                    className="h-6 text-[10px] px-1.5 bg-background"
+                  />
+                </td>
+                <td className="border-r border-border p-1">
+                  <Input
+                    placeholder="Filter..."
+                    value={columnFilters.otDays}
+                    onChange={(e) => handleColumnFilterChange('otDays', e.target.value)}
+                    className="h-6 text-[10px] px-1.5 bg-background"
+                  />
+                </td>
+                <td className="p-1"></td>
+              </tr>
+            </thead>
+            <tbody>
               {paginatedRecords.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
+                <tr>
+                  <td colSpan={11} className="text-center py-8 text-muted-foreground">
                     No records found
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ) : (
                 paginatedRecords.map((record, index) => {
                   const employee = employees.find((e) => e.epNumber === record.epNumber);
                   const isEven = index % 2 === 0;
                   return (
-                    <TableRow 
+                    <tr 
                       key={`${record.epNumber}-${record.date}`} 
                       className={cn(
                         'hover:bg-accent/50 transition-colors border-b border-border/50',
-                        isEven ? 'bg-card' : 'bg-muted/30'
+                        isEven ? 'bg-card' : 'bg-muted/20'
                       )}
                     >
-                      <TableCell className="font-medium text-sm py-2.5">{record.epNumber}</TableCell>
-                      <TableCell className="text-sm py-2.5">{employee?.name || '-'}</TableCell>
-                      <TableCell className="text-sm py-2.5">{record.date}</TableCell>
-                      <TableCell className="text-sm py-2.5">-</TableCell>
-                      <TableCell className="font-mono text-xs py-2.5 text-center">
+                      <td className="border-r border-border/50 px-2 py-1.5 font-medium">{record.epNumber}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5">{employee?.name || '-'}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5">{record.date}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center">-</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center font-mono">
                         {record.punchIn && record.punchOut 
-                          ? `${record.punchIn} - ${record.punchOut}` 
+                          ? `${record.punchIn}-${record.punchOut}` 
                           : '-'}
-                      </TableCell>
-                      <TableCell className="text-sm py-2.5 text-center">
+                      </td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center">
                         {record.punchIn && record.punchOut ? '8.0' : '-'}
-                      </TableCell>
-                      <TableCell className="text-sm py-2.5 text-center">-</TableCell>
-                      <TableCell className="py-2.5">{getStatusBadge(record.status)}</TableCell>
-                      <TableCell className="text-sm py-2.5 text-center">{record.overtime || '-'}</TableCell>
-                      <TableCell className="text-sm py-2.5 text-center">{record.mandays?.toFixed(1) || '0.0'}</TableCell>
-                      <TableCell className="py-2.5 text-center">
+                      </td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center">-</td>
+                      <td className="border-r border-border/50 px-2 py-1.5">{getStatusBadge(record.status)}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center">{record.overtime || '-'}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center">{record.mandays?.toFixed(1) || '0.0'}</td>
+                      <td className="px-2 py-1.5 text-center">
                         <Button 
-                          variant="ghost" 
+                          variant="link" 
                           size="sm" 
-                          className="h-7 px-2.5 text-xs font-medium text-primary hover:text-primary hover:bg-primary/10"
+                          className="h-5 px-1 text-[10px] font-medium text-primary"
                         >
-                          <Eye className="h-3.5 w-3.5 mr-1" />
                           View
                         </Button>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   );
                 })
               )}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-border px-4 py-3 bg-muted/30">
+        {/* Pagination Footer */}
+        {totalPages >= 1 && (
+          <div className="flex items-center justify-between border-t border-border px-3 py-2 bg-muted/30">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                Showing {startIndex + 1} to {Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
+              <span className="text-[10px] text-muted-foreground">
+                {startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
               </span>
               <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
-                <SelectTrigger className="h-8 w-20 text-xs">
+                <SelectTrigger className="h-6 w-14 text-[10px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
@@ -457,49 +523,51 @@ export default function Reports() {
                   <SelectItem value="15">15</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-xs text-muted-foreground">per page</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-6 w-6 p-0"
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
               >
-                <ChevronsUpDown className="h-4 w-4 rotate-90" />
+                <ChevronLeft className="h-3 w-3" />
+                <ChevronLeft className="h-3 w-3 -ml-1.5" />
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-6 w-6 p-0"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3 w-3" />
               </Button>
-              <span className="text-sm px-2 min-w-[80px] text-center">
-                Page {currentPage} of {totalPages}
+              <span className="text-[10px] px-2 min-w-[60px] text-center">
+                {currentPage} / {totalPages}
               </span>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-6 w-6 p-0"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3 w-3" />
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="h-6 w-6 p-0"
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
               >
-                <ChevronsUpDown className="h-4 w-4 -rotate-90" />
+                <ChevronRight className="h-3 w-3" />
+                <ChevronRight className="h-3 w-3 -ml-1.5" />
               </Button>
             </div>
           </div>
