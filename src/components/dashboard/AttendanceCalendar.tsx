@@ -101,28 +101,28 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="py-1.5 px-2 bg-muted/30">
-        <div className="flex items-center justify-between gap-1">
-          <CardTitle className="text-xs font-medium flex items-center gap-1">
-            <CalendarIcon className="h-3 w-3 text-primary" />
+    <Card className="overflow-hidden w-fit">
+      <CardHeader className="py-2 px-3 bg-muted/30">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-1.5">
+            <CalendarIcon className="h-4 w-4 text-primary" />
             Calendar
           </CardTitle>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <div className="relative">
-              <Search className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-muted-foreground" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
               <Input
                 placeholder="Search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-5 h-5 text-[10px] w-20"
+                className="pl-7 h-7 text-xs w-24"
               />
             </div>
             <Select 
               value={selectedEP || selectedEmployee?.epNumber} 
               onValueChange={setSelectedEP}
             >
-              <SelectTrigger className="w-16 h-5 text-[10px] px-1">
+              <SelectTrigger className="w-20 h-7 text-xs px-2">
                 <SelectValue placeholder="EP" />
               </SelectTrigger>
               <SelectContent>
@@ -137,61 +137,61 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
         </div>
       </CardHeader>
       
-      <CardContent className="p-1.5">
+      <CardContent className="p-3">
         {/* Employee Info + Month Navigation */}
-        <div className="flex items-center justify-between gap-1 mb-1 pb-1 border-b border-border/40">
+        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-border/40">
           {selectedEmployee && (
-            <div className="flex items-center gap-1 min-w-0">
-              <div className="h-5 w-5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                <span className="text-primary font-semibold text-[8px]">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <span className="text-primary font-semibold text-sm">
                   {selectedEmployee.name.charAt(0)}
                 </span>
               </div>
               <div className="min-w-0">
-                <p className="font-medium text-[10px] truncate leading-tight">{selectedEmployee.name}</p>
-                <p className="text-[8px] text-muted-foreground truncate leading-tight">{selectedEmployee.trade}</p>
+                <p className="font-medium text-sm truncate">{selectedEmployee.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{selectedEmployee.trade}</p>
               </div>
             </div>
           )}
           
-          <div className="flex items-center gap-0">
-            <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-4 w-4">
-              <ChevronLeft className="h-2.5 w-2.5" />
+          <div className="flex items-center gap-0.5">
+            <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-6 w-6">
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
-              <SelectTrigger className="w-10 h-4 text-[9px] px-1 border-0 bg-transparent">
+              <SelectTrigger className="w-14 h-6 text-xs px-2 border-0 bg-transparent">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {months.map((month, idx) => (
-                  <SelectItem key={month} value={String(idx)} className="text-xs">{month}</SelectItem>
+                  <SelectItem key={month} value={String(idx)} className="text-sm">{month}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
-              <SelectTrigger className="w-11 h-4 text-[9px] px-1 border-0 bg-transparent">
+              <SelectTrigger className="w-16 h-6 text-xs px-2 border-0 bg-transparent">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {years.map((year) => (
-                  <SelectItem key={year} value={String(year)} className="text-xs">{year}</SelectItem>
+                  <SelectItem key={year} value={String(year)} className="text-sm">{year}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-4 w-4">
-              <ChevronRight className="h-2.5 w-2.5" />
+            <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-6 w-6">
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Compact Calendar Grid */}
-        <div className="max-w-[220px] mx-auto">
-          <div className="grid grid-cols-7 gap-0.5">
+        {/* Calendar Grid */}
+        <div>
+          <div className="grid grid-cols-7 gap-1">
             {weekDays.map((day, idx) => (
               <div 
                 key={idx} 
                 className={cn(
-                  "text-center text-[8px] font-medium",
+                  "text-center text-xs font-semibold py-1",
                   idx === 0 || idx === 6 ? "text-muted-foreground" : "text-foreground"
                 )}
               >
@@ -199,7 +199,7 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-0.5 mt-0.5">
+          <div className="grid grid-cols-7 gap-1 mt-1">
             {Array.from({ length: calendarData.firstDayOffset }).map((_, idx) => (
               <div key={`empty-${idx}`} className="aspect-square" />
             ))}
@@ -211,10 +211,10 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
                 <div
                   key={day}
                   className={cn(
-                    "aspect-square rounded-[2px] flex items-center justify-center text-[8px] font-medium cursor-pointer",
+                    "aspect-square rounded flex items-center justify-center text-xs font-semibold cursor-pointer transition-transform hover:scale-105",
                     config 
-                      ? cn(config.bg, config.text, "hover:opacity-90") 
-                      : cn("bg-muted/30 text-muted-foreground", isWeekend && "bg-muted/50")
+                      ? cn(config.bg, config.text, "shadow-sm") 
+                      : cn("bg-muted/40 text-muted-foreground border border-border/50", isWeekend && "bg-muted/60")
                   )}
                   title={status ? `Day ${day}: ${status} - ${mandays} mandays` : `Day ${day}: No data`}
                 >
@@ -225,35 +225,35 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
           </div>
         </div>
 
-        {/* Legend + Stats Combined */}
-        <div className="mt-1.5 pt-1.5 border-t border-border/30 space-y-1.5">
-          <div className="flex flex-wrap items-center justify-center gap-1">
+        {/* Legend + Stats */}
+        <div className="mt-3 pt-2 border-t border-border/30 space-y-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {Object.entries(statusConfig).map(([key, config]) => (
-              <div key={key} className="flex items-center gap-0.5">
+              <div key={key} className="flex items-center gap-1">
                 <div className={cn(
-                  "w-3 h-3 rounded-[2px] flex items-center justify-center text-[6px] font-bold",
+                  "w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold",
                   config.bg, config.text
                 )}>
                   {config.shortLabel}
                 </div>
-                <span className="text-[8px] text-muted-foreground">{config.label}</span>
+                <span className="text-xs text-muted-foreground">{config.label}</span>
               </div>
             ))}
           </div>
           
           {/* Monthly Stats */}
-          <div className="grid grid-cols-3 gap-1 bg-muted/30 rounded p-1.5">
+          <div className="grid grid-cols-3 gap-2 bg-muted/30 rounded-lg p-2">
             <div className="text-center">
-              <p className="text-[10px] font-semibold text-emerald-600">{calendarData.stats.present}</p>
-              <p className="text-[7px] text-muted-foreground">Present</p>
+              <p className="text-base font-bold text-emerald-600">{calendarData.stats.present}</p>
+              <p className="text-[10px] text-muted-foreground">Present</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] font-semibold text-red-500">{calendarData.stats.absent}</p>
-              <p className="text-[7px] text-muted-foreground">Absent</p>
+              <p className="text-base font-bold text-red-500">{calendarData.stats.absent}</p>
+              <p className="text-[10px] text-muted-foreground">Absent</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] font-semibold text-primary">{calendarData.stats.totalMandays.toFixed(1)}</p>
-              <p className="text-[7px] text-muted-foreground">Mandays</p>
+              <p className="text-base font-bold text-primary">{calendarData.stats.totalMandays.toFixed(1)}</p>
+              <p className="text-[10px] text-muted-foreground">Mandays</p>
             </div>
           </div>
         </div>

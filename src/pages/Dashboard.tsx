@@ -48,9 +48,13 @@ export default function Dashboard() {
       )}
 
       {/* Calendar + ARC Summary Side by Side on Desktop */}
-      <div className="grid gap-3 grid-cols-1 lg:grid-cols-[280px_1fr]">
-        <AttendanceCalendar companyId={user?.companyId} />
-        <ARCSummaryTable companyId={user?.companyId} />
+      <div className="flex flex-col lg:flex-row gap-3">
+        <div className="shrink-0">
+          <AttendanceCalendar companyId={user?.companyId} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <ARCSummaryTable companyId={user?.companyId} />
+        </div>
       </div>
 
       {/* Status Summary Tables */}
