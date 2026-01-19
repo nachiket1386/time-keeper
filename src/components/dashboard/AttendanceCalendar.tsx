@@ -47,7 +47,7 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
   }, [filteredEmployees, selectedEP]);
 
   const calendarData = useMemo(() => {
-    if (!selectedEmployee) return { days: [], firstDayOffset: 0 };
+    if (!selectedEmployee) return { days: [], firstDayOffset: 0, stats: { present: 0, absent: 0, partial: 0, leave: 0, holiday: 0, totalMandays: 0 } };
     
     const year = selectedYear;
     const month = selectedMonth;
@@ -55,6 +55,7 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
     const firstDay = new Date(year, month, 1).getDay();
     
     const days: { day: number; status: AttendanceStatus | null; mandays: number }[] = [];
+    const stats = { present: 0, absent: 0, partial: 0, leave: 0, holiday: 0, totalMandays: 0 };
     
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -62,14 +63,18 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
         r => r.epNumber === selectedEmployee.epNumber && r.date === dateStr
       );
       
-      days.push({
-        day,
-        status: record ? (record.status as AttendanceStatus) : null,
-        mandays: record?.mandays || 0
-      });
+      const status = record ? (record.status as AttendanceStatus) : null;
+      if (status === 'Present') stats.present++;
+      else if (status === 'Absent') stats.absent++;
+      else if (status === 'Partial Day') stats.partial++;
+      else if (status === 'On Leave') stats.leave++;
+      else if (status === 'Holiday') stats.holiday++;
+      stats.totalMandays += record?.mandays || 0;
+      
+      days.push({ day, status, mandays: record?.mandays || 0 });
     }
     
-    return { days, firstDayOffset: firstDay };
+    return { days, firstDayOffset: firstDay, stats };
   }, [selectedEmployee, selectedMonth, selectedYear]);
 
   const years = useMemo(() => {
@@ -96,7 +101,7 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
   };
 
   return (
-    <Card className="overflow-hidden h-full">
+    <Card className="overflow-hidden">
       <CardHeader className="py-1.5 px-2 bg-muted/30">
         <div className="flex items-center justify-between gap-1">
           <CardTitle className="text-xs font-medium flex items-center gap-1">
@@ -220,19 +225,37 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
           </div>
         </div>
 
-        {/* Compact Legend */}
-        <div className="flex flex-wrap items-center justify-center gap-1 mt-1 pt-1 border-t border-border/30">
-          {Object.entries(statusConfig).map(([key, config]) => (
-            <div key={key} className="flex items-center gap-0.5">
-              <div className={cn(
-                "w-3 h-3 rounded-[2px] flex items-center justify-center text-[6px] font-bold",
-                config.bg, config.text
-              )}>
-                {config.shortLabel}
+        {/* Legend + Stats Combined */}
+        <div className="mt-1.5 pt-1.5 border-t border-border/30 space-y-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-1">
+            {Object.entries(statusConfig).map(([key, config]) => (
+              <div key={key} className="flex items-center gap-0.5">
+                <div className={cn(
+                  "w-3 h-3 rounded-[2px] flex items-center justify-center text-[6px] font-bold",
+                  config.bg, config.text
+                )}>
+                  {config.shortLabel}
+                </div>
+                <span className="text-[8px] text-muted-foreground">{config.label}</span>
               </div>
-              <span className="text-[8px] text-muted-foreground">{config.label}</span>
+            ))}
+          </div>
+          
+          {/* Monthly Stats */}
+          <div className="grid grid-cols-3 gap-1 bg-muted/30 rounded p-1.5">
+            <div className="text-center">
+              <p className="text-[10px] font-semibold text-emerald-600">{calendarData.stats.present}</p>
+              <p className="text-[7px] text-muted-foreground">Present</p>
             </div>
-          ))}
+            <div className="text-center">
+              <p className="text-[10px] font-semibold text-red-500">{calendarData.stats.absent}</p>
+              <p className="text-[7px] text-muted-foreground">Absent</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] font-semibold text-primary">{calendarData.stats.totalMandays.toFixed(1)}</p>
+              <p className="text-[7px] text-muted-foreground">Mandays</p>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
