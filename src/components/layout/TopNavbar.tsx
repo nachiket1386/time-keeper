@@ -79,14 +79,14 @@ export function TopNavbar() {
           <Link
             to={href}
             className={cn(
-              'flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-lg transition-all text-xs font-medium',
+              'flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-lg transition-all font-medium min-w-[70px]',
               isActive(href)
                 ? 'bg-primary text-primary-foreground shadow-md'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
-            <Icon className="h-4 w-4" />
-            <span className="hidden sm:block text-[10px]">{title}</span>
+            <Icon className="h-5 w-5" />
+            <span className="text-xs">{title}</span>
           </Link>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="sm:hidden">
@@ -98,7 +98,7 @@ export function TopNavbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border">
-      <div className="flex h-14 items-center px-4 gap-2">
+      <div className="flex h-16 items-center px-4 gap-3">
         {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2 mr-4">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
@@ -108,7 +108,7 @@ export function TopNavbar() {
         </Link>
 
         {/* Tab Navigation */}
-        <nav className="flex items-center gap-1 bg-muted/50 rounded-xl p-1">
+        <nav className="flex items-center gap-1 bg-muted/50 rounded-xl p-1.5">
           {navTabs.map((item) => (
             <TabLink key={item.href} {...item} />
           ))}
@@ -118,22 +118,22 @@ export function TopNavbar() {
             <DropdownMenuTrigger asChild>
               <button
                 className={cn(
-                  'flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-lg transition-all text-xs font-medium',
+                  'flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-lg transition-all font-medium min-w-[70px]',
                   isActiveGroup(reportsItems)
                     ? 'bg-primary text-primary-foreground shadow-md'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 )}
               >
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:flex items-center gap-0.5 text-[10px]">
-                  Reports <ChevronDown className="h-2.5 w-2.5" />
+                <FileText className="h-5 w-5" />
+                <span className="flex items-center gap-0.5 text-xs">
+                  Reports <ChevronDown className="h-3 w-3" />
                 </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuContent align="start" className="w-52 bg-card border shadow-lg">
               {reportsItems.map((item) => (
                 <DropdownMenuItem key={item.href} asChild>
-                  <Link to={item.href} className={cn('flex items-center gap-2', isActive(item.href) && 'bg-accent')}>
+                  <Link to={item.href} className={cn('flex items-center gap-2 text-sm', isActive(item.href) && 'bg-accent')}>
                     <item.icon className="h-4 w-4 text-muted-foreground" />
                     {item.title}
                   </Link>
@@ -148,24 +148,24 @@ export function TopNavbar() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-lg transition-all text-xs font-medium',
+                    'flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-lg transition-all font-medium min-w-[70px]',
                     isActiveGroup(managementItems)
                       ? 'bg-primary text-primary-foreground shadow-md'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   )}
                 >
-                  <Users className="h-4 w-4" />
-                  <span className="hidden sm:flex items-center gap-0.5 text-[10px]">
-                    Manage <ChevronDown className="h-2.5 w-2.5" />
+                  <Users className="h-5 w-5" />
+                  <span className="flex items-center gap-0.5 text-xs">
+                    Manage <ChevronDown className="h-3 w-3" />
                   </span>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-44">
+              <DropdownMenuContent align="start" className="w-48 bg-card border shadow-lg">
                 {managementItems
                   .filter((item) => !item.rootOnly || user.role === 'root')
                   .map((item) => (
                     <DropdownMenuItem key={item.href} asChild>
-                      <Link to={item.href} className={cn('flex items-center gap-2', isActive(item.href) && 'bg-accent')}>
+                      <Link to={item.href} className={cn('flex items-center gap-2 text-sm', isActive(item.href) && 'bg-accent')}>
                         <item.icon className="h-4 w-4 text-muted-foreground" />
                         {item.title}
                       </Link>
@@ -175,7 +175,7 @@ export function TopNavbar() {
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to="/audit-logs" className={cn('flex items-center gap-2', isActive('/audit-logs') && 'bg-accent')}>
+                      <Link to="/audit-logs" className={cn('flex items-center gap-2 text-sm', isActive('/audit-logs') && 'bg-accent')}>
                         <History className="h-4 w-4 text-muted-foreground" />
                         Audit Logs
                       </Link>
