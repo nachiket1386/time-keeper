@@ -1,29 +1,22 @@
 import { useState, useMemo } from 'react';
-import { format } from 'date-fns';
 import {
   Clock,
   FileSpreadsheet,
   FileText,
   ClipboardList,
   TrendingUp,
-  Filter,
-  X,
   Download,
-  Calendar as CalendarIcon,
-  Search,
   ChevronLeft,
   ChevronRight,
   ChevronsUpDown,
   ChevronUp,
   ChevronDown,
-  Eye,
   FilterX,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -32,11 +25,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
@@ -59,6 +52,9 @@ interface ColumnFilters {
   name: string;
   date: string;
   shift: string;
+  timePairs: string;
+  hrs: string;
+  overstay: string;
   status: string;
   ot: string;
   otDays: string;
@@ -66,10 +62,6 @@ interface ColumnFilters {
 
 export default function Reports() {
   const [activeTab, setActiveTab] = useState<ReportTab>('attendance');
-  const [fromDate, setFromDate] = useState<Date | undefined>(new Date());
-  const [toDate, setToDate] = useState<Date | undefined>(new Date());
-  const [overstay, setOverstay] = useState('all');
-  const [records, setRecords] = useState('complete');
   
   // Column filters
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>({
@@ -77,6 +69,9 @@ export default function Reports() {
     name: '',
     date: '',
     shift: '',
+    timePairs: '',
+    hrs: '',
+    overstay: '',
     status: '',
     ot: '',
     otDays: '',
@@ -84,7 +79,7 @@ export default function Reports() {
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(15);
+  const [pageSize, setPageSize] = useState(20);
   
   // Sorting state
   const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -101,22 +96,18 @@ export default function Reports() {
     return attendanceRecords.filter((record) => {
       const employee = employees.find((e) => e.epNumber === record.epNumber);
       
-      // EP Number filter
       if (columnFilters.epNumber && !record.epNumber.toLowerCase().includes(columnFilters.epNumber.toLowerCase())) {
         return false;
       }
       
-      // Name filter
       if (columnFilters.name && employee && !employee.name.toLowerCase().includes(columnFilters.name.toLowerCase())) {
         return false;
       }
       
-      // Date filter
       if (columnFilters.date && !record.date.includes(columnFilters.date)) {
         return false;
       }
       
-      // Status filter
       if (columnFilters.status && columnFilters.status !== 'all' && record.status !== columnFilters.status) {
         return false;
       }
@@ -133,7 +124,6 @@ export default function Reports() {
       let aVal: any = a[sortColumn as keyof typeof a];
       let bVal: any = b[sortColumn as keyof typeof b];
       
-      // Handle employee name lookup
       if (sortColumn === 'name') {
         const empA = employees.find((e) => e.epNumber === a.epNumber);
         const empB = employees.find((e) => e.epNumber === b.epNumber);
@@ -178,14 +168,13 @@ export default function Reports() {
       name: '',
       date: '',
       shift: '',
+      timePairs: '',
+      hrs: '',
+      overstay: '',
       status: '',
       ot: '',
       otDays: '',
     });
-    setFromDate(new Date());
-    setToDate(new Date());
-    setOverstay('all');
-    setRecords('complete');
     setCurrentPage(1);
   };
 
@@ -210,11 +199,27 @@ export default function Reports() {
       'Holiday': 'bg-blue-500 text-white hover:bg-blue-500',
     };
     return (
-      <Badge className={cn('font-medium text-[10px] px-1.5 py-0', styles[status] || '')}>
+      <Badge className={cn('font-medium text-[10px] px-1.5 py-0 whitespace-nowrap', styles[status] || '')}>
         {status}
       </Badge>
     );
   };
+
+  // Cell with tooltip for overflow
+  const CellWithTooltip = ({ content, className }: { content: string; className?: string }) => (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className={cn("block truncate max-w-full", className)}>
+            {content}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="bg-popover border shadow-lg z-50 max-w-xs">
+          <p className="text-xs">{content}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 
   return (
     <div className="animate-fade-in space-y-3 pb-6">
@@ -223,209 +228,117 @@ export default function Reports() {
         description="View and manage attendance records."
       />
 
-      {/* Report Type Tabs - Pill Style */}
-      <div className="flex flex-wrap gap-2">
-        {reportTabs.map((tab) => (
-          <Button
-            key={tab.id}
-            variant={activeTab === tab.id ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => {
-              setActiveTab(tab.id);
-              setCurrentPage(1);
-            }}
-            className={cn(
-              'gap-1.5 rounded-full px-3 h-8 text-xs transition-all font-medium',
-              activeTab === tab.id 
-                ? 'bg-primary text-primary-foreground shadow-md' 
-                : 'bg-card hover:bg-muted border-border'
-            )}
-          >
-            <tab.icon className="h-3.5 w-3.5" />
-            {tab.label}
-          </Button>
-        ))}
-      </div>
-
-      {/* Compact Filters Row */}
-      <Card className="border-border shadow-sm">
-        <CardContent className="p-3">
-          <div className="flex flex-wrap items-end gap-3">
-            {/* From Date */}
-            <div className="space-y-1">
-              <Label className="text-[10px] font-medium text-muted-foreground uppercase">From</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-[120px] justify-start text-left font-normal h-8 text-xs"
-                  >
-                    <CalendarIcon className="mr-1.5 h-3 w-3 text-muted-foreground" />
-                    {fromDate ? format(fromDate, 'dd-MM-yyyy') : 'Select'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={fromDate}
-                    onSelect={setFromDate}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* To Date */}
-            <div className="space-y-1">
-              <Label className="text-[10px] font-medium text-muted-foreground uppercase">To</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-[120px] justify-start text-left font-normal h-8 text-xs"
-                  >
-                    <CalendarIcon className="mr-1.5 h-3 w-3 text-muted-foreground" />
-                    {toDate ? format(toDate, 'dd-MM-yyyy') : 'Select'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-popover z-50" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={toDate}
-                    onSelect={setToDate}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Overstay */}
-            <div className="space-y-1">
-              <Label className="text-[10px] font-medium text-muted-foreground uppercase">Overstay</Label>
-              <Select value={overstay} onValueChange={setOverstay}>
-                <SelectTrigger className="h-8 w-[100px] text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="yes">Yes</SelectItem>
-                  <SelectItem value="no">No</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Records */}
-            <div className="space-y-1">
-              <Label className="text-[10px] font-medium text-muted-foreground uppercase">Records</Label>
-              <Select value={records} onValueChange={setRecords}>
-                <SelectTrigger className="h-8 w-[110px] text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  <SelectItem value="complete">Complete</SelectItem>
-                  <SelectItem value="incomplete">Incomplete</SelectItem>
-                  <SelectItem value="all">All</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-2 ml-auto">
-              <Button size="sm" className="gap-1.5 h-8 text-xs">
-                <Filter className="h-3 w-3" />
-                Apply
-              </Button>
-              {hasActiveFilters && (
-                <Button size="sm" variant="outline" onClick={handleClearAllFilters} className="gap-1.5 h-8 text-xs">
-                  <FilterX className="h-3 w-3" />
-                  Clear All
-                </Button>
+      {/* Report Type Tabs + Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-1.5">
+          {reportTabs.map((tab) => (
+            <Button
+              key={tab.id}
+              variant={activeTab === tab.id ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                setActiveTab(tab.id);
+                setCurrentPage(1);
+              }}
+              className={cn(
+                'gap-1.5 rounded-full px-3 h-7 text-xs transition-all font-medium',
+                activeTab === tab.id 
+                  ? 'bg-primary text-primary-foreground shadow-md' 
+                  : 'bg-card hover:bg-muted border-border'
               )}
-              <Button size="sm" className="gap-1.5 h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Download className="h-3 w-3" />
-                Export
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            >
+              <tab.icon className="h-3 w-3" />
+              {tab.label}
+            </Button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <Button size="sm" variant="outline" onClick={handleClearAllFilters} className="gap-1.5 h-7 text-xs">
+              <FilterX className="h-3 w-3" />
+              Clear Filters
+            </Button>
+          )}
+          <Button size="sm" className="gap-1.5 h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Download className="h-3 w-3" />
+            Export
+          </Button>
+        </div>
+      </div>
 
       {/* Records Count */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">{totalRecords}</span> records found
-          {hasActiveFilters && <span className="text-primary ml-1">(filtered)</span>}
-        </p>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">{totalRecords}</span> records
+        {hasActiveFilters && <span className="text-primary ml-1">(filtered)</span>}
+      </p>
 
       {/* Excel-Like Data Table */}
       <Card className="border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs border-collapse">
+          <table className="w-full text-xs border-collapse min-w-[1000px]">
             {/* Header Row with Sort */}
             <thead>
               <tr className="bg-primary text-primary-foreground">
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('epNumber')}>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[100px]" onClick={() => handleSort('epNumber')}>
                   <div className="flex items-center gap-1">EP NO {getSortIcon('epNumber')}</div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('name')}>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[120px]" onClick={() => handleSort('name')}>
                   <div className="flex items-center gap-1">NAME {getSortIcon('name')}</div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('date')}>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[90px]" onClick={() => handleSort('date')}>
                   <div className="flex items-center gap-1">DATE {getSortIcon('date')}</div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">SHIFT</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">TIME PAIRS</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">HRS</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OVERSTAY</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90" onClick={() => handleSort('status')}>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[60px]">SHIFT</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[100px]">TIME PAIRS</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[50px]">HRS</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[70px]">OVERSTAY</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[80px]" onClick={() => handleSort('status')}>
                   <div className="flex items-center gap-1">STATUS {getSortIcon('status')}</div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OT</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OT DAYS</th>
-                <th className="px-2 py-2 text-center font-semibold whitespace-nowrap">ACTIONS</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[50px]">OT</th>
+                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[60px]">OT DAYS</th>
+                <th className="px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[60px]">ACTIONS</th>
               </tr>
               {/* Filter Row */}
-              <tr className="bg-muted/70 border-b border-border">
-                <td className="border-r border-border p-1">
+              <tr className="bg-muted/50 border-b border-border">
+                <td className="border-r border-border/70 p-0.5">
                   <Input
                     placeholder="Filter..."
                     value={columnFilters.epNumber}
                     onChange={(e) => handleColumnFilterChange('epNumber', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background"
+                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
                   />
                 </td>
-                <td className="border-r border-border p-1">
+                <td className="border-r border-border/70 p-0.5">
                   <Input
                     placeholder="Filter..."
                     value={columnFilters.name}
                     onChange={(e) => handleColumnFilterChange('name', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background"
+                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
                   />
                 </td>
-                <td className="border-r border-border p-1">
+                <td className="border-r border-border/70 p-0.5">
                   <Input
                     placeholder="Filter..."
                     value={columnFilters.date}
                     onChange={(e) => handleColumnFilterChange('date', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background"
+                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
                   />
                 </td>
-                <td className="border-r border-border p-1">
+                <td className="border-r border-border/70 p-0.5">
                   <Input
                     placeholder="Filter..."
                     value={columnFilters.shift}
                     onChange={(e) => handleColumnFilterChange('shift', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background"
+                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
                   />
                 </td>
-                <td className="border-r border-border p-1"></td>
-                <td className="border-r border-border p-1"></td>
-                <td className="border-r border-border p-1"></td>
-                <td className="border-r border-border p-1">
+                <td className="border-r border-border/70 p-0.5"></td>
+                <td className="border-r border-border/70 p-0.5"></td>
+                <td className="border-r border-border/70 p-0.5"></td>
+                <td className="border-r border-border/70 p-0.5">
                   <Select value={columnFilters.status || 'all'} onValueChange={(v) => handleColumnFilterChange('status', v)}>
-                    <SelectTrigger className="h-6 text-[10px] px-1.5 bg-background">
+                    <SelectTrigger className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm">
                       <SelectValue placeholder="All" />
                     </SelectTrigger>
                     <SelectContent className="bg-popover z-50">
@@ -436,23 +349,23 @@ export default function Reports() {
                     </SelectContent>
                   </Select>
                 </td>
-                <td className="border-r border-border p-1">
+                <td className="border-r border-border/70 p-0.5">
                   <Input
                     placeholder="Filter..."
                     value={columnFilters.ot}
                     onChange={(e) => handleColumnFilterChange('ot', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background"
+                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
                   />
                 </td>
-                <td className="border-r border-border p-1">
+                <td className="border-r border-border/70 p-0.5">
                   <Input
                     placeholder="Filter..."
                     value={columnFilters.otDays}
                     onChange={(e) => handleColumnFilterChange('otDays', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background"
+                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
                   />
                 </td>
-                <td className="p-1"></td>
+                <td className="p-0.5"></td>
               </tr>
             </thead>
             <tbody>
@@ -466,35 +379,55 @@ export default function Reports() {
                 paginatedRecords.map((record, index) => {
                   const employee = employees.find((e) => e.epNumber === record.epNumber);
                   const isEven = index % 2 === 0;
+                  const timePair = record.punchIn && record.punchOut 
+                    ? `${record.punchIn}-${record.punchOut}` 
+                    : '-';
+                  
                   return (
                     <tr 
                       key={`${record.epNumber}-${record.date}`} 
                       className={cn(
-                        'hover:bg-accent/50 transition-colors border-b border-border/50',
+                        'hover:bg-accent/50 transition-colors border-b border-border/30',
                         isEven ? 'bg-card' : 'bg-muted/20'
                       )}
                     >
-                      <td className="border-r border-border/50 px-2 py-1.5 font-medium">{record.epNumber}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5">{employee?.name || '-'}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5">{record.date}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center">-</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center font-mono">
-                        {record.punchIn && record.punchOut 
-                          ? `${record.punchIn}-${record.punchOut}` 
-                          : '-'}
+                      <td className="border-r border-border/30 px-2 py-1 font-medium whitespace-nowrap">
+                        <CellWithTooltip content={record.epNumber} />
                       </td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center">
+                      <td className="border-r border-border/30 px-2 py-1 whitespace-nowrap">
+                        <CellWithTooltip content={employee?.name || '-'} />
+                      </td>
+                      <td className="border-r border-border/30 px-2 py-1 whitespace-nowrap">{record.date}</td>
+                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">-</td>
+                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="font-mono cursor-default">{timePair}</span>
+                            </TooltipTrigger>
+                            {timePair !== '-' && (
+                              <TooltipContent side="top" className="bg-popover border shadow-lg z-50">
+                                <div className="text-xs p-1">
+                                  <div>In: {record.punchIn}</div>
+                                  <div>Out: {record.punchOut}</div>
+                                </div>
+                              </TooltipContent>
+                            )}
+                          </Tooltip>
+                        </TooltipProvider>
+                      </td>
+                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">
                         {record.punchIn && record.punchOut ? '8.0' : '-'}
                       </td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center">-</td>
-                      <td className="border-r border-border/50 px-2 py-1.5">{getStatusBadge(record.status)}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center">{record.overtime || '-'}</td>
-                      <td className="border-r border-border/50 px-2 py-1.5 text-center">{record.mandays?.toFixed(1) || '0.0'}</td>
-                      <td className="px-2 py-1.5 text-center">
+                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">-</td>
+                      <td className="border-r border-border/30 px-2 py-1 whitespace-nowrap">{getStatusBadge(record.status)}</td>
+                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">{record.overtime || '-'}</td>
+                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">{record.mandays?.toFixed(1) || '0.0'}</td>
+                      <td className="px-2 py-1 text-center whitespace-nowrap">
                         <Button 
                           variant="link" 
                           size="sm" 
-                          className="h-5 px-1 text-[10px] font-medium text-primary"
+                          className="h-5 px-1 text-[10px] font-medium text-primary p-0"
                         >
                           View
                         </Button>
@@ -509,19 +442,18 @@ export default function Reports() {
 
         {/* Pagination Footer */}
         {totalPages >= 1 && (
-          <div className="flex items-center justify-between border-t border-border px-3 py-2 bg-muted/30">
+          <div className="flex items-center justify-between border-t border-border px-3 py-1.5 bg-muted/30">
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-muted-foreground">
                 {startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
               </span>
               <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
-                <SelectTrigger className="h-6 w-14 text-[10px]">
+                <SelectTrigger className="h-5 w-12 text-[10px] px-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
                   <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="15">15</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
                   <SelectItem value="50">50</SelectItem>
                   <SelectItem value="100">100</SelectItem>
                 </SelectContent>
@@ -531,29 +463,29 @@ export default function Reports() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 p-0"
                 onClick={() => setCurrentPage(1)}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-3 w-3" />
-                <ChevronLeft className="h-3 w-3 -ml-1.5" />
+                <ChevronLeft className="h-3 w-3 -ml-2" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 p-0"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-3 w-3" />
               </Button>
-              <span className="text-[10px] px-2 min-w-[60px] text-center">
-                {currentPage} / {totalPages}
+              <span className="text-[10px] px-1.5">
+                {currentPage}/{totalPages}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 p-0"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
@@ -562,12 +494,12 @@ export default function Reports() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 p-0"
                 onClick={() => setCurrentPage(totalPages)}
                 disabled={currentPage === totalPages}
               >
                 <ChevronRight className="h-3 w-3" />
-                <ChevronRight className="h-3 w-3 -ml-1.5" />
+                <ChevronRight className="h-3 w-3 -ml-2" />
               </Button>
             </div>
           </div>
