@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Clock,
   FileSpreadsheet,
@@ -8,15 +8,17 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
-  ChevronsUpDown,
-  ChevronUp,
   ChevronDown,
   FilterX,
+  ArrowUpAZ,
+  ArrowDownAZ,
+  X,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -25,11 +27,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
@@ -47,89 +48,274 @@ const reportTabs = [
 
 type SortDirection = 'asc' | 'desc' | null;
 
-interface ColumnFilters {
-  epNumber: string;
-  name: string;
-  date: string;
-  shift: string;
-  timePairs: string;
-  hrs: string;
-  overstay: string;
-  status: string;
-  ot: string;
-  otDays: string;
+interface ColumnFilter {
+  selectedValues: Set<string>;
+  searchText: string;
+}
+
+interface FilterDropdownProps {
+  column: string;
+  allValues: string[];
+  filter: ColumnFilter;
+  onFilterChange: (filter: ColumnFilter) => void;
+  sortColumn: string | null;
+  sortDirection: SortDirection;
+  onSort: (direction: 'asc' | 'desc') => void;
+  onClearSort: () => void;
+}
+
+function FilterDropdown({ 
+  column, 
+  allValues, 
+  filter, 
+  onFilterChange, 
+  sortColumn, 
+  sortDirection, 
+  onSort,
+  onClearSort 
+}: FilterDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [tempSelected, setTempSelected] = useState<Set<string>>(new Set(filter.selectedValues));
+  
+  const filteredValues = allValues.filter(v => 
+    v.toLowerCase().includes(searchText.toLowerCase())
+  );
+  
+  const allSelected = filteredValues.every(v => tempSelected.has(v));
+  
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const newSelected = new Set(tempSelected);
+      filteredValues.forEach(v => newSelected.add(v));
+      setTempSelected(newSelected);
+    } else {
+      const newSelected = new Set(tempSelected);
+      filteredValues.forEach(v => newSelected.delete(v));
+      setTempSelected(newSelected);
+    }
+  };
+  
+  const handleValueToggle = (value: string, checked: boolean) => {
+    const newSelected = new Set(tempSelected);
+    if (checked) {
+      newSelected.add(value);
+    } else {
+      newSelected.delete(value);
+    }
+    setTempSelected(newSelected);
+  };
+  
+  const handleOk = () => {
+    onFilterChange({ selectedValues: tempSelected, searchText: '' });
+    setOpen(false);
+  };
+  
+  const handleCancel = () => {
+    setTempSelected(new Set(filter.selectedValues));
+    setSearchText('');
+    setOpen(false);
+  };
+  
+  const handleClearFilter = () => {
+    const allSet = new Set(allValues);
+    setTempSelected(allSet);
+    onFilterChange({ selectedValues: allSet, searchText: '' });
+  };
+  
+  const isFiltered = filter.selectedValues.size < allValues.length && filter.selectedValues.size > 0;
+  const isSorted = sortColumn === column;
+  
+  useEffect(() => {
+    if (open) {
+      setTempSelected(new Set(filter.selectedValues));
+      setSearchText('');
+    }
+  }, [open, filter.selectedValues]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className={cn(
+          "flex items-center gap-0.5 ml-1 p-0.5 rounded hover:bg-primary-foreground/20",
+          (isFiltered || isSorted) && "text-yellow-300"
+        )}>
+          <ChevronDown className="h-3 w-3" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent 
+        className="w-56 p-0 bg-popover border shadow-lg z-50" 
+        align="start"
+        sideOffset={2}
+      >
+        <div className="p-2 space-y-1 border-b border-border">
+          <button 
+            className="flex items-center gap-2 w-full px-2 py-1.5 text-xs hover:bg-muted rounded text-left"
+            onClick={() => { onSort('asc'); setOpen(false); }}
+          >
+            <ArrowUpAZ className="h-3.5 w-3.5" />
+            Sort A to Z
+          </button>
+          <button 
+            className="flex items-center gap-2 w-full px-2 py-1.5 text-xs hover:bg-muted rounded text-left"
+            onClick={() => { onSort('desc'); setOpen(false); }}
+          >
+            <ArrowDownAZ className="h-3.5 w-3.5" />
+            Sort Z to A
+          </button>
+          {(isFiltered || isSorted) && (
+            <button 
+              className="flex items-center gap-2 w-full px-2 py-1.5 text-xs hover:bg-muted rounded text-left text-muted-foreground"
+              onClick={() => { handleClearFilter(); onClearSort(); }}
+            >
+              <FilterX className="h-3.5 w-3.5" />
+              Clear Filter from "{column}"
+            </button>
+          )}
+        </div>
+        
+        <div className="p-2 border-b border-border">
+          <Input
+            placeholder="Search..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="h-7 text-xs"
+          />
+        </div>
+        
+        <div className="p-2 max-h-48 overflow-y-auto">
+          <label className="flex items-center gap-2 px-1 py-1 text-xs cursor-pointer hover:bg-muted rounded">
+            <Checkbox 
+              checked={allSelected}
+              onCheckedChange={handleSelectAll}
+              className="h-3.5 w-3.5"
+            />
+            (Select All)
+          </label>
+          {filteredValues.map((value) => (
+            <label 
+              key={value} 
+              className="flex items-center gap-2 px-1 py-1 text-xs cursor-pointer hover:bg-muted rounded"
+            >
+              <Checkbox 
+                checked={tempSelected.has(value)}
+                onCheckedChange={(checked) => handleValueToggle(value, checked as boolean)}
+                className="h-3.5 w-3.5"
+              />
+              {value || '(Blank)'}
+            </label>
+          ))}
+        </div>
+        
+        <div className="flex justify-end gap-2 p-2 border-t border-border bg-muted/30">
+          <Button size="sm" variant="outline" className="h-7 text-xs px-3" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button size="sm" className="h-7 text-xs px-3" onClick={handleOk}>
+            OK
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export default function Reports() {
   const [activeTab, setActiveTab] = useState<ReportTab>('attendance');
-  
-  // Column filters
-  const [columnFilters, setColumnFilters] = useState<ColumnFilters>({
-    epNumber: '',
-    name: '',
-    date: '',
-    shift: '',
-    timePairs: '',
-    hrs: '',
-    overstay: '',
-    status: '',
-    ot: '',
-    otDays: '',
-  });
-  
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  
-  // Sorting state
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
-  // Get unique values for dropdown filters
-  const uniqueStatuses = useMemo(() => 
-    [...new Set(attendanceRecords.map(r => r.status))].sort(),
-    []
-  );
+  // Build enriched records with employee names
+  const enrichedRecords = useMemo(() => {
+    return attendanceRecords.map(record => {
+      const employee = employees.find(e => e.epNumber === record.epNumber);
+      return {
+        ...record,
+        employeeName: employee?.name || '-',
+        shift: record.punchIn && record.punchOut ? `${record.punchIn}-${record.punchOut}` : '-',
+        timePair: record.punchIn && record.punchOut ? `${record.punchIn}-${record.punchOut}` : '-',
+        hrs: record.punchIn && record.punchOut ? '8.0' : '-',
+        overstayDisplay: '-',
+        otDisplay: record.overtime?.toString() || '-',
+        otDays: record.mandays?.toFixed(1) || '0.0',
+      };
+    });
+  }, []);
 
-  // Filter records based on column filters
+  // Get unique values for each column
+  const uniqueValues = useMemo(() => ({
+    epNumber: [...new Set(enrichedRecords.map(r => r.epNumber))].sort(),
+    employeeName: [...new Set(enrichedRecords.map(r => r.employeeName))].sort(),
+    date: [...new Set(enrichedRecords.map(r => r.date))].sort(),
+    shift: [...new Set(enrichedRecords.map(r => r.shift))].sort(),
+    status: [...new Set(enrichedRecords.map(r => r.status))].sort(),
+    otDisplay: [...new Set(enrichedRecords.map(r => r.otDisplay))].sort(),
+    otDays: [...new Set(enrichedRecords.map(r => r.otDays))].sort(),
+  }), [enrichedRecords]);
+
+  // Column filters
+  const [filters, setFilters] = useState<Record<string, ColumnFilter>>(() => {
+    const initial: Record<string, ColumnFilter> = {};
+    Object.keys(uniqueValues).forEach(key => {
+      initial[key] = { 
+        selectedValues: new Set(uniqueValues[key as keyof typeof uniqueValues]), 
+        searchText: '' 
+      };
+    });
+    return initial;
+  });
+
+  const updateFilter = (column: string, filter: ColumnFilter) => {
+    setFilters(prev => ({ ...prev, [column]: filter }));
+    setCurrentPage(1);
+  };
+
+  const handleSort = (column: string, direction: 'asc' | 'desc') => {
+    setSortColumn(column);
+    setSortDirection(direction);
+  };
+
+  const handleClearSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortColumn(null);
+      setSortDirection(null);
+    }
+  };
+
+  const clearAllFilters = () => {
+    const reset: Record<string, ColumnFilter> = {};
+    Object.keys(uniqueValues).forEach(key => {
+      reset[key] = { 
+        selectedValues: new Set(uniqueValues[key as keyof typeof uniqueValues]), 
+        searchText: '' 
+      };
+    });
+    setFilters(reset);
+    setSortColumn(null);
+    setSortDirection(null);
+    setCurrentPage(1);
+  };
+
+  // Filter and sort records
   const filteredRecords = useMemo(() => {
-    return attendanceRecords.filter((record) => {
-      const employee = employees.find((e) => e.epNumber === record.epNumber);
-      
-      if (columnFilters.epNumber && !record.epNumber.toLowerCase().includes(columnFilters.epNumber.toLowerCase())) {
-        return false;
-      }
-      
-      if (columnFilters.name && employee && !employee.name.toLowerCase().includes(columnFilters.name.toLowerCase())) {
-        return false;
-      }
-      
-      if (columnFilters.date && !record.date.includes(columnFilters.date)) {
-        return false;
-      }
-      
-      if (columnFilters.status && columnFilters.status !== 'all' && record.status !== columnFilters.status) {
-        return false;
-      }
-      
+    return enrichedRecords.filter(record => {
+      if (!filters.epNumber.selectedValues.has(record.epNumber)) return false;
+      if (!filters.employeeName.selectedValues.has(record.employeeName)) return false;
+      if (!filters.date.selectedValues.has(record.date)) return false;
+      if (!filters.shift.selectedValues.has(record.shift)) return false;
+      if (!filters.status.selectedValues.has(record.status)) return false;
       return true;
     });
-  }, [columnFilters]);
+  }, [enrichedRecords, filters]);
 
-  // Sort records
   const sortedRecords = useMemo(() => {
+    if (!sortColumn || !sortDirection) return filteredRecords;
+    
     return [...filteredRecords].sort((a, b) => {
-      if (!sortColumn || !sortDirection) return 0;
-      
-      let aVal: any = a[sortColumn as keyof typeof a];
-      let bVal: any = b[sortColumn as keyof typeof b];
-      
-      if (sortColumn === 'name') {
-        const empA = employees.find((e) => e.epNumber === a.epNumber);
-        const empB = employees.find((e) => e.epNumber === b.epNumber);
-        aVal = empA?.name || '';
-        bVal = empB?.name || '';
-      }
+      const aVal = a[sortColumn as keyof typeof a] || '';
+      const bVal = b[sortColumn as keyof typeof b] || '';
       
       if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
@@ -143,60 +329,18 @@ export default function Reports() {
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedRecords = sortedRecords.slice(startIndex, startIndex + pageSize);
 
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      if (sortDirection === 'asc') {
-        setSortDirection('desc');
-      } else if (sortDirection === 'desc') {
-        setSortColumn(null);
-        setSortDirection(null);
-      }
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
-
-  const handleColumnFilterChange = (column: keyof ColumnFilters, value: string) => {
-    setColumnFilters(prev => ({ ...prev, [column]: value }));
-    setCurrentPage(1);
-  };
-
-  const handleClearAllFilters = () => {
-    setColumnFilters({
-      epNumber: '',
-      name: '',
-      date: '',
-      shift: '',
-      timePairs: '',
-      hrs: '',
-      overstay: '',
-      status: '',
-      ot: '',
-      otDays: '',
-    });
-    setCurrentPage(1);
-  };
-
-  const hasActiveFilters = Object.values(columnFilters).some(v => v !== '' && v !== 'all');
-
-  const getSortIcon = (column: string) => {
-    if (sortColumn !== column) {
-      return <ChevronsUpDown className="h-3 w-3 opacity-40" />;
-    }
-    if (sortDirection === 'asc') {
-      return <ChevronUp className="h-3 w-3" />;
-    }
-    return <ChevronDown className="h-3 w-3" />;
-  };
+  const hasActiveFilters = Object.entries(filters).some(([key, filter]) => {
+    const allVals = uniqueValues[key as keyof typeof uniqueValues];
+    return filter.selectedValues.size < allVals.length;
+  }) || sortColumn !== null;
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      'Present': 'bg-emerald-500 text-white hover:bg-emerald-500',
-      'Absent': 'bg-red-500 text-white hover:bg-red-500',
-      'Partial Day': 'bg-amber-400 text-amber-900 hover:bg-amber-400',
-      'On Leave': 'bg-violet-500 text-white hover:bg-violet-500',
-      'Holiday': 'bg-blue-500 text-white hover:bg-blue-500',
+      'Present': 'bg-emerald-500 text-white',
+      'Absent': 'bg-red-500 text-white',
+      'Partial Day': 'bg-amber-400 text-amber-900',
+      'On Leave': 'bg-violet-500 text-white',
+      'Holiday': 'bg-blue-500 text-white',
     };
     return (
       <Badge className={cn('font-medium text-[10px] px-1.5 py-0 whitespace-nowrap', styles[status] || '')}>
@@ -204,22 +348,6 @@ export default function Reports() {
       </Badge>
     );
   };
-
-  // Cell with tooltip for overflow
-  const CellWithTooltip = ({ content, className }: { content: string; className?: string }) => (
-    <TooltipProvider delayDuration={200}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className={cn("block truncate max-w-full", className)}>
-            {content}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent side="top" className="bg-popover border shadow-lg z-50 max-w-xs">
-          <p className="text-xs">{content}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
 
   return (
     <div className="animate-fade-in space-y-3 pb-6">
@@ -254,9 +382,9 @@ export default function Reports() {
         </div>
         <div className="flex items-center gap-2">
           {hasActiveFilters && (
-            <Button size="sm" variant="outline" onClick={handleClearAllFilters} className="gap-1.5 h-7 text-xs">
+            <Button size="sm" variant="outline" onClick={clearAllFilters} className="gap-1.5 h-7 text-xs">
               <FilterX className="h-3 w-3" />
-              Clear Filters
+              Clear All
             </Button>
           )}
           <Button size="sm" className="gap-1.5 h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -275,97 +403,90 @@ export default function Reports() {
       {/* Excel-Like Data Table */}
       <Card className="border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs border-collapse min-w-[1000px]">
-            {/* Header Row with Sort */}
+          <table className="w-full text-xs border-collapse min-w-[1100px]">
             <thead>
-              <tr className="bg-primary text-primary-foreground">
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[100px]" onClick={() => handleSort('epNumber')}>
-                  <div className="flex items-center gap-1">EP NO {getSortIcon('epNumber')}</div>
+              <tr className="bg-[#1a4480] text-white">
+                <th className="border-r border-white/20 px-2 py-2 text-left font-semibold whitespace-nowrap">
+                  <div className="flex items-center">
+                    EP NO
+                    <FilterDropdown
+                      column="epNumber"
+                      allValues={uniqueValues.epNumber}
+                      filter={filters.epNumber}
+                      onFilterChange={(f) => updateFilter('epNumber', f)}
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={(dir) => handleSort('epNumber', dir)}
+                      onClearSort={() => handleClearSort('epNumber')}
+                    />
+                  </div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[120px]" onClick={() => handleSort('name')}>
-                  <div className="flex items-center gap-1">NAME {getSortIcon('name')}</div>
+                <th className="border-r border-white/20 px-2 py-2 text-left font-semibold whitespace-nowrap">
+                  <div className="flex items-center">
+                    EP NAME
+                    <FilterDropdown
+                      column="employeeName"
+                      allValues={uniqueValues.employeeName}
+                      filter={filters.employeeName}
+                      onFilterChange={(f) => updateFilter('employeeName', f)}
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={(dir) => handleSort('employeeName', dir)}
+                      onClearSort={() => handleClearSort('employeeName')}
+                    />
+                  </div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[90px]" onClick={() => handleSort('date')}>
-                  <div className="flex items-center gap-1">DATE {getSortIcon('date')}</div>
+                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">
+                  <div className="flex items-center justify-center">
+                    SHIFT
+                    <FilterDropdown
+                      column="shift"
+                      allValues={uniqueValues.shift}
+                      filter={filters.shift}
+                      onFilterChange={(f) => updateFilter('shift', f)}
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={(dir) => handleSort('shift', dir)}
+                      onClearSort={() => handleClearSort('shift')}
+                    />
+                  </div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[60px]">SHIFT</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[100px]">TIME PAIRS</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[50px]">HRS</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[70px]">OVERSTAY</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-left font-semibold whitespace-nowrap cursor-pointer hover:bg-primary/90 w-[80px]" onClick={() => handleSort('status')}>
-                  <div className="flex items-center gap-1">STATUS {getSortIcon('status')}</div>
+                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">
+                  <div className="flex items-center justify-center">
+                    PUNCHDATE
+                    <FilterDropdown
+                      column="date"
+                      allValues={uniqueValues.date}
+                      filter={filters.date}
+                      onFilterChange={(f) => updateFilter('date', f)}
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={(dir) => handleSort('date', dir)}
+                      onClearSort={() => handleClearSort('date')}
+                    />
+                  </div>
                 </th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[50px]">OT</th>
-                <th className="border-r border-primary-foreground/20 px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[60px]">OT DAYS</th>
-                <th className="px-2 py-1.5 text-center font-semibold whitespace-nowrap w-[60px]">ACTIONS</th>
-              </tr>
-              {/* Filter Row */}
-              <tr className="bg-muted/50 border-b border-border">
-                <td className="border-r border-border/70 p-0.5">
-                  <Input
-                    placeholder="Filter..."
-                    value={columnFilters.epNumber}
-                    onChange={(e) => handleColumnFilterChange('epNumber', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
-                  />
-                </td>
-                <td className="border-r border-border/70 p-0.5">
-                  <Input
-                    placeholder="Filter..."
-                    value={columnFilters.name}
-                    onChange={(e) => handleColumnFilterChange('name', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
-                  />
-                </td>
-                <td className="border-r border-border/70 p-0.5">
-                  <Input
-                    placeholder="Filter..."
-                    value={columnFilters.date}
-                    onChange={(e) => handleColumnFilterChange('date', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
-                  />
-                </td>
-                <td className="border-r border-border/70 p-0.5">
-                  <Input
-                    placeholder="Filter..."
-                    value={columnFilters.shift}
-                    onChange={(e) => handleColumnFilterChange('shift', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
-                  />
-                </td>
-                <td className="border-r border-border/70 p-0.5"></td>
-                <td className="border-r border-border/70 p-0.5"></td>
-                <td className="border-r border-border/70 p-0.5"></td>
-                <td className="border-r border-border/70 p-0.5">
-                  <Select value={columnFilters.status || 'all'} onValueChange={(v) => handleColumnFilterChange('status', v)}>
-                    <SelectTrigger className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm">
-                      <SelectValue placeholder="All" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover z-50">
-                      <SelectItem value="all">All</SelectItem>
-                      {uniqueStatuses.map(s => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </td>
-                <td className="border-r border-border/70 p-0.5">
-                  <Input
-                    placeholder="Filter..."
-                    value={columnFilters.ot}
-                    onChange={(e) => handleColumnFilterChange('ot', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
-                  />
-                </td>
-                <td className="border-r border-border/70 p-0.5">
-                  <Input
-                    placeholder="Filter..."
-                    value={columnFilters.otDays}
-                    onChange={(e) => handleColumnFilterChange('otDays', e.target.value)}
-                    className="h-6 text-[10px] px-1.5 bg-background border-border/50 rounded-sm"
-                  />
-                </td>
-                <td className="p-0.5"></td>
+                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">PUNCH1</th>
+                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">PUNCH2 OUT</th>
+                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">HRS</th>
+                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OVERSTAY</th>
+                <th className="border-r border-white/20 px-2 py-2 text-left font-semibold whitespace-nowrap">
+                  <div className="flex items-center">
+                    STATUS
+                    <FilterDropdown
+                      column="status"
+                      allValues={uniqueValues.status}
+                      filter={filters.status}
+                      onFilterChange={(f) => updateFilter('status', f)}
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={(dir) => handleSort('status', dir)}
+                      onClearSort={() => handleClearSort('status')}
+                    />
+                  </div>
+                </th>
+                <th className="border-r border-white/20 px-2 py-2 text-center font-semibold whitespace-nowrap">OT</th>
+                <th className="px-2 py-2 text-center font-semibold whitespace-nowrap">OT DAYS</th>
               </tr>
             </thead>
             <tbody>
@@ -377,61 +498,26 @@ export default function Reports() {
                 </tr>
               ) : (
                 paginatedRecords.map((record, index) => {
-                  const employee = employees.find((e) => e.epNumber === record.epNumber);
                   const isEven = index % 2 === 0;
-                  const timePair = record.punchIn && record.punchOut 
-                    ? `${record.punchIn}-${record.punchOut}` 
-                    : '-';
-                  
                   return (
                     <tr 
-                      key={`${record.epNumber}-${record.date}`} 
+                      key={`${record.epNumber}-${record.date}-${index}`} 
                       className={cn(
-                        'hover:bg-accent/50 transition-colors border-b border-border/30',
-                        isEven ? 'bg-card' : 'bg-muted/20'
+                        'hover:bg-blue-50 transition-colors border-b border-border/30',
+                        isEven ? 'bg-white' : 'bg-slate-50'
                       )}
                     >
-                      <td className="border-r border-border/30 px-2 py-1 font-medium whitespace-nowrap">
-                        <CellWithTooltip content={record.epNumber} />
-                      </td>
-                      <td className="border-r border-border/30 px-2 py-1 whitespace-nowrap">
-                        <CellWithTooltip content={employee?.name || '-'} />
-                      </td>
-                      <td className="border-r border-border/30 px-2 py-1 whitespace-nowrap">{record.date}</td>
-                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">-</td>
-                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">
-                        <TooltipProvider delayDuration={200}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="font-mono cursor-default">{timePair}</span>
-                            </TooltipTrigger>
-                            {timePair !== '-' && (
-                              <TooltipContent side="top" className="bg-popover border shadow-lg z-50">
-                                <div className="text-xs p-1">
-                                  <div>In: {record.punchIn}</div>
-                                  <div>Out: {record.punchOut}</div>
-                                </div>
-                              </TooltipContent>
-                            )}
-                          </Tooltip>
-                        </TooltipProvider>
-                      </td>
-                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">
-                        {record.punchIn && record.punchOut ? '8.0' : '-'}
-                      </td>
-                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">-</td>
-                      <td className="border-r border-border/30 px-2 py-1 whitespace-nowrap">{getStatusBadge(record.status)}</td>
-                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">{record.overtime || '-'}</td>
-                      <td className="border-r border-border/30 px-2 py-1 text-center whitespace-nowrap">{record.mandays?.toFixed(1) || '0.0'}</td>
-                      <td className="px-2 py-1 text-center whitespace-nowrap">
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="h-5 px-1 text-[10px] font-medium text-primary p-0"
-                        >
-                          View
-                        </Button>
-                      </td>
+                      <td className="border-r border-border/50 px-2 py-1.5 font-medium whitespace-nowrap">{record.epNumber}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 whitespace-nowrap text-center">{record.employeeName}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.shift}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.date}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.punchIn || '-'}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.punchOut || '-'}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.hrs}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.overstayDisplay}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 whitespace-nowrap">{getStatusBadge(record.status)}</td>
+                      <td className="border-r border-border/50 px-2 py-1.5 text-center whitespace-nowrap">{record.otDisplay}</td>
+                      <td className="px-2 py-1.5 text-center whitespace-nowrap">{record.otDays}</td>
                     </tr>
                   );
                 })
@@ -460,46 +546,18 @@ export default function Reports() {
               </Select>
             </div>
             <div className="flex items-center gap-0.5">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0"
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-3 w-3" />
-                <ChevronLeft className="h-3 w-3 -ml-2" />
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                <ChevronLeft className="h-3 w-3" /><ChevronLeft className="h-3 w-3 -ml-2" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
                 <ChevronLeft className="h-3 w-3" />
               </Button>
-              <span className="text-[10px] px-1.5">
-                {currentPage}/{totalPages}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
+              <span className="text-[10px] px-1.5">{currentPage}/{totalPages}</span>
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
                 <ChevronRight className="h-3 w-3" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-3 w-3" />
-                <ChevronRight className="h-3 w-3 -ml-2" />
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+                <ChevronRight className="h-3 w-3" /><ChevronRight className="h-3 w-3 -ml-2" />
               </Button>
             </div>
           </div>
