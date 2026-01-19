@@ -24,12 +24,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const mainMenuItems = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, color: 'bg-blue-500' },
-  { title: 'Attendance', href: '/attendance', icon: Clock, color: 'bg-green-500' },
   { title: 'Import Data', href: '/import', icon: Upload, color: 'bg-purple-500' },
   { title: 'Settings', href: '/settings', icon: Settings, color: 'bg-gray-500' },
 ];
 
 const reportsItems = [
+  { title: 'Attendance', href: '/attendance', icon: Clock, color: 'bg-green-500' },
   { title: 'ARC Summary', href: '/reports/arc-summary', icon: FileSpreadsheet, color: 'bg-orange-500' },
   { title: 'Overtime', href: '/reports/overtime', icon: Clock, color: 'bg-cyan-500' },
   { title: 'Partial Day', href: '/reports/partial-day', icon: FileText, color: 'bg-amber-500' },
