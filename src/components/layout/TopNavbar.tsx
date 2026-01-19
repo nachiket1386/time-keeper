@@ -28,18 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-
-const navTabs = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { title: 'Import', href: '/import', icon: Upload },
-];
 
 const reportsItems = [
   { title: 'Attendance', href: '/attendance', icon: Clock },
@@ -72,70 +61,75 @@ export function TopNavbar() {
   const isActiveGroup = (items: { href: string }[]) =>
     items.some((item) => location.pathname.startsWith(item.href));
 
-  const TabLink = ({ href, icon: Icon, title }: { href: string; icon: any; title: string }) => (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link
-            to={href}
-            className={cn(
-              'flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-lg transition-all font-medium min-w-[70px]',
-              isActive(href)
-                ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            )}
-          >
-            <Icon className="h-5 w-5" />
-            <span className="text-xs">{title}</span>
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="sm:hidden">
-          {title}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-
   return (
-    <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b border-border">
-      <div className="flex h-16 items-center px-4 gap-3">
+    <header className="sticky top-0 z-50 w-full bg-primary shadow-lg">
+      <div className="flex h-14 items-center px-6">
         {/* Logo */}
-        <Link to="/dashboard" className="flex items-center gap-2 mr-4">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <Clock className="h-5 w-5 text-primary-foreground" />
+        <Link to="/dashboard" className="flex items-center gap-2 mr-8">
+          <div className="h-9 w-9 rounded-lg bg-white/20 flex items-center justify-center">
+            <Clock className="h-5 w-5 text-white" />
           </div>
-          <span className="font-bold text-lg hidden md:block">AMS</span>
+          <span className="font-bold text-xl text-white hidden md:block">AMS</span>
         </Link>
 
-        {/* Tab Navigation */}
-        <nav className="flex items-center gap-1 bg-muted/50 rounded-xl p-1.5">
-          {navTabs.map((item) => (
-            <TabLink key={item.href} {...item} />
-          ))}
+        {/* Navigation Tabs */}
+        <nav className="flex items-center h-full">
+          {/* Dashboard */}
+          <Link
+            to="/dashboard"
+            className={cn(
+              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
+              isActive('/dashboard')
+                ? 'text-white border-white bg-white/10'
+                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
+            )}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            Dashboard
+          </Link>
+
+          {/* Import */}
+          <Link
+            to="/import"
+            className={cn(
+              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
+              isActive('/import')
+                ? 'text-white border-white bg-white/10'
+                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
+            )}
+          >
+            <Upload className="h-4 w-4" />
+            Import
+          </Link>
 
           {/* Reports Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 className={cn(
-                  'flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-lg transition-all font-medium min-w-[70px]',
+                  'flex items-center gap-2 px-5 h-14 text-sm font-medium transition-colors border-b-2',
                   isActiveGroup(reportsItems)
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'text-white border-white bg-white/10'
+                    : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
                 )}
               >
-                <FileText className="h-5 w-5" />
-                <span className="flex items-center gap-0.5 text-xs">
-                  Reports <ChevronDown className="h-3 w-3" />
-                </span>
+                <FileText className="h-4 w-4" />
+                Reports
+                <ChevronDown className="h-3.5 w-3.5 ml-1" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52 bg-card border shadow-lg">
+            <DropdownMenuContent align="start" className="w-56 bg-card border shadow-xl z-50">
               {reportsItems.map((item) => (
                 <DropdownMenuItem key={item.href} asChild>
-                  <Link to={item.href} className={cn('flex items-center gap-2 text-sm', isActive(item.href) && 'bg-accent')}>
-                    <item.icon className="h-4 w-4 text-muted-foreground" />
-                    {item.title}
+                  <Link 
+                    to={item.href} 
+                    className={cn(
+                      'flex items-center gap-3 py-2.5 cursor-pointer',
+                      isActive(item.href) && 'bg-accent'
+                    )}
+                  >
+                    <item.icon className="h-4 w-4 text-primary" />
+                    <span>{item.title}</span>
                   </Link>
                 </DropdownMenuItem>
               ))}
@@ -148,26 +142,31 @@ export function TopNavbar() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-lg transition-all font-medium min-w-[70px]',
+                    'flex items-center gap-2 px-5 h-14 text-sm font-medium transition-colors border-b-2',
                     isActiveGroup(managementItems)
-                      ? 'bg-primary text-primary-foreground shadow-md'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'text-white border-white bg-white/10'
+                      : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
                   )}
                 >
-                  <Users className="h-5 w-5" />
-                  <span className="flex items-center gap-0.5 text-xs">
-                    Manage <ChevronDown className="h-3 w-3" />
-                  </span>
+                  <Users className="h-4 w-4" />
+                  Manage
+                  <ChevronDown className="h-3.5 w-3.5 ml-1" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48 bg-card border shadow-lg">
+              <DropdownMenuContent align="start" className="w-52 bg-card border shadow-xl z-50">
                 {managementItems
                   .filter((item) => !item.rootOnly || user.role === 'root')
                   .map((item) => (
                     <DropdownMenuItem key={item.href} asChild>
-                      <Link to={item.href} className={cn('flex items-center gap-2 text-sm', isActive(item.href) && 'bg-accent')}>
-                        <item.icon className="h-4 w-4 text-muted-foreground" />
-                        {item.title}
+                      <Link 
+                        to={item.href} 
+                        className={cn(
+                          'flex items-center gap-3 py-2.5 cursor-pointer',
+                          isActive(item.href) && 'bg-accent'
+                        )}
+                      >
+                        <item.icon className="h-4 w-4 text-primary" />
+                        <span>{item.title}</span>
                       </Link>
                     </DropdownMenuItem>
                   ))}
@@ -175,9 +174,15 @@ export function TopNavbar() {
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to="/audit-logs" className={cn('flex items-center gap-2 text-sm', isActive('/audit-logs') && 'bg-accent')}>
-                        <History className="h-4 w-4 text-muted-foreground" />
-                        Audit Logs
+                      <Link 
+                        to="/audit-logs" 
+                        className={cn(
+                          'flex items-center gap-3 py-2.5 cursor-pointer',
+                          isActive('/audit-logs') && 'bg-accent'
+                        )}
+                      >
+                        <History className="h-4 w-4 text-primary" />
+                        <span>Audit Logs</span>
                       </Link>
                     </DropdownMenuItem>
                   </>
@@ -189,85 +194,89 @@ export function TopNavbar() {
 
         <div className="flex-1" />
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-1">
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-2">
           {/* Company Selector (Root) */}
           {user.role === 'root' && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1.5 h-8 px-2">
+                <Button variant="ghost" size="sm" className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
                   <Building2 className="h-4 w-4" />
-                  <span className="hidden lg:inline text-xs">All</span>
-                  <ChevronDown className="h-3 w-3" />
+                  <span className="hidden lg:inline text-sm">All Companies</span>
+                  <ChevronDown className="h-3.5 w-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel className="text-xs">Select Company</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-52 bg-card border shadow-xl z-50">
+                <DropdownMenuLabel>Select Company</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-xs">All Companies</DropdownMenuItem>
+                <DropdownMenuItem>All Companies</DropdownMenuItem>
                 {companies.map((company) => (
-                  <DropdownMenuItem key={company.id} className="text-xs">{company.name}</DropdownMenuItem>
+                  <DropdownMenuItem key={company.id}>{company.name}</DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
 
-          {/* Role Switcher */}
+          {/* Role Badge */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1 h-8 px-2 text-xs">
-                <span className="capitalize">{user.role}</span>
-                <ChevronDown className="h-3 w-3" />
+              <Button variant="ghost" size="sm" className="gap-1.5 text-white/80 hover:text-white hover:bg-white/10 text-sm">
+                <span className="capitalize px-2 py-0.5 bg-white/20 rounded text-xs font-medium">{user.role}</span>
+                <ChevronDown className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="text-xs">Switch Role</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="bg-card border shadow-xl z-50">
+              <DropdownMenuLabel>Switch Role (Demo)</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => switchRole('root')} className="text-xs">Root</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('admin')} className="text-xs">Admin</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('user1')} className="text-xs">User1</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => switchRole('root')}>Root Administrator</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => switchRole('admin')}>Company Admin</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => switchRole('user1')}>Supervisor (User1)</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative h-8 w-8">
-            <Bell className="h-4 w-4" />
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
+          <Button variant="ghost" size="icon" className="relative text-white/80 hover:text-white hover:bg-white/10">
+            <Bell className="h-5 w-5" />
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
               3
             </span>
           </Button>
 
           {/* Settings */}
-          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+          <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
             <Link to="/settings">
-              <Settings className="h-4 w-4" />
+              <Settings className="h-5 w-5" />
             </Link>
           </Button>
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2 h-8 pl-1 pr-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-semibold">
+              <Button variant="ghost" size="sm" className="gap-2 pl-2 pr-3 text-white hover:bg-white/10">
+                <Avatar className="h-8 w-8 border-2 border-white/30">
+                  <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden lg:block text-xs font-medium max-w-[80px] truncate">{user.name.split(' ')[0]}</span>
+                <div className="hidden lg:flex flex-col items-start">
+                  <span className="text-sm font-medium">{user.name.split(' ')[0]}</span>
+                  {user.company && <span className="text-[10px] text-white/60">{user.company}</span>}
+                </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel className="font-normal">
-                <p className="text-sm font-medium">{user.name}</p>
+            <DropdownMenuContent align="end" className="w-56 bg-card border shadow-xl z-50">
+              <DropdownMenuLabel>
+                <p className="font-medium">{user.name}</p>
                 <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild className="text-xs">
-                <Link to="/settings">Profile Settings</Link>
+              <DropdownMenuItem asChild>
+                <Link to="/settings" className="cursor-pointer">Profile Settings</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem>Preferences</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-destructive text-xs">
-                <LogOut className="mr-2 h-3 w-3" />
+              <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
