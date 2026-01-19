@@ -41,10 +41,10 @@ import { cn } from '@/lib/utils';
 
 const mainNavItems = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { title: 'Attendance', href: '/attendance', icon: Clock },
 ];
 
 const reportsItems = [
+  { title: 'Attendance', href: '/attendance', icon: Clock },
   { title: 'ARC Summary', href: '/reports/arc-summary', icon: FileSpreadsheet },
   { title: 'Overtime Report', href: '/reports/overtime', icon: Clock },
   { title: 'Partial Day Report', href: '/reports/partial-day', icon: FileText },
