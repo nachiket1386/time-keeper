@@ -6,13 +6,18 @@ import {
   FileText,
   Upload,
   Settings,
+  Bell,
   ChevronDown,
   Building2,
+  ClipboardList,
+  FileSpreadsheet,
   UserCog,
   History,
   LogOut,
+  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { companies } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -48,24 +53,26 @@ export function TopNavbar() {
     items.some((item) => location.pathname.startsWith(item.href));
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background border-b border-border/50 shadow-sm">
-      <div className="flex h-12 items-center px-6">
+    <header className="sticky top-0 z-50 w-full bg-primary shadow-lg">
+      <div className="flex h-14 items-center px-6">
         {/* Logo */}
-        <Link to="/dashboard" className="flex items-center gap-2 mr-6">
-          <Clock className="h-5 w-5 text-primary" />
-          <span className="font-bold text-lg text-primary">AMS</span>
+        <Link to="/dashboard" className="flex items-center gap-2 mr-8">
+          <div className="h-9 w-9 rounded-lg bg-white/20 flex items-center justify-center">
+            <Clock className="h-5 w-5 text-white" />
+          </div>
+          <span className="font-bold text-xl text-white hidden md:block">AMS</span>
         </Link>
 
-        {/* Centered Navigation */}
-        <nav className="flex-1 flex items-center justify-center gap-1">
+        {/* Navigation Tabs */}
+        <nav className="flex items-center h-full">
           {/* Dashboard */}
           <Link
             to="/dashboard"
             className={cn(
-              'flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all',
+              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
               isActive('/dashboard')
-                ? 'bg-primary/10 text-primary border border-primary/30'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ? 'text-white border-white bg-white/10'
+                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
             )}
           >
             <LayoutDashboard className="h-4 w-4" />
@@ -76,28 +83,28 @@ export function TopNavbar() {
           <Link
             to="/import"
             className={cn(
-              'flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all',
+              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
               isActive('/import')
-                ? 'bg-primary/10 text-primary border border-primary/30'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ? 'text-white border-white bg-white/10'
+                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
             )}
           >
             <Upload className="h-4 w-4" />
-            Upload Data
+            Import
           </Link>
 
           {/* Reports */}
           <Link
             to="/reports"
             className={cn(
-              'flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all',
+              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
               isActive('/reports')
-                ? 'bg-primary/10 text-primary border border-primary/30'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                ? 'text-white border-white bg-white/10'
+                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
             )}
           >
             <FileText className="h-4 w-4" />
-            Data
+            Reports
           </Link>
 
           {/* Management Dropdown */}
@@ -106,18 +113,18 @@ export function TopNavbar() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all',
+                    'flex items-center gap-2 px-5 h-14 text-sm font-medium transition-colors border-b-2',
                     isActiveGroup(managementItems)
-                      ? 'bg-primary/10 text-primary border border-primary/30'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      ? 'text-white border-white bg-white/10'
+                      : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
                   )}
                 >
-                  <Settings className="h-4 w-4" />
-                  Admin
-                  <ChevronDown className="h-3 w-3" />
+                  <Users className="h-4 w-4" />
+                  Manage
+                  <ChevronDown className="h-3.5 w-3.5 ml-1" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-48 bg-card border shadow-xl z-50">
+              <DropdownMenuContent align="start" className="w-52 bg-card border shadow-xl z-50">
                 {managementItems
                   .filter((item) => !item.rootOnly || user.role === 'root')
                   .map((item) => (
@@ -125,11 +132,11 @@ export function TopNavbar() {
                       <Link 
                         to={item.href} 
                         className={cn(
-                          'flex items-center gap-3 cursor-pointer',
+                          'flex items-center gap-3 py-2.5 cursor-pointer',
                           isActive(item.href) && 'bg-accent'
                         )}
                       >
-                        <item.icon className="h-4 w-4 text-muted-foreground" />
+                        <item.icon className="h-4 w-4 text-primary" />
                         <span>{item.title}</span>
                       </Link>
                     </DropdownMenuItem>
@@ -141,11 +148,11 @@ export function TopNavbar() {
                       <Link 
                         to="/audit-logs" 
                         className={cn(
-                          'flex items-center gap-3 cursor-pointer',
+                          'flex items-center gap-3 py-2.5 cursor-pointer',
                           isActive('/audit-logs') && 'bg-accent'
                         )}
                       >
-                        <History className="h-4 w-4 text-muted-foreground" />
+                        <History className="h-4 w-4 text-primary" />
                         <span>Audit Logs</span>
                       </Link>
                     </DropdownMenuItem>
@@ -156,20 +163,75 @@ export function TopNavbar() {
           )}
         </nav>
 
-        {/* Right Side - User */}
-        <div className="flex items-center gap-3">
+        <div className="flex-1" />
+
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-2">
+          {/* Company Selector (Root) */}
+          {user.role === 'root' && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
+                  <Building2 className="h-4 w-4" />
+                  <span className="hidden lg:inline text-sm">All Companies</span>
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 bg-card border shadow-xl z-50">
+                <DropdownMenuLabel>Select Company</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>All Companies</DropdownMenuItem>
+                {companies.map((company) => (
+                  <DropdownMenuItem key={company.id}>{company.name}</DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {/* Role Badge */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5 text-white/80 hover:text-white hover:bg-white/10 text-sm">
+                <span className="capitalize px-2 py-0.5 bg-white/20 rounded text-xs font-medium">{user.role}</span>
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-card border shadow-xl z-50">
+              <DropdownMenuLabel>Switch Role (Demo)</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => switchRole('root')}>Root Administrator</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => switchRole('admin')}>Company Admin</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => switchRole('user1')}>Supervisor (User1)</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Notifications */}
+          <Button variant="ghost" size="icon" className="relative text-white/80 hover:text-white hover:bg-white/10">
+            <Bell className="h-5 w-5" />
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              3
+            </span>
+          </Button>
+
+          {/* Settings */}
+          <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
+            <Link to="/settings">
+              <Settings className="h-5 w-5" />
+            </Link>
+          </Button>
+
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2 px-2 hover:bg-muted">
-                <Avatar className="h-8 w-8 border-2 border-primary/20">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+              <Button variant="ghost" size="sm" className="gap-2 pl-2 pr-3 text-white hover:bg-white/10">
+                <Avatar className="h-8 w-8 border-2 border-white/30">
+                  <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="hidden md:flex flex-col items-start">
-                  <span className="text-sm font-medium text-foreground">{user.name.split(' ')[0]}</span>
-                  <span className="text-[10px] text-muted-foreground capitalize">{user.role}</span>
+                <div className="hidden lg:flex flex-col items-start">
+                  <span className="text-sm font-medium">{user.name.split(' ')[0]}</span>
+                  {user.company && <span className="text-[10px] text-white/60">{user.company}</span>}
                 </div>
               </Button>
             </DropdownMenuTrigger>
@@ -179,13 +241,10 @@ export function TopNavbar() {
                 <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => switchRole('root')}>Switch to Root</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('admin')}>Switch to Admin</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('user1')}>Switch to User1</DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link to="/settings" className="cursor-pointer">Settings</Link>
+                <Link to="/settings" className="cursor-pointer">Profile Settings</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem>Preferences</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
@@ -193,13 +252,6 @@ export function TopNavbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Settings Icon */}
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" asChild>
-            <Link to="/settings">
-              <Settings className="h-4 w-4" />
-            </Link>
-          </Button>
         </div>
       </div>
     </header>
