@@ -103,36 +103,19 @@ export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
   return (
     <Card className="overflow-hidden w-fit">
       <CardHeader className="py-2 px-3 bg-muted/30">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-3">
           <CardTitle className="text-sm font-medium flex items-center gap-1.5">
             <CalendarIcon className="h-4 w-4 text-primary" />
             Calendar
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-              <Input
-                placeholder="Search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-7 h-7 text-xs w-24"
-              />
-            </div>
-            <Select 
-              value={selectedEP || selectedEmployee?.epNumber} 
-              onValueChange={setSelectedEP}
-            >
-              <SelectTrigger className="w-20 h-7 text-xs px-2">
-                <SelectValue placeholder="EP" />
-              </SelectTrigger>
-              <SelectContent>
-                {searchedEmployees.map((emp) => (
-                  <SelectItem key={emp.epNumber} value={emp.epNumber} className="text-xs">
-                    {emp.epNumber.replace('EP-2024-', 'EP')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search employee..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-8 text-sm w-40"
+            />
           </div>
         </div>
       </CardHeader>
