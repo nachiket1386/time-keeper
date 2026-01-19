@@ -12,6 +12,8 @@ import {
   FilterX,
   ArrowUpAZ,
   ArrowDownAZ,
+  Filter,
+  X,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -30,9 +32,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'comprehensive';
 
@@ -236,11 +246,13 @@ const columns = [
 ];
 
 export default function Reports() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<ReportTab>('attendance');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Build enriched records with all displayable values
   const enrichedRecords = useMemo(() => {
@@ -438,119 +450,317 @@ export default function Reports() {
         {hasActiveFilters && <span className="text-primary ml-1">(filtered)</span>}
       </p>
 
-      {/* Excel-Like Data Table */}
-      <Card className="border-border shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs border-collapse min-w-[1100px]">
-            <thead>
-              <tr className="bg-[#1a4480] text-white">
-                {columns.map((col, idx) => (
-                  <th 
-                    key={col.key}
-                    className={cn(
-                      "px-2 py-2 font-semibold whitespace-nowrap",
-                      idx < columns.length - 1 && "border-r border-white/20",
-                      col.align === 'center' && "text-center",
-                      col.align === 'left' && "text-left"
-                    )}
-                  >
-                    <div className={cn(
-                      "flex items-center",
-                      col.align === 'center' && "justify-center"
-                    )}>
-                      {col.label}
-                      <FilterDropdown
-                        column={col.key}
-                        label={col.label}
-                        allValues={uniqueValues[col.key] || []}
-                        filter={filters[col.key] || { selectedValues: new Set() }}
-                        onFilterChange={(f) => updateFilter(col.key, f)}
-                        sortColumn={sortColumn}
-                        sortDirection={sortDirection}
-                        onSort={(dir) => handleSort(col.key, dir)}
-                        onClearSort={() => handleClearSort(col.key)}
-                      />
+      {/* Mobile/Tablet Card View */}
+      {isMobile ? (
+        <div className="space-y-3">
+          {/* Mobile Filter Button */}
+          <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="w-full gap-2 h-9">
+                <Filter className="h-4 w-4" />
+                Filters & Sort
+                {hasActiveFilters && (
+                  <Badge className="ml-1 bg-primary text-primary-foreground h-5 px-1.5 text-[10px]">
+                    Active
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl">
+              <SheetHeader className="pb-4">
+                <SheetTitle className="flex items-center justify-between">
+                  <span>Filters & Sort</span>
+                  {hasActiveFilters && (
+                    <Button size="sm" variant="ghost" onClick={clearAllFilters} className="text-destructive gap-1">
+                      <X className="h-3 w-3" />
+                      Clear All
+                    </Button>
+                  )}
+                </SheetTitle>
+              </SheetHeader>
+              <div className="overflow-y-auto h-[calc(100%-60px)] space-y-4">
+                {columns.map((col) => (
+                  <div key={col.key} className="border rounded-lg p-3 bg-muted/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">{col.label}</span>
+                      <div className="flex gap-1">
+                        <Button 
+                          size="sm" 
+                          variant={sortColumn === col.key && sortDirection === 'asc' ? 'default' : 'outline'} 
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleSort(col.key, 'asc')}
+                        >
+                          <ArrowUpAZ className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant={sortColumn === col.key && sortDirection === 'desc' ? 'default' : 'outline'} 
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleSort(col.key, 'desc')}
+                        >
+                          <ArrowDownAZ className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
-                  </th>
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                      {(uniqueValues[col.key] || []).slice(0, 20).map((value) => {
+                        const isSelected = filters[col.key]?.selectedValues.has(value);
+                        return (
+                          <Badge 
+                            key={value} 
+                            variant={isSelected ? "default" : "outline"}
+                            className={cn(
+                              "cursor-pointer text-xs transition-all",
+                              isSelected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                            )}
+                            onClick={() => {
+                              const newSelected = new Set(filters[col.key]?.selectedValues || []);
+                              if (isSelected) {
+                                newSelected.delete(value);
+                              } else {
+                                newSelected.add(value);
+                              }
+                              updateFilter(col.key, { selectedValues: newSelected });
+                            }}
+                          >
+                            {value || '(Blank)'}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedRecords.length === 0 ? (
-                <tr>
-                  <td colSpan={columns.length} className="text-center py-8 text-muted-foreground">
-                    No records found
-                  </td>
-                </tr>
-              ) : (
-                paginatedRecords.map((record, index) => {
-                  const isEven = index % 2 === 0;
-                  return (
-                    <tr 
-                      key={`${record.epNumber}-${record.date}-${index}`} 
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 gap-3">
+            {paginatedRecords.length === 0 ? (
+              <Card className="p-8 text-center text-muted-foreground">
+                No records found
+              </Card>
+            ) : (
+              paginatedRecords.map((record, index) => (
+                <Card 
+                  key={`${record.epNumber}-${record.date}-${index}`} 
+                  className="overflow-hidden border-l-4 border-l-primary"
+                >
+                  {/* Card Header */}
+                  <div className="bg-[#1a4480] text-white px-3 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm">{record.epNumber}</span>
+                      <span className="text-white/80 text-xs">•</span>
+                      <span className="text-sm truncate max-w-[150px]">{record.employeeName}</span>
+                    </div>
+                    {getStatusBadge(record.status)}
+                  </div>
+                  
+                  {/* Card Body - Grid Layout */}
+                  <div className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">Date</span>
+                      <span className="font-medium text-xs">{record.date}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">Shift</span>
+                      <span className="font-medium text-xs">{record.shift}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">Punch In</span>
+                      <span className="font-medium text-xs text-emerald-600">{record.punch1}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">Punch Out</span>
+                      <span className="font-medium text-xs text-red-600">{record.punch2}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">Hours</span>
+                      <span className="font-medium text-xs">{record.hrs}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">Overstay</span>
+                      <span className="font-medium text-xs">{record.overstay}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">OT</span>
+                      <span className="font-medium text-xs text-primary">{record.ot}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">OT Days</span>
+                      <span className="font-medium text-xs">{record.otDays}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
+
+          {/* Mobile Pagination */}
+          {totalPages >= 1 && (
+            <Card className="p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  {startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
+                </span>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => setCurrentPage(1)} 
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" /><ChevronLeft className="h-4 w-4 -ml-2.5" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm px-2 font-medium">{currentPage}/{totalPages}</span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => setCurrentPage(totalPages)} 
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" /><ChevronRight className="h-4 w-4 -ml-2.5" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+      ) : (
+        /* Desktop Table View */
+        <Card className="border-border shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse min-w-[1100px]">
+              <thead>
+                <tr className="bg-[#1a4480] text-white">
+                  {columns.map((col, idx) => (
+                    <th 
+                      key={col.key}
                       className={cn(
-                        'hover:bg-blue-50 transition-colors border-b border-border/30',
-                        isEven ? 'bg-white' : 'bg-slate-50'
+                        "px-2 py-2 font-semibold whitespace-nowrap",
+                        idx < columns.length - 1 && "border-r border-white/20",
+                        col.align === 'center' && "text-center",
+                        col.align === 'left' && "text-left"
                       )}
                     >
-                      {columns.map((col, idx) => (
-                        <td 
-                          key={col.key}
-                          className={cn(
-                            "px-2 py-1.5 whitespace-nowrap",
-                            idx < columns.length - 1 && "border-r border-border/50",
-                            col.align === 'center' && "text-center",
-                            col.key === 'epNumber' && "font-medium"
-                          )}
-                        >
-                          {renderCell(record, col.key)}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Footer */}
-        {totalPages >= 1 && (
-          <div className="flex items-center justify-between border-t border-border px-3 py-1.5 bg-muted/30">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground">
-                {startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
-              </span>
-              <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
-                <SelectTrigger className="h-5 w-12 text-[10px] px-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-                <ChevronLeft className="h-3 w-3" /><ChevronLeft className="h-3 w-3 -ml-2" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
-                <ChevronLeft className="h-3 w-3" />
-              </Button>
-              <span className="text-[10px] px-1.5">{currentPage}/{totalPages}</span>
-              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
-                <ChevronRight className="h-3 w-3" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
-                <ChevronRight className="h-3 w-3" /><ChevronRight className="h-3 w-3 -ml-2" />
-              </Button>
-            </div>
+                      <div className={cn(
+                        "flex items-center",
+                        col.align === 'center' && "justify-center"
+                      )}>
+                        {col.label}
+                        <FilterDropdown
+                          column={col.key}
+                          label={col.label}
+                          allValues={uniqueValues[col.key] || []}
+                          filter={filters[col.key] || { selectedValues: new Set() }}
+                          onFilterChange={(f) => updateFilter(col.key, f)}
+                          sortColumn={sortColumn}
+                          sortDirection={sortDirection}
+                          onSort={(dir) => handleSort(col.key, dir)}
+                          onClearSort={() => handleClearSort(col.key)}
+                        />
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedRecords.length === 0 ? (
+                  <tr>
+                    <td colSpan={columns.length} className="text-center py-8 text-muted-foreground">
+                      No records found
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedRecords.map((record, index) => {
+                    const isEven = index % 2 === 0;
+                    return (
+                      <tr 
+                        key={`${record.epNumber}-${record.date}-${index}`} 
+                        className={cn(
+                          'hover:bg-blue-50 transition-colors border-b border-border/30',
+                          isEven ? 'bg-white' : 'bg-slate-50'
+                        )}
+                      >
+                        {columns.map((col, idx) => (
+                          <td 
+                            key={col.key}
+                            className={cn(
+                              "px-2 py-1.5 whitespace-nowrap",
+                              idx < columns.length - 1 && "border-r border-border/50",
+                              col.align === 'center' && "text-center",
+                              col.key === 'epNumber' && "font-medium"
+                            )}
+                          >
+                            {renderCell(record, col.key)}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </Card>
+
+          {/* Pagination Footer */}
+          {totalPages >= 1 && (
+            <div className="flex items-center justify-between border-t border-border px-3 py-1.5 bg-muted/30">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-muted-foreground">
+                  {startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
+                </span>
+                <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
+                  <SelectTrigger className="h-5 w-12 text-[10px] px-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                  <ChevronLeft className="h-3 w-3" /><ChevronLeft className="h-3 w-3 -ml-2" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                  <ChevronLeft className="h-3 w-3" />
+                </Button>
+                <span className="text-[10px] px-1.5">{currentPage}/{totalPages}</span>
+                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+                  <ChevronRight className="h-3 w-3" /><ChevronRight className="h-3 w-3 -ml-2" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }
