@@ -2,18 +2,14 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
-  Clock,
   FileText,
   Upload,
   Settings,
   Building2,
-  ClipboardList,
-  FileSpreadsheet,
   UserCog,
   History,
   LogOut,
   Bell,
-  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -24,17 +20,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 const mainMenuItems = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, color: 'bg-blue-500' },
+  { title: 'Reports', href: '/reports', icon: FileText, color: 'bg-green-500' },
   { title: 'Import Data', href: '/import', icon: Upload, color: 'bg-purple-500' },
   { title: 'Settings', href: '/settings', icon: Settings, color: 'bg-gray-500' },
-];
-
-const reportsItems = [
-  { title: 'Attendance', href: '/attendance', icon: Clock, color: 'bg-green-500' },
-  { title: 'ARC Summary', href: '/reports/arc-summary', icon: FileSpreadsheet, color: 'bg-orange-500' },
-  { title: 'Overtime', href: '/reports/overtime', icon: Clock, color: 'bg-cyan-500' },
-  { title: 'Partial Day', href: '/reports/partial-day', icon: FileText, color: 'bg-amber-500' },
-  { title: 'Regularization', href: '/reports/regularization', icon: ClipboardList, color: 'bg-indigo-500' },
-  { title: 'Comprehensive', href: '/reports/comprehensive', icon: TrendingUp, color: 'bg-pink-500' },
 ];
 
 const managementItems = [
@@ -138,17 +126,6 @@ export function MobileMenu() {
           </div>
         </div>
 
-        {/* Reports Grid */}
-        <div>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-            Reports
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            {reportsItems.map((item) => (
-              <MenuCard key={item.href} {...item} />
-            ))}
-          </div>
-        </div>
 
         {/* Management Grid (Admin/Root only) */}
         {(user.role === 'root' || user.role === 'admin') && (
