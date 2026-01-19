@@ -7,7 +7,13 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { MainLayout } from "./components/layout/MainLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Attendance from "./pages/Attendance";
+import Reports from "./pages/Reports";
+import Import from "./pages/Import";
+import Users from "./pages/Users";
+import Companies from "./pages/Companies";
+import Employees from "./pages/Employees";
+import Settings from "./pages/Settings";
+import AuditLogs from "./pages/AuditLogs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,10 +37,58 @@ const App = () => (
               }
             />
             <Route
-              path="/attendance"
+              path="/reports"
               element={
                 <MainLayout>
-                  <Attendance />
+                  <Reports />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/import"
+              element={
+                <MainLayout>
+                  <Import />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <MainLayout>
+                  <Users />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/companies"
+              element={
+                <MainLayout>
+                  <Companies />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/employees"
+              element={
+                <MainLayout>
+                  <Employees />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <MainLayout>
+                  <Settings />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/audit-logs"
+              element={
+                <MainLayout>
+                  <AuditLogs />
                 </MainLayout>
               }
             />
