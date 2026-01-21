@@ -59,13 +59,49 @@ import { useIsMobileOrTablet } from '@/hooks/use-mobile';
 type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'comprehensive';
 
 const reportTabs = [
-  { id: 'attendance' as ReportTab, label: 'Attendance', icon: Clock },
-  { id: 'arc' as ReportTab, label: 'ARC Summary', icon: FileSpreadsheet },
-  { id: 'overtime' as ReportTab, label: 'Overtime', icon: Clock },
-  { id: 'partial' as ReportTab, label: 'Partial Day', icon: FileText },
-  { id: 'regularization' as ReportTab, label: 'Regularization', icon: ClipboardList },
-  { id: 'comprehensive' as ReportTab, label: 'Comprehensive', icon: TrendingUp },
+  { id: 'attendance' as ReportTab, label: 'Attendance', icon: Clock, color: 'emerald' },
+  { id: 'arc' as ReportTab, label: 'ARC Summary', icon: FileSpreadsheet, color: 'rose' },
+  { id: 'overtime' as ReportTab, label: 'Overtime', icon: Clock, color: 'amber' },
+  { id: 'partial' as ReportTab, label: 'Partial Day', icon: FileText, color: 'sky' },
+  { id: 'regularization' as ReportTab, label: 'Regularization', icon: ClipboardList, color: 'violet' },
+  { id: 'comprehensive' as ReportTab, label: 'Comprehensive', icon: TrendingUp, color: 'slate' },
 ];
+
+const getTabStyles = (color: string, isActive: boolean) => {
+  const styles: Record<string, { active: string; inactive: string; icon: string }> = {
+    emerald: {
+      active: 'bg-emerald-100 border-emerald-400 text-emerald-700',
+      inactive: 'bg-white border-gray-200 text-gray-600 hover:bg-emerald-50 hover:border-emerald-200',
+      icon: 'text-emerald-600',
+    },
+    rose: {
+      active: 'bg-rose-100 border-rose-400 text-rose-700',
+      inactive: 'bg-white border-gray-200 text-gray-600 hover:bg-rose-50 hover:border-rose-200',
+      icon: 'text-rose-500',
+    },
+    amber: {
+      active: 'bg-amber-100 border-amber-400 text-amber-700',
+      inactive: 'bg-white border-gray-200 text-gray-600 hover:bg-amber-50 hover:border-amber-200',
+      icon: 'text-amber-500',
+    },
+    sky: {
+      active: 'bg-sky-100 border-sky-400 text-sky-700',
+      inactive: 'bg-white border-gray-200 text-gray-600 hover:bg-sky-50 hover:border-sky-200',
+      icon: 'text-sky-500',
+    },
+    violet: {
+      active: 'bg-violet-100 border-violet-400 text-violet-700',
+      inactive: 'bg-white border-gray-200 text-gray-600 hover:bg-violet-50 hover:border-violet-200',
+      icon: 'text-violet-500',
+    },
+    slate: {
+      active: 'bg-slate-200 border-slate-400 text-slate-700',
+      inactive: 'bg-white border-gray-200 text-gray-600 hover:bg-slate-50 hover:border-slate-200',
+      icon: 'text-slate-600',
+    },
+  };
+  return styles[color] || styles.slate;
+};
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -501,28 +537,26 @@ export default function Reports() {
           />
 
           {/* Report Type Tabs */}
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {reportTabs.map((tab) => {
               const IconComponent = tab.icon;
+              const isActive = activeTab === tab.id;
+              const tabStyles = getTabStyles(tab.color, isActive);
               return (
-                <Button
+                <button
                   key={tab.id}
-                  variant={activeTab === tab.id ? 'default' : 'outline'}
-                  size="sm"
                   onClick={() => {
                     setActiveTab(tab.id);
                     setCurrentPage(1);
                   }}
                   className={cn(
-                    'gap-1.5 rounded-full px-3 h-7 text-xs transition-all font-medium',
-                    activeTab === tab.id 
-                      ? 'bg-primary text-primary-foreground shadow-md' 
-                      : 'bg-card hover:bg-muted border-border'
+                    'flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all',
+                    isActive ? tabStyles.active : tabStyles.inactive
                   )}
                 >
-                  <IconComponent className="h-3 w-3" />
+                  <IconComponent className={cn('h-4 w-4', tabStyles.icon)} />
                   {tab.label}
-                </Button>
+                </button>
               );
             })}
           </div>
