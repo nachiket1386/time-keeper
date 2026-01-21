@@ -18,6 +18,7 @@ import {
   SlidersHorizontal,
   PanelLeftClose,
   PanelLeft,
+  Trash2,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -477,7 +478,23 @@ export default function Reports() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Delete Buttons */}
+          <Button 
+            size="sm" 
+            className="gap-1.5 h-8 text-xs bg-foreground hover:bg-foreground/90 text-background rounded-full px-4"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete Attendance Data
+          </Button>
+          <Button 
+            size="sm" 
+            variant="destructive"
+            className="gap-1.5 h-8 text-xs rounded-full px-4"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete All Reports
+          </Button>
           {hasActiveFilters && (
             <Button size="sm" variant="outline" onClick={clearAllFilters} className="gap-1.5 h-7 text-xs">
               <FilterX className="h-3 w-3" />
