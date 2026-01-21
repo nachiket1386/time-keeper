@@ -16,6 +16,8 @@ import {
   X,
   Check,
   SlidersHorizontal,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -262,6 +264,26 @@ export default function Reports() {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [isNavbarHidden, setIsNavbarHidden] = useState(false);
+
+  // Toggle navbar visibility
+  useEffect(() => {
+    const navbar = document.querySelector('header.sticky');
+    if (navbar) {
+      if (isNavbarHidden) {
+        navbar.classList.add('!hidden');
+      } else {
+        navbar.classList.remove('!hidden');
+      }
+    }
+    return () => {
+      // Cleanup: show navbar when leaving the page
+      const navbarEl = document.querySelector('header.sticky');
+      if (navbarEl) {
+        navbarEl.classList.remove('!hidden');
+      }
+    };
+  }, [isNavbarHidden]);
 
   // Build enriched records with all displayable values
   const enrichedRecords = useMemo(() => {
@@ -440,6 +462,26 @@ export default function Reports() {
           })}
         </div>
         <div className="flex items-center gap-2">
+          {/* Toggle Navbar Button */}
+          <Button 
+            size="sm" 
+            variant={isNavbarHidden ? "default" : "outline"}
+            onClick={() => setIsNavbarHidden(!isNavbarHidden)} 
+            className="gap-1.5 h-7 text-xs"
+            title={isNavbarHidden ? "Show Navigation" : "Hide Navigation"}
+          >
+            {isNavbarHidden ? (
+              <>
+                <PanelLeft className="h-3 w-3" />
+                <span className="hidden sm:inline">Show</span>
+              </>
+            ) : (
+              <>
+                <PanelLeftClose className="h-3 w-3" />
+                <span className="hidden sm:inline">Hide</span>
+              </>
+            )}
+          </Button>
           {hasActiveFilters && (
             <Button size="sm" variant="outline" onClick={clearAllFilters} className="gap-1.5 h-7 text-xs">
               <FilterX className="h-3 w-3" />
