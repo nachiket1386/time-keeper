@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 
 interface AttendanceCalendarProps {
   companyId?: string;
+  selectedMonth?: Date;
 }
 
 type AttendanceStatus = 'Present' | 'Absent' | 'Partial Day' | 'On Leave' | 'Holiday';
@@ -24,11 +25,19 @@ const statusConfig: Record<AttendanceStatus, { label: string; shortLabel: string
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-export function AttendanceCalendar({ companyId }: AttendanceCalendarProps) {
+export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: AttendanceCalendarProps) {
   const [search, setSearch] = useState('');
   const [selectedEP, setSelectedEP] = useState<string>('');
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(externalMonth?.getMonth() ?? new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState<number>(externalMonth?.getFullYear() ?? new Date().getFullYear());
+
+  // Sync with external month selection
+  useEffect(() => {
+    if (externalMonth) {
+      setSelectedMonth(externalMonth.getMonth());
+      setSelectedYear(externalMonth.getFullYear());
+    }
+  }, [externalMonth]);
 
   const filteredEmployees = useMemo(() => {
     return employees.filter(e => !companyId || e.companyId === companyId);

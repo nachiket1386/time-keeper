@@ -6,17 +6,25 @@ import { cn } from '@/lib/utils';
 
 interface ARCSummaryTableProps {
   companyId?: string;
+  dateRange?: { start: string; end: string };
 }
 
-export function ARCSummaryTable({ companyId }: ARCSummaryTableProps) {
+export function ARCSummaryTable({ companyId, dateRange }: ARCSummaryTableProps) {
   const summaryData = useMemo(() => {
     // Filter by company if provided
     const filteredEmployees = employees.filter(
       (e) => !companyId || e.companyId === companyId
     );
-    const filteredRecords = attendanceRecords.filter(
+    let filteredRecords = attendanceRecords.filter(
       (r) => !companyId || r.companyId === companyId
     );
+    
+    // Filter by date range if provided
+    if (dateRange) {
+      filteredRecords = filteredRecords.filter(
+        (r) => r.date >= dateRange.start && r.date <= dateRange.end
+      );
+    }
 
     // Get unique trades and contractors
     const trades = [...new Set(filteredEmployees.map((e) => e.trade))].sort();
@@ -59,7 +67,7 @@ export function ARCSummaryTable({ companyId }: ARCSummaryTableProps) {
     const grandTotal = Object.values(tradeTotals).reduce((a, b) => a + b, 0);
 
     return { trades, contractors: contractorList, data, tradeTotals, contractorTotals, grandTotal };
-  }, [companyId]);
+  }, [companyId, dateRange]);
 
   const getHeatmapColor = (value: number, max: number) => {
     if (value === 0) return 'bg-muted/30 text-muted-foreground';

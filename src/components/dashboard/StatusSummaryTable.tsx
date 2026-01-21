@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 interface StatusSummaryTableProps {
   companyId?: string;
   type: 'overtime' | 'regularization' | 'partialday';
+  dateRange?: { start: string; end: string };
 }
 
 const typeConfig: Record<string, { title: string; icon: LucideIcon; color: string }> = {
@@ -39,12 +40,12 @@ const statusColors: Record<string, { header: string; cell: string }> = {
 };
 
 
-export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps) {
+export function StatusSummaryTable({ companyId, type, dateRange }: StatusSummaryTableProps) {
   const config = typeConfig[type];
   const Icon = config.icon;
 
   const summaryData = useMemo(() => {
-    let requests: Array<{ employeeId: string; status: string; companyId: string }> = [];
+    let requests: Array<{ employeeId: string; status: string; companyId: string; date?: string }> = [];
 
     if (type === 'overtime') {
       requests = overtimeRequests;
@@ -55,9 +56,16 @@ export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps)
     }
 
     // Filter by company
-    const filteredRequests = requests.filter(
+    let filteredRequests = requests.filter(
       (r) => !companyId || r.companyId === companyId
     );
+    
+    // Filter by date range if provided
+    if (dateRange) {
+      filteredRequests = filteredRequests.filter(
+        (r) => !r.date || (r.date >= dateRange.start && r.date <= dateRange.end)
+      );
+    }
 
     // Get unique EIC codes (using employee epNumber as EIC)
     const employeeMap = new Map<string, string>();
@@ -98,7 +106,7 @@ export function StatusSummaryTable({ companyId, type }: StatusSummaryTableProps)
     const grandTotal = Object.values(eicTotals).reduce((a, b) => a + b, 0);
 
     return { eicCodes, data, eicTotals, statusTotals, grandTotal };
-  }, [companyId, type]);
+  }, [companyId, type, dateRange]);
 
   if (summaryData.eicCodes.length === 0) {
     return (
