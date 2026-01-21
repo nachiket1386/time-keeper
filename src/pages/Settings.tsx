@@ -94,8 +94,8 @@ export default function Settings() {
                   <Input defaultValue={user?.name} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input type="email" defaultValue={user?.email} />
+                  <Label>Username</Label>
+                  <Input defaultValue={user?.username} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label>Phone Number</Label>

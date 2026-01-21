@@ -1,29 +1,44 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Eye, EyeOff } from 'lucide-react';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { Shield, Eye, EyeOff, User, Lock } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin@techcorp.com');
-  const [password, setPassword] = useState('demo123');
-  const [role, setRole] = useState<UserRole>('admin');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
+    if (!username.trim()) {
+      setError('Please enter username');
+      return;
+    }
+    if (!password.trim()) {
+      setError('Please enter password');
+      return;
+    }
+
     setIsLoading(true);
-    const success = await login(email, password, role);
+    const result = await login(username, password);
     setIsLoading(false);
-    if (success) {
+    
+    if (result.success) {
+      toast.success('Login successful');
       navigate('/dashboard');
+    } else {
+      setError(result.error || 'Login failed');
     }
   };
 
@@ -40,37 +55,30 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="role">Select Role (Demo)</Label>
-              <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="root">Root Administrator</SelectItem>
-                  <SelectItem value="admin">Company Admin</SelectItem>
-                  <SelectItem value="user1">Supervisor (User1)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-              />
+              <Label htmlFor="username">Username</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  className="pl-10"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
+                  className="pl-10 pr-10"
                 />
                 <Button
                   type="button"
@@ -82,11 +90,25 @@ export default function Login() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">Demo password: demo123</p>
             </div>
+            
+            {error && (
+              <p className="text-sm text-destructive text-center">{error}</p>
+            )}
+            
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
+            
+            {/* Demo credentials hint */}
+            <div className="mt-4 p-3 bg-muted rounded-lg text-xs">
+              <p className="font-medium text-foreground mb-2">Demo Credentials:</p>
+              <div className="space-y-1 text-muted-foreground">
+                <p><span className="font-medium text-foreground">Root:</span> root / root123</p>
+                <p><span className="font-medium text-foreground">Admin:</span> admin / admin123</p>
+                <p><span className="font-medium text-foreground">Supervisor:</span> supervisor / user123</p>
+              </div>
+            </div>
           </form>
         </CardContent>
       </Card>
