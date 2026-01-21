@@ -161,12 +161,8 @@ export default function Users() {
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label>Full Name</Label>
-                    <Input placeholder="Enter full name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input type="email" placeholder="Enter email address" />
+                    <Label>Username</Label>
+                    <Input placeholder="Enter username" />
                   </div>
                   <div className="space-y-2">
                     <Label>Password</Label>
