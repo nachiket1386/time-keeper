@@ -245,16 +245,16 @@ function FilterDropdown({
 // Column definitions per report type
 const attendanceColumns = [
   { key: 'epNumber', label: 'EP NO', align: 'left' as const },
-  { key: 'employeeName', label: 'EP NAME', align: 'center' as const },
+  { key: 'employeeName', label: 'NAME', align: 'left' as const },
+  { key: 'date', label: 'DATE', align: 'center' as const },
   { key: 'shift', label: 'SHIFT', align: 'center' as const },
-  { key: 'date', label: 'PUNCHDATE', align: 'center' as const },
-  { key: 'punch1', label: 'PUNCH1', align: 'center' as const },
-  { key: 'punch2', label: 'PUNCH2 OUT', align: 'center' as const },
+  { key: 'timePairs', label: 'TIME PAIRS', align: 'center' as const },
   { key: 'hrs', label: 'HRS', align: 'center' as const },
   { key: 'overstay', label: 'OVERSTAY', align: 'center' as const },
-  { key: 'status', label: 'STATUS', align: 'left' as const },
+  { key: 'status', label: 'STATUS', align: 'center' as const },
   { key: 'ot', label: 'OT', align: 'center' as const },
   { key: 'otDays', label: 'OT DAYS', align: 'center' as const },
+  { key: 'actions', label: 'ACTIONS', align: 'center' as const },
 ];
 
 const arcSummaryColumns = [
@@ -313,18 +313,29 @@ export default function Reports() {
     }
     return attendanceRecords.map(record => {
       const employee = employees.find(e => e.epNumber === record.epNumber);
+      // Calculate hours worked
+      let hrs = '-';
+      if (record.punchIn && record.punchOut) {
+        const [inH, inM] = record.punchIn.split(':').map(Number);
+        const [outH, outM] = record.punchOut.split(':').map(Number);
+        const totalMins = (outH * 60 + outM) - (inH * 60 + inM);
+        hrs = (totalMins / 60).toFixed(1);
+      }
+      // Calculate overstay (hours beyond 8)
+      const overstay = hrs !== '-' && parseFloat(hrs) > 8 ? (parseFloat(hrs) - 8).toFixed(1) : '0.0';
+      
       return {
         epNumber: record.epNumber,
         employeeName: employee?.name || '-',
-        shift: record.punchIn && record.punchOut ? `${record.punchIn}-${record.punchOut}` : '-',
         date: record.date,
-        punch1: record.punchIn || '-',
-        punch2: record.punchOut || '-',
-        hrs: record.punchIn && record.punchOut ? '8.0' : '-',
-        overstay: '-',
+        shift: 'General', // Default shift
+        timePairs: record.punchIn && record.punchOut ? `${record.punchIn} - ${record.punchOut}` : '-',
+        hrs,
+        overstay,
         status: record.status,
-        ot: record.overtime?.toString() || '-',
+        ot: record.overtime?.toString() || '0',
         otDays: record.mandays?.toFixed(1) || '0.0',
+        actions: 'actions', // Placeholder for actions column
       };
     });
   }, [activeTab]);
@@ -444,6 +455,18 @@ export default function Reports() {
     const value = record[colKey as keyof typeof record];
     if (colKey === 'status') {
       return getStatusBadge(value);
+    }
+    if (colKey === 'actions') {
+      return (
+        <div className="flex items-center justify-center gap-1">
+          <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-muted">
+            <FileText className="h-3.5 w-3.5" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive">
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      );
     }
     return value;
   };
