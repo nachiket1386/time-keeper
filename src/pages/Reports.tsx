@@ -14,6 +14,8 @@ import {
   ArrowDownAZ,
   Filter,
   X,
+  Check,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -39,6 +41,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
@@ -453,83 +462,159 @@ export default function Reports() {
       {/* Mobile/Tablet Card View */}
       {isMobile ? (
         <div className="space-y-3">
-          {/* Mobile Filter Button */}
+      {/* Mobile Filter Button */}
           <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="w-full gap-2 h-9">
-                <Filter className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="w-full gap-2 h-10 text-sm font-medium">
+                <SlidersHorizontal className="h-4 w-4" />
                 Filters & Sort
                 {hasActiveFilters && (
-                  <Badge className="ml-1 bg-primary text-primary-foreground h-5 px-1.5 text-[10px]">
-                    Active
+                  <Badge className="ml-1 bg-primary text-primary-foreground h-5 px-2 text-xs">
+                    {Object.entries(filters).filter(([key, filter]) => {
+                      const allVals = uniqueValues[key] || [];
+                      return filter.selectedValues.size < allVals.length;
+                    }).length + (sortColumn ? 1 : 0)}
                   </Badge>
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl">
-              <SheetHeader className="pb-4">
+            <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl p-0">
+              <SheetHeader className="px-4 py-3 border-b border-border bg-muted/30">
                 <SheetTitle className="flex items-center justify-between">
-                  <span>Filters & Sort</span>
+                  <span className="text-base font-semibold">Filters & Sort</span>
                   {hasActiveFilters && (
-                    <Button size="sm" variant="ghost" onClick={clearAllFilters} className="text-destructive gap-1">
-                      <X className="h-3 w-3" />
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => { clearAllFilters(); setMobileFilterOpen(false); }} 
+                      className="text-destructive gap-1.5 h-8"
+                    >
+                      <FilterX className="h-4 w-4" />
                       Clear All
                     </Button>
                   )}
                 </SheetTitle>
               </SheetHeader>
-              <div className="overflow-y-auto h-[calc(100%-60px)] space-y-4">
-                {columns.map((col) => (
-                  <div key={col.key} className="border rounded-lg p-3 bg-muted/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">{col.label}</span>
-                      <div className="flex gap-1">
-                        <Button 
-                          size="sm" 
-                          variant={sortColumn === col.key && sortDirection === 'asc' ? 'default' : 'outline'} 
-                          className="h-7 px-2 text-xs"
-                          onClick={() => handleSort(col.key, 'asc')}
-                        >
-                          <ArrowUpAZ className="h-3 w-3" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant={sortColumn === col.key && sortDirection === 'desc' ? 'default' : 'outline'} 
-                          className="h-7 px-2 text-xs"
-                          onClick={() => handleSort(col.key, 'desc')}
-                        >
-                          <ArrowDownAZ className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
-                      {(uniqueValues[col.key] || []).slice(0, 20).map((value) => {
-                        const isSelected = filters[col.key]?.selectedValues.has(value);
-                        return (
-                          <Badge 
-                            key={value} 
-                            variant={isSelected ? "default" : "outline"}
-                            className={cn(
-                              "cursor-pointer text-xs transition-all",
-                              isSelected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+              
+              {/* Sort Section */}
+              <div className="px-4 py-3 border-b border-border bg-background">
+                <div className="text-xs font-medium text-muted-foreground mb-2">SORT BY</div>
+                <div className="flex flex-wrap gap-2">
+                  {columns.slice(0, 6).map((col) => (
+                    <Button
+                      key={col.key}
+                      size="sm"
+                      variant={sortColumn === col.key ? "default" : "outline"}
+                      className={cn(
+                        "h-8 px-3 text-xs gap-1.5 rounded-full",
+                        sortColumn === col.key && "bg-primary text-primary-foreground"
+                      )}
+                      onClick={() => {
+                        if (sortColumn === col.key) {
+                          setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+                        } else {
+                          handleSort(col.key, 'asc');
+                        }
+                      }}
+                    >
+                      {col.label}
+                      {sortColumn === col.key && (
+                        sortDirection === 'asc' ? <ArrowUpAZ className="h-3 w-3" /> : <ArrowDownAZ className="h-3 w-3" />
+                      )}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Filter Section with Accordion */}
+              <ScrollArea className="h-[calc(80vh-180px)]">
+                <Accordion type="single" collapsible className="px-4">
+                  {columns.map((col) => {
+                    const allVals = uniqueValues[col.key] || [];
+                    const selectedCount = filters[col.key]?.selectedValues.size || 0;
+                    const isFiltered = selectedCount < allVals.length && selectedCount > 0;
+                    
+                    return (
+                      <AccordionItem key={col.key} value={col.key} className="border-b border-border/50">
+                        <AccordionTrigger className="py-3 hover:no-underline">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{col.label}</span>
+                            {isFiltered && (
+                              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary">
+                                {selectedCount}/{allVals.length}
+                              </Badge>
                             )}
-                            onClick={() => {
-                              const newSelected = new Set(filters[col.key]?.selectedValues || []);
-                              if (isSelected) {
-                                newSelected.delete(value);
-                              } else {
-                                newSelected.add(value);
-                              }
-                              updateFilter(col.key, { selectedValues: newSelected });
-                            }}
-                          >
-                            {value || '(Blank)'}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-3">
+                          {/* Quick Actions */}
+                          <div className="flex gap-2 mb-3">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-7 text-xs flex-1"
+                              onClick={() => {
+                                updateFilter(col.key, { selectedValues: new Set(allVals) });
+                              }}
+                            >
+                              Select All
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="h-7 text-xs flex-1"
+                              onClick={() => {
+                                updateFilter(col.key, { selectedValues: new Set() });
+                              }}
+                            >
+                              Clear All
+                            </Button>
+                          </div>
+                          
+                          {/* Filter Chips */}
+                          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                            {allVals.map((value) => {
+                              const isSelected = filters[col.key]?.selectedValues.has(value);
+                              return (
+                                <button
+                                  key={value}
+                                  className={cn(
+                                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border",
+                                    isSelected 
+                                      ? "bg-primary text-primary-foreground border-primary shadow-sm" 
+                                      : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
+                                  )}
+                                  onClick={() => {
+                                    const newSelected = new Set(filters[col.key]?.selectedValues || []);
+                                    if (isSelected) {
+                                      newSelected.delete(value);
+                                    } else {
+                                      newSelected.add(value);
+                                    }
+                                    updateFilter(col.key, { selectedValues: newSelected });
+                                  }}
+                                >
+                                  {isSelected && <Check className="h-3 w-3" />}
+                                  {value || '(Blank)'}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
+              </ScrollArea>
+
+              {/* Apply Button */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
+                <Button 
+                  className="w-full h-11 text-sm font-medium"
+                  onClick={() => setMobileFilterOpen(false)}
+                >
+                  Apply Filters ({totalRecords} results)
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
