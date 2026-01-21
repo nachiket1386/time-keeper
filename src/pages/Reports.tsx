@@ -264,26 +264,7 @@ export default function Reports() {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [isNavbarHidden, setIsNavbarHidden] = useState(false);
-
-  // Toggle navbar visibility
-  useEffect(() => {
-    const navbar = document.querySelector('header.sticky');
-    if (navbar) {
-      if (isNavbarHidden) {
-        navbar.classList.add('!hidden');
-      } else {
-        navbar.classList.remove('!hidden');
-      }
-    }
-    return () => {
-      // Cleanup: show navbar when leaving the page
-      const navbarEl = document.querySelector('header.sticky');
-      if (navbarEl) {
-        navbarEl.classList.remove('!hidden');
-      }
-    };
-  }, [isNavbarHidden]);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
 
   // Build enriched records with all displayable values
   const enrichedRecords = useMemo(() => {
@@ -429,48 +410,55 @@ export default function Reports() {
 
   return (
     <div className="animate-fade-in space-y-3 pb-6">
-      <PageHeader
-        title="Attendance Data"
-        description="View and manage attendance records."
-      />
+      {/* Collapsible Header Section */}
+      {!isHeaderHidden && (
+        <>
+          <PageHeader
+            title="Attendance Data"
+            description="View and manage attendance records."
+          />
 
-      {/* Report Type Tabs + Actions */}
+          {/* Report Type Tabs */}
+          <div className="flex flex-wrap gap-1.5">
+            {reportTabs.map((tab) => {
+              const IconComponent = tab.icon;
+              return (
+                <Button
+                  key={tab.id}
+                  variant={activeTab === tab.id ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setCurrentPage(1);
+                  }}
+                  className={cn(
+                    'gap-1.5 rounded-full px-3 h-7 text-xs transition-all font-medium',
+                    activeTab === tab.id 
+                      ? 'bg-primary text-primary-foreground shadow-md' 
+                      : 'bg-card hover:bg-muted border-border'
+                  )}
+                >
+                  <IconComponent className="h-3 w-3" />
+                  {tab.label}
+                </Button>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Actions Bar - Always visible */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-1.5">
-          {reportTabs.map((tab) => {
-            const IconComponent = tab.icon;
-            return (
-              <Button
-                key={tab.id}
-                variant={activeTab === tab.id ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setCurrentPage(1);
-                }}
-                className={cn(
-                  'gap-1.5 rounded-full px-3 h-7 text-xs transition-all font-medium',
-                  activeTab === tab.id 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
-                    : 'bg-card hover:bg-muted border-border'
-                )}
-              >
-                <IconComponent className="h-3 w-3" />
-                {tab.label}
-              </Button>
-            );
-          })}
-        </div>
         <div className="flex items-center gap-2">
-          {/* Toggle Navbar Button */}
+          {/* Toggle Header Button */}
           <Button 
             size="sm" 
-            variant={isNavbarHidden ? "default" : "outline"}
-            onClick={() => setIsNavbarHidden(!isNavbarHidden)} 
+            variant={isHeaderHidden ? "default" : "outline"}
+            onClick={() => setIsHeaderHidden(!isHeaderHidden)} 
             className="gap-1.5 h-7 text-xs"
-            title={isNavbarHidden ? "Show Navigation" : "Hide Navigation"}
+            title={isHeaderHidden ? "Show Header & Tabs" : "Hide Header & Tabs"}
           >
-            {isNavbarHidden ? (
+            {isHeaderHidden ? (
               <>
                 <PanelLeft className="h-3 w-3" />
                 <span className="hidden sm:inline">Show</span>
@@ -482,6 +470,14 @@ export default function Reports() {
               </>
             )}
           </Button>
+          {/* Show current tab when header is hidden */}
+          {isHeaderHidden && (
+            <span className="text-xs font-medium text-muted-foreground">
+              {reportTabs.find(t => t.id === activeTab)?.label}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
           {hasActiveFilters && (
             <Button size="sm" variant="outline" onClick={clearAllFilters} className="gap-1.5 h-7 text-xs">
               <FilterX className="h-3 w-3" />
