@@ -448,14 +448,33 @@ export default function Reports() {
     return value;
   };
 
+  const getHeaderContent = () => {
+    switch (activeTab) {
+      case 'arc':
+        return { title: 'ARC Summary', description: 'Attendance Record Card summary by contractor with manday calculations.' };
+      case 'overtime':
+        return { title: 'Overtime Report', description: 'View and manage overtime records and approvals.' };
+      case 'partial':
+        return { title: 'Partial Day Report', description: 'View and manage partial day attendance records.' };
+      case 'regularization':
+        return { title: 'Regularization Report', description: 'View and manage attendance regularization requests.' };
+      case 'comprehensive':
+        return { title: 'Comprehensive Report', description: 'Complete attendance data with all metrics combined.' };
+      default:
+        return { title: 'Attendance Data', description: 'View and manage attendance records.' };
+    }
+  };
+
+  const headerContent = getHeaderContent();
+
   return (
     <div className="animate-fade-in space-y-3 pb-6">
       {/* Collapsible Header Section */}
       {!isHeaderHidden && (
         <>
           <PageHeader
-            title="Attendance Data"
-            description="View and manage attendance records."
+            title={headerContent.title}
+            description={headerContent.description}
           />
 
           {/* Report Type Tabs */}
