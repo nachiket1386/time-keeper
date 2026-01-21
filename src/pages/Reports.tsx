@@ -53,7 +53,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobileOrTablet } from '@/hooks/use-mobile';
 
 type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'comprehensive';
 
@@ -257,7 +257,7 @@ const columns = [
 ];
 
 export default function Reports() {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobileOrTablet();
   const [activeTab, setActiveTab] = useState<ReportTab>('attendance');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
