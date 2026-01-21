@@ -242,8 +242,8 @@ function FilterDropdown({
   );
 }
 
-// Column definitions
-const columns = [
+// Column definitions per report type
+const attendanceColumns = [
   { key: 'epNumber', label: 'EP NO', align: 'left' as const },
   { key: 'employeeName', label: 'EP NAME', align: 'center' as const },
   { key: 'shift', label: 'SHIFT', align: 'center' as const },
@@ -257,6 +257,37 @@ const columns = [
   { key: 'otDays', label: 'OT DAYS', align: 'center' as const },
 ];
 
+const arcSummaryColumns = [
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const },
+  { key: 'name', label: 'NAME', align: 'center' as const },
+  { key: 'date', label: 'DATE', align: 'center' as const },
+  { key: 'contractor', label: 'CONTRACTOR', align: 'center' as const },
+  { key: 'trade', label: 'TRADE', align: 'center' as const },
+  { key: 'contract', label: 'CONTRACT', align: 'center' as const },
+  { key: 'mandays', label: 'MANDAYS', align: 'center' as const },
+  { key: 'regularHr', label: 'REGULAR HR', align: 'center' as const },
+  { key: 'ot', label: 'OT', align: 'center' as const },
+];
+
+// Dummy ARC Summary data
+const arcSummaryData = [
+  { epNumber: 'EP-2024-001', name: 'Amit Patel', date: '2026-01-21', contractor: 'ABC Contractors', trade: 'Electrician', contract: 'CON-001', mandays: '1.0', regularHr: '8.0', ot: '2', status: 'Present' },
+  { epNumber: 'EP-2024-002', name: 'Suresh Kumar', date: '2026-01-21', contractor: 'XYZ Services', trade: 'Welder', contract: 'CON-002', mandays: '1.0', regularHr: '8.0', ot: '0', status: 'Present' },
+  { epNumber: 'EP-2024-003', name: 'Ramesh Singh', date: '2026-01-21', contractor: 'ABC Contractors', trade: 'Fitter', contract: 'CON-001', mandays: '0.5', regularHr: '4.0', ot: '0', status: 'Partial Day' },
+  { epNumber: 'EP-2024-004', name: 'Vijay Sharma', date: '2026-01-21', contractor: 'DEF Industries', trade: 'Rigger', contract: 'CON-003', mandays: '0.0', regularHr: '0.0', ot: '0', status: 'Absent' },
+  { epNumber: 'EP-2024-005', name: 'Manoj Gupta', date: '2026-01-21', contractor: 'XYZ Services', trade: 'Electrician', contract: 'CON-002', mandays: '1.0', regularHr: '8.0', ot: '1', status: 'Present' },
+  { epNumber: 'EP-2024-006', name: 'Anil Verma', date: '2026-01-21', contractor: 'ABC Contractors', trade: 'Welder', contract: 'CON-001', mandays: '1.0', regularHr: '8.0', ot: '3', status: 'Present' },
+  { epNumber: 'EP-2024-007', name: 'Sanjay Yadav', date: '2026-01-21', contractor: 'GHI Corp', trade: 'Painter', contract: 'CON-004', mandays: '1.0', regularHr: '8.0', ot: '0', status: 'Present' },
+  { epNumber: 'EP-2024-008', name: 'Deepak Joshi', date: '2026-01-21', contractor: 'DEF Industries', trade: 'Fitter', contract: 'CON-003', mandays: '0.0', regularHr: '0.0', ot: '0', status: 'Absent' },
+  { epNumber: 'EP-2024-009', name: 'Rohit Mishra', date: '2026-01-21', contractor: 'XYZ Services', trade: 'Rigger', contract: 'CON-002', mandays: '1.0', regularHr: '8.0', ot: '2', status: 'Present' },
+  { epNumber: 'EP-2024-010', name: 'Karan Malhotra', date: '2026-01-21', contractor: 'ABC Contractors', trade: 'Electrician', contract: 'CON-001', mandays: '0.5', regularHr: '4.0', ot: '0', status: 'Partial Day' },
+  { epNumber: 'EP-2024-011', name: 'Nitin Agarwal', date: '2026-01-20', contractor: 'GHI Corp', trade: 'Welder', contract: 'CON-004', mandays: '1.0', regularHr: '8.0', ot: '1', status: 'Present' },
+  { epNumber: 'EP-2024-012', name: 'Prakash Reddy', date: '2026-01-20', contractor: 'DEF Industries', trade: 'Painter', contract: 'CON-003', mandays: '1.0', regularHr: '8.0', ot: '0', status: 'Present' },
+  { epNumber: 'EP-2024-013', name: 'Santosh Nair', date: '2026-01-20', contractor: 'ABC Contractors', trade: 'Fitter', contract: 'CON-001', mandays: '1.0', regularHr: '8.0', ot: '2', status: 'Present' },
+  { epNumber: 'EP-2024-014', name: 'Arvind Das', date: '2026-01-20', contractor: 'XYZ Services', trade: 'Rigger', contract: 'CON-002', mandays: '0.0', regularHr: '0.0', ot: '0', status: 'Absent' },
+  { epNumber: 'EP-2024-015', name: 'Mukesh Pandey', date: '2026-01-20', contractor: 'GHI Corp', trade: 'Electrician', contract: 'CON-004', mandays: '1.0', regularHr: '8.0', ot: '0', status: 'Present' },
+];
+
 export default function Reports() {
   const isMobile = useIsMobileOrTablet();
   const [activeTab, setActiveTab] = useState<ReportTab>('attendance');
@@ -267,8 +298,19 @@ export default function Reports() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
 
+  // Get columns based on active tab
+  const columns = useMemo(() => {
+    if (activeTab === 'arc') {
+      return arcSummaryColumns;
+    }
+    return attendanceColumns;
+  }, [activeTab]);
+
   // Build enriched records with all displayable values
   const enrichedRecords = useMemo(() => {
+    if (activeTab === 'arc') {
+      return arcSummaryData;
+    }
     return attendanceRecords.map(record => {
       const employee = employees.find(e => e.epNumber === record.epNumber);
       return {
@@ -285,7 +327,7 @@ export default function Reports() {
         otDays: record.mandays?.toFixed(1) || '0.0',
       };
     });
-  }, []);
+  }, [activeTab]);
 
   // Get unique values for each column
   const uniqueValues = useMemo(() => {
@@ -305,20 +347,17 @@ export default function Reports() {
     return initial;
   });
 
-  // Update filters when uniqueValues change
+  // Reset filters when tab or columns change
   useEffect(() => {
-    setFilters(prev => {
-      const updated: Record<string, ColumnFilter> = {};
-      columns.forEach(col => {
-        if (prev[col.key]) {
-          updated[col.key] = prev[col.key];
-        } else {
-          updated[col.key] = { selectedValues: new Set(uniqueValues[col.key] || []) };
-        }
-      });
-      return updated;
+    const reset: Record<string, ColumnFilter> = {};
+    columns.forEach(col => {
+      reset[col.key] = { selectedValues: new Set(uniqueValues[col.key] || []) };
     });
-  }, [uniqueValues]);
+    setFilters(reset);
+    setSortColumn(null);
+    setSortDirection(null);
+    setCurrentPage(1);
+  }, [activeTab, columns, uniqueValues]);
 
   const updateFilter = (column: string, filter: ColumnFilter) => {
     setFilters(prev => ({ ...prev, [column]: filter }));
@@ -485,7 +524,7 @@ export default function Reports() {
             className="gap-1.5 h-8 text-xs bg-foreground hover:bg-foreground/90 text-background rounded-full px-4"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Delete Attendance Data
+            Delete {activeTab === 'arc' ? 'ARC Summary' : reportTabs.find(t => t.id === activeTab)?.label} Data
           </Button>
           <Button 
             size="sm" 
@@ -681,58 +720,36 @@ export default function Reports() {
                 No records found
               </Card>
             ) : (
-              paginatedRecords.map((record, index) => (
-                <Card 
-                  key={`${record.epNumber}-${record.date}-${index}`} 
-                  className="overflow-hidden border-l-4 border-l-primary"
-                >
-                  {/* Card Header */}
-                  <div className="bg-[#1a4480] text-white px-3 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm">{record.epNumber}</span>
-                      <span className="text-white/80 text-xs">•</span>
-                      <span className="text-sm truncate max-w-[150px]">{record.employeeName}</span>
+              paginatedRecords.map((record, index) => {
+                const recordAny = record as Record<string, string>;
+                const displayName = recordAny.employeeName || recordAny.name || '-';
+                return (
+                  <Card 
+                    key={`${record.epNumber}-${record.date}-${index}`} 
+                    className="overflow-hidden border-l-4 border-l-primary"
+                  >
+                    {/* Card Header */}
+                    <div className="bg-[#1a4480] text-white px-3 py-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm">{record.epNumber}</span>
+                        <span className="text-white/80 text-xs">•</span>
+                        <span className="text-sm truncate max-w-[150px]">{displayName}</span>
+                      </div>
+                      {getStatusBadge(record.status)}
                     </div>
-                    {getStatusBadge(record.status)}
-                  </div>
-                  
-                  {/* Card Body - Grid Layout */}
-                  <div className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">Date</span>
-                      <span className="font-medium text-xs">{record.date}</span>
+                    
+                    {/* Card Body - Dynamic Grid Layout */}
+                    <div className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      {columns.slice(2).map((col) => (
+                        <div key={col.key} className="flex justify-between items-center">
+                          <span className="text-muted-foreground text-xs">{col.label}</span>
+                          <span className="font-medium text-xs">{recordAny[col.key] || '-'}</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">Shift</span>
-                      <span className="font-medium text-xs">{record.shift}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">Punch In</span>
-                      <span className="font-medium text-xs text-emerald-600">{record.punch1}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">Punch Out</span>
-                      <span className="font-medium text-xs text-red-600">{record.punch2}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">Hours</span>
-                      <span className="font-medium text-xs">{record.hrs}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">Overstay</span>
-                      <span className="font-medium text-xs">{record.overstay}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">OT</span>
-                      <span className="font-medium text-xs text-primary">{record.ot}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-xs">OT Days</span>
-                      <span className="font-medium text-xs">{record.otDays}</span>
-                    </div>
-                  </div>
-                </Card>
-              ))
+                  </Card>
+                );
+              })
             )}
           </div>
 
