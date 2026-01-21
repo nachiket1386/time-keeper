@@ -618,10 +618,6 @@ export default function Reports() {
               Clear All
             </Button>
           )}
-          <Button size="sm" className="gap-1.5 h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-            <Download className="h-3 w-3" />
-            Export
-          </Button>
         </div>
       </div>
 
