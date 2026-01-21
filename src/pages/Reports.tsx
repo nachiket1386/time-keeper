@@ -284,7 +284,12 @@ const attendanceColumns = [
   { key: 'employeeName', label: 'NAME', align: 'left' as const },
   { key: 'date', label: 'DATE', align: 'center' as const },
   { key: 'shift', label: 'SHIFT', align: 'center' as const },
-  { key: 'timePairs', label: 'TIME PAIRS', align: 'center' as const },
+  { key: 'punch1', label: 'PUNCH1 IN', align: 'center' as const, punchType: 'in' },
+  { key: 'punch2', label: 'PUNCH2 OUT', align: 'center' as const, punchType: 'out' },
+  { key: 'punch3', label: 'PUNCH3 IN', align: 'center' as const, punchType: 'in' },
+  { key: 'punch4', label: 'PUNCH4 OUT', align: 'center' as const, punchType: 'out' },
+  { key: 'punch5', label: 'PUNCH5 IN', align: 'center' as const, punchType: 'in' },
+  { key: 'punch6', label: 'PUNCH6 OUT', align: 'center' as const, punchType: 'out' },
   { key: 'hrs', label: 'HRS', align: 'center' as const },
   { key: 'overstay', label: 'OVERSTAY', align: 'center' as const },
   { key: 'status', label: 'STATUS', align: 'center' as const },
@@ -347,31 +352,101 @@ export default function Reports() {
     if (activeTab === 'arc') {
       return arcSummaryData;
     }
-    return attendanceRecords.map(record => {
+    return attendanceRecords.map((record, index) => {
       const employee = employees.find(e => e.epNumber === record.epNumber);
-      // Calculate hours worked
-      let hrs = '-';
-      if (record.punchIn && record.punchOut) {
-        const [inH, inM] = record.punchIn.split(':').map(Number);
-        const [outH, outM] = record.punchOut.split(':').map(Number);
-        const totalMins = (outH * 60 + outM) - (inH * 60 + inM);
-        hrs = (totalMins / 60).toFixed(1);
-      }
-      // Calculate overstay (hours beyond 8)
+      
+      // Generate realistic multiple punch data
+      const generatePunches = () => {
+        if (!record.punchIn || !record.punchOut) {
+          return { punch1: '', punch2: '', punch3: '', punch4: '', punch5: '', punch6: '' };
+        }
+        
+        // Simulate different punch patterns based on index
+        const pattern = index % 5;
+        const isNightShift = parseInt(record.punchOut.split(':')[0]) < 6;
+        const nightSuffix = isNightShift ? ' (N)' : '';
+        
+        switch (pattern) {
+          case 0: // Single in/out
+            return {
+              punch1: record.punchIn,
+              punch2: record.punchOut + nightSuffix,
+              punch3: '', punch4: '', punch5: '', punch6: ''
+            };
+          case 1: // Two pairs (lunch break)
+            return {
+              punch1: record.punchIn,
+              punch2: '12:30',
+              punch3: '13:00',
+              punch4: record.punchOut + nightSuffix,
+              punch5: '', punch6: ''
+            };
+          case 2: // Three pairs (two breaks)
+            return {
+              punch1: record.punchIn,
+              punch2: '10:30',
+              punch3: '10:45',
+              punch4: '13:00',
+              punch5: '13:30',
+              punch6: record.punchOut + nightSuffix
+            };
+          case 3: // Only morning punches
+            return {
+              punch1: record.punchIn,
+              punch2: '',
+              punch3: record.punchOut + nightSuffix,
+              punch4: '', punch5: '', punch6: ''
+            };
+          default: // Full day with break
+            return {
+              punch1: record.punchIn,
+              punch2: '12:00',
+              punch3: '12:45',
+              punch4: record.punchOut + nightSuffix,
+              punch5: '', punch6: ''
+            };
+        }
+      };
+      
+      const punches = generatePunches();
+      
+      // Calculate hours worked from all punches
+      let totalMins = 0;
+      const punchPairs = [
+        [punches.punch1, punches.punch2],
+        [punches.punch3, punches.punch4],
+        [punches.punch5, punches.punch6]
+      ];
+      
+      punchPairs.forEach(([inPunch, outPunch]) => {
+        if (inPunch && outPunch) {
+          const cleanIn = inPunch.replace(' (N)', '');
+          const cleanOut = outPunch.replace(' (N)', '');
+          const [inH, inM] = cleanIn.split(':').map(Number);
+          const [outH, outM] = cleanOut.split(':').map(Number);
+          if (!isNaN(inH) && !isNaN(outH)) {
+            let mins = (outH * 60 + outM) - (inH * 60 + inM);
+            if (mins < 0) mins += 24 * 60; // Handle overnight
+            totalMins += mins;
+          }
+        }
+      });
+      
+      const hrs = totalMins > 0 ? (totalMins / 60).toFixed(1) : '-';
       const overstay = hrs !== '-' && parseFloat(hrs) > 8 ? (parseFloat(hrs) - 8).toFixed(1) : '0.0';
       
       return {
         epNumber: record.epNumber,
         employeeName: employee?.name || '-',
         date: record.date,
-        shift: 'General', // Default shift
-        timePairs: record.punchIn && record.punchOut ? `${record.punchIn} - ${record.punchOut}` : '-',
+        shift: 'General',
+        ...punches,
         hrs,
         overstay,
         status: record.status,
         ot: record.overtime?.toString() || '0',
         otDays: record.mandays?.toFixed(1) || '0.0',
-        actions: 'actions', // Placeholder for actions column
+        actions: 'actions',
       };
     });
   }, [activeTab]);
@@ -487,6 +562,32 @@ export default function Reports() {
     );
   };
 
+  // Get punch column styling
+  const getPunchCellStyle = (colKey: string, value: string) => {
+    const isPunchColumn = colKey.startsWith('punch');
+    if (!isPunchColumn) return '';
+    
+    const column = attendanceColumns.find(c => c.key === colKey);
+    const punchType = (column as { punchType?: string })?.punchType;
+    
+    if (!value || value === '-') return 'text-muted-foreground';
+    
+    // Check for night shift indicator
+    const isNight = value.includes('(N)');
+    
+    if (punchType === 'in') {
+      return cn(
+        'font-medium',
+        isNight ? 'text-indigo-600 bg-indigo-50' : 'text-emerald-700 bg-emerald-50'
+      );
+    } else {
+      return cn(
+        'font-medium',
+        isNight ? 'text-purple-600 bg-purple-50' : 'text-blue-700 bg-blue-50'
+      );
+    }
+  };
+
   const renderCell = (record: typeof enrichedRecords[0], colKey: string) => {
     const value = record[colKey as keyof typeof record];
     if (colKey === 'status') {
@@ -502,6 +603,15 @@ export default function Reports() {
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
+      );
+    }
+    // Punch columns with color coding
+    if (colKey.startsWith('punch')) {
+      const cellStyle = getPunchCellStyle(colKey, value);
+      return (
+        <span className={cn('px-2 py-0.5 rounded text-xs', cellStyle)}>
+          {value || '-'}
+        </span>
       );
     }
     return value;
