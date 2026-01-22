@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, AlertTriangle, BarChart3, Timer, Calendar, Edit, Search } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, AlertTriangle, BarChart3, Timer, Calendar, Edit, Search, ClipboardList, FileText, CheckSquare, Lightbulb } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,52 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+interface FormatRequirements {
+  required: string[];
+  optional: string[];
+  rules: string[];
+  tip: string;
+}
+
+const formatRequirements: Record<string, FormatRequirements> = {
+  'punchrecord': {
+    required: ['EP NO', 'PUNCHDATE', 'SHIFT', 'STATUS'],
+    optional: ['PUNCH1 IN', 'PUNCH2 OUT', 'PUNCH3 IN', 'PUNCH4 OUT', 'PUNCH5 IN', 'PUNCH6 OUT', 'HOURS WORKED', 'OVERSTAY', 'OVERTIME'],
+    rules: ['Date: DD/MM/YYYY or YYYY-MM-DD', 'Time: HH:MM or HH:MM:SS', 'Status: P, A, PH, PD, L, WO', 'No future dates allowed', 'Duplicates will be updated'],
+    tip: 'Punchrecord files contain detailed punch time records with in/out times.'
+  },
+  'arc-summary': {
+    required: ['EP NO', 'NAME', 'DATE', 'CONTRACTOR', 'MANDAYS'],
+    optional: ['TRADE', 'CONTRACT', 'REGULAR HR', 'OT'],
+    rules: ['Date: DD/MM/YYYY or YYYY-MM-DD', 'Mandays: Numeric (0.5 or 1)', 'OT format: HH:MM', 'Contractor must exist in master'],
+    tip: 'ARC Summary provides aggregated attendance data per contractor.'
+  },
+  'overtime': {
+    required: ['EP NO', 'NAME', 'DATE', 'OT HOURS', 'REASON'],
+    optional: ['CONTRACTOR', 'APPROVED BY', 'STATUS', 'REMARKS'],
+    rules: ['Date: DD/MM/YYYY or YYYY-MM-DD', 'OT Hours: HH:MM format', 'Status: Pending, Approved, Rejected', 'Reason is mandatory'],
+    tip: 'Overtime records require approval workflow after import.'
+  },
+  'partial-day': {
+    required: ['EP NO', 'NAME', 'DATE', 'HOURS WORKED', 'MANDAYS'],
+    optional: ['CONTRACTOR', 'REASON', 'STATUS', 'APPROVED BY'],
+    rules: ['Date: DD/MM/YYYY or YYYY-MM-DD', 'Hours: Numeric (1-8)', 'Mandays: 0.25, 0.5, 0.75', 'Status: Pending, Approved, Rejected'],
+    tip: 'Partial day records track employees who worked less than full shift.'
+  },
+  'regularization': {
+    required: ['EP NO', 'NAME', 'DATE', 'OLD PUNCH', 'NEW PUNCH', 'EIC CODE'],
+    optional: ['REASON', 'APPROVED BY', 'STATUS', 'REMARKS'],
+    rules: ['Date: DD/MM/YYYY or YYYY-MM-DD', 'Time: HH:MM format', 'EIC Code must be valid', 'Status: Pending, Approved, Rejected'],
+    tip: 'Regularization requests correct incorrect or missing punch entries.'
+  },
+  'auto-detect': {
+    required: ['File headers will be analyzed automatically'],
+    optional: ['System will match columns to known templates'],
+    rules: ['Ensure first row contains column headers', 'Use consistent date/time formats', 'File must be under 20MB'],
+    tip: 'Auto-detect works best with files following standard templates.'
+  },
+};
 
 const uploadTypes = [
   { 
@@ -205,6 +251,72 @@ export default function Import() {
               );
             })}
           </div>
+
+          {/* Format Requirements Panel */}
+          {selectedType && formatRequirements[selectedType] && (
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Format Requirements</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Required Columns */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <ClipboardList className="h-4 w-4 text-primary" />
+                      <span>Required Columns</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {formatRequirements[selectedType].required.map((col, idx) => (
+                        <Badge key={idx} variant="outline" className="bg-background text-xs font-mono">
+                          {col}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Optional Columns */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span>Optional Columns</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {formatRequirements[selectedType].optional.map((col, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs font-mono">
+                          {col}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Format Rules */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <CheckSquare className="h-4 w-4 text-emerald-500" />
+                    <span>Format Rules</span>
+                  </div>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    {formatRequirements[selectedType].rules.map((rule, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-emerald-500 mt-0.5">•</span>
+                        <span>{rule}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Tip */}
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                  <Lightbulb className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    <span className="font-medium">Tip:</span> {formatRequirements[selectedType].tip}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Upload Zone - Shows after type selection */}
           {selectedType && (
