@@ -284,12 +284,9 @@ const attendanceColumns = [
   { key: 'employeeName', label: 'NAME', align: 'left' as const },
   { key: 'date', label: 'DATE', align: 'center' as const },
   { key: 'shift', label: 'SHIFT', align: 'center' as const },
-  { key: 'punch1', label: 'PUNCH1 IN', align: 'center' as const, punchType: 'in' },
-  { key: 'punch2', label: 'PUNCH2 OUT', align: 'center' as const, punchType: 'out' },
-  { key: 'punch3', label: 'PUNCH3 IN', align: 'center' as const, punchType: 'in' },
-  { key: 'punch4', label: 'PUNCH4 OUT', align: 'center' as const, punchType: 'out' },
-  { key: 'punch5', label: 'PUNCH5 IN', align: 'center' as const, punchType: 'in' },
-  { key: 'punch6', label: 'PUNCH6 OUT', align: 'center' as const, punchType: 'out' },
+  { key: 'timePair1', label: 'IN - OUT', align: 'center' as const, isTimePair: true },
+  { key: 'timePair2', label: 'IN - OUT', align: 'center' as const, isTimePair: true },
+  { key: 'timePair3', label: 'IN - OUT', align: 'center' as const, isTimePair: true },
   { key: 'hrs', label: 'HRS', align: 'center' as const },
   { key: 'overstay', label: 'OVERSTAY', align: 'center' as const },
   { key: 'status', label: 'STATUS', align: 'center' as const },
@@ -463,12 +460,26 @@ export default function Reports() {
       const otDaysMM = otDaysMins % 60;
       const otDays = `${otDaysHH.toString().padStart(2, '0')}:${otDaysMM.toString().padStart(2, '0')}`;
       
+      // Create time pairs (IN - OUT format)
+      const formatTimePair = (inTime: string, outTime: string) => {
+        if (!inTime && !outTime) return '-';
+        if (!inTime) return `- / ${outTime}`;
+        if (!outTime) return `${inTime} / -`;
+        return `${inTime} - ${outTime}`;
+      };
+
+      const timePair1 = formatTimePair(punches.punch1, punches.punch2);
+      const timePair2 = formatTimePair(punches.punch3, punches.punch4);
+      const timePair3 = formatTimePair(punches.punch5, punches.punch6);
+
       return {
         epNumber: record.epNumber,
         employeeName: employee?.name || '-',
         date: record.date,
         shift,
-        ...punches,
+        timePair1,
+        timePair2,
+        timePair3,
         hrs,
         overstay,
         status,
@@ -633,13 +644,37 @@ export default function Reports() {
         </div>
       );
     }
-    // Punch columns with color coding
-    if (colKey.startsWith('punch')) {
-      const cellStyle = getPunchCellStyle(colKey, value);
+    // Time pair columns with IN/OUT color coding
+    if (colKey.startsWith('timePair')) {
+      if (!value || value === '-') {
+        return <span className="text-muted-foreground">-</span>;
+      }
+      // Parse the time pair (format: "IN - OUT" or "IN / -" or "- / OUT")
+      const parts = value.includes(' - ') ? value.split(' - ') : value.split(' / ');
+      const inTime = parts[0]?.trim();
+      const outTime = parts[1]?.trim();
+      const isNight = value.includes('(N)');
+      
       return (
-        <span className={cn('px-2 py-0.5 rounded text-xs', cellStyle)}>
-          {value || '-'}
-        </span>
+        <div className="flex items-center justify-center gap-1">
+          <span className={cn(
+            'px-1.5 py-0.5 rounded text-xs font-medium',
+            inTime && inTime !== '-' 
+              ? (isNight ? 'text-indigo-600 bg-indigo-50' : 'text-emerald-700 bg-emerald-50')
+              : 'text-muted-foreground'
+          )}>
+            {inTime || '-'}
+          </span>
+          <span className="text-muted-foreground text-xs">-</span>
+          <span className={cn(
+            'px-1.5 py-0.5 rounded text-xs font-medium',
+            outTime && outTime !== '-'
+              ? (isNight || outTime.includes('(N)') ? 'text-purple-600 bg-purple-50' : 'text-blue-700 bg-blue-50')
+              : 'text-muted-foreground'
+          )}>
+            {outTime || '-'}
+          </span>
+        </div>
       );
     }
     return value;
