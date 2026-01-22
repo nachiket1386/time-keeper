@@ -460,12 +460,12 @@ export default function Reports() {
       const otDaysMM = otDaysMins % 60;
       const otDays = `${otDaysHH.toString().padStart(2, '0')}:${otDaysMM.toString().padStart(2, '0')}`;
       
-      // Create time pairs (IN - OUT format)
+      // Create time pairs (IN-OUT format: 08:06-12:30 or 07:44-- for missing out)
       const formatTimePair = (inTime: string, outTime: string) => {
-        if (!inTime && !outTime) return '-';
-        if (!inTime) return `- / ${outTime}`;
-        if (!outTime) return `${inTime} / -`;
-        return `${inTime} - ${outTime}`;
+        if (!inTime && !outTime) return '--';
+        const cleanIn = inTime ? inTime.replace(' (N)', '') : '--';
+        const cleanOut = outTime ? outTime.replace(' (N)', '') : '--';
+        return `${cleanIn}-${cleanOut}`;
       };
 
       const timePair1 = formatTimePair(punches.punch1, punches.punch2);
