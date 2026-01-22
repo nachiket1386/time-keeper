@@ -637,7 +637,28 @@ export default function Reports() {
   const headerContent = getHeaderContent();
 
   return (
-    <div className="animate-fade-in space-y-3 pb-6">
+    <div className="animate-fade-in space-y-3 pb-6 relative">
+      {/* Hide/Show Button - Positioned top right below navbar */}
+      <Button 
+        size="sm" 
+        variant={isHeaderHidden ? "default" : "outline"}
+        onClick={() => setIsHeaderHidden(!isHeaderHidden)} 
+        className="absolute right-0 top-0 gap-1.5 h-8 text-xs z-10"
+        title={isHeaderHidden ? "Show Header & Tabs" : "Hide Header & Tabs"}
+      >
+        {isHeaderHidden ? (
+          <>
+            <PanelLeft className="h-3 w-3" />
+            <span className="hidden sm:inline">Show</span>
+          </>
+        ) : (
+          <>
+            <PanelLeftClose className="h-3 w-3" />
+            <span className="hidden sm:inline">Hide</span>
+          </>
+        )}
+      </Button>
+
       {/* Collapsible Header Section */}
       {!isHeaderHidden && (
         <>
@@ -690,26 +711,6 @@ export default function Reports() {
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Toggle Header Button */}
-          <Button 
-            size="sm" 
-            variant={isHeaderHidden ? "default" : "outline"}
-            onClick={() => setIsHeaderHidden(!isHeaderHidden)} 
-            className="gap-1.5 h-8 text-xs"
-            title={isHeaderHidden ? "Show Header & Tabs" : "Hide Header & Tabs"}
-          >
-            {isHeaderHidden ? (
-              <>
-                <PanelLeft className="h-3 w-3" />
-                <span className="hidden sm:inline">Show</span>
-              </>
-            ) : (
-              <>
-                <PanelLeftClose className="h-3 w-3" />
-                <span className="hidden sm:inline">Hide</span>
-              </>
-            )}
-          </Button>
           {/* Delete Buttons */}
           <Button 
             size="sm" 
