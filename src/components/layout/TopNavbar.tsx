@@ -53,26 +53,26 @@ export function TopNavbar() {
     items.some((item) => location.pathname.startsWith(item.href));
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-primary shadow-lg">
+    <header className="sticky top-0 z-50 w-full bg-background border-b border-border shadow-sm">
       <div className="flex h-14 items-center px-6">
         {/* Logo */}
         <Link to="/dashboard" className="flex items-center gap-2 mr-8">
-          <div className="h-9 w-9 rounded-lg bg-white/20 flex items-center justify-center">
-            <Clock className="h-5 w-5 text-white" />
+          <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
+            <Clock className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="font-bold text-xl text-white hidden md:block">AMS</span>
+          <span className="font-bold text-xl text-foreground hidden md:block">AMS</span>
         </Link>
 
         {/* Navigation Tabs */}
-        <nav className="flex items-center h-full">
+        <nav className="flex items-center h-full gap-1">
           {/* Dashboard */}
           <Link
             to="/dashboard"
             className={cn(
-              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
+              'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               isActive('/dashboard')
-                ? 'text-white border-white bg-white/10'
-                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <LayoutDashboard className="h-4 w-4" />
@@ -83,10 +83,10 @@ export function TopNavbar() {
           <Link
             to="/import"
             className={cn(
-              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
+              'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               isActive('/import')
-                ? 'text-white border-white bg-white/10'
-                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <Upload className="h-4 w-4" />
@@ -97,10 +97,10 @@ export function TopNavbar() {
           <Link
             to="/reports"
             className={cn(
-              'flex items-center gap-2 px-5 h-full text-sm font-medium transition-colors border-b-2',
+              'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               isActive('/reports')
-                ? 'text-white border-white bg-white/10'
-                : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <FileText className="h-4 w-4" />
@@ -113,10 +113,10 @@ export function TopNavbar() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={cn(
-                    'flex items-center gap-2 px-5 h-14 text-sm font-medium transition-colors border-b-2',
+                    'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
                     isActiveGroup(managementItems)
-                      ? 'text-white border-white bg-white/10'
-                      : 'text-white/70 border-transparent hover:text-white hover:bg-white/5'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   )}
                 >
                   <Users className="h-4 w-4" />
@@ -166,12 +166,12 @@ export function TopNavbar() {
         <div className="flex-1" />
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {/* Company Selector (Root) */}
           {user.role === 'root' && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground hover:bg-muted">
                   <Building2 className="h-4 w-4" />
                   <span className="hidden lg:inline text-sm">All Companies</span>
                   <ChevronDown className="h-3.5 w-3.5" />
@@ -191,8 +191,8 @@ export function TopNavbar() {
           {/* Role Badge */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-white/80 hover:text-white hover:bg-white/10 text-sm">
-                <span className="capitalize px-2 py-0.5 bg-white/20 rounded text-xs font-medium">{user.role}</span>
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted text-sm">
+                <span className="capitalize px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-medium">{user.role}</span>
                 <ChevronDown className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
@@ -206,15 +206,15 @@ export function TopNavbar() {
           </DropdownMenu>
 
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative text-white/80 hover:text-white hover:bg-white/10">
+          <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground hover:bg-muted">
             <Bell className="h-5 w-5" />
-            <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
               3
             </span>
           </Button>
 
           {/* Settings */}
-          <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-muted" asChild>
             <Link to="/settings">
               <Settings className="h-5 w-5" />
             </Link>
@@ -223,15 +223,15 @@ export function TopNavbar() {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2 pl-2 pr-3 text-white hover:bg-white/10">
-                <Avatar className="h-8 w-8 border-2 border-white/30">
-                  <AvatarFallback className="bg-white/20 text-white text-sm font-semibold">
+              <Button variant="ghost" size="sm" className="gap-2 pl-2 pr-3 text-foreground hover:bg-muted">
+                <Avatar className="h-8 w-8 border-2 border-border">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden lg:flex flex-col items-start">
                   <span className="text-sm font-medium">{user.name.split(' ')[0]}</span>
-                  {user.company && <span className="text-[10px] text-white/60">{user.company}</span>}
+                  {user.company && <span className="text-[10px] text-muted-foreground">{user.company}</span>}
                 </div>
               </Button>
             </DropdownMenuTrigger>
