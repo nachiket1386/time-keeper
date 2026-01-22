@@ -676,6 +676,14 @@ export default function Reports() {
       {/* Actions Bar - Always visible */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
+          {/* Show current tab when header is hidden */}
+          {isHeaderHidden && (
+            <span className="text-xs font-medium text-muted-foreground">
+              {reportTabs.find(t => t.id === activeTab)?.label}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Toggle Header Button */}
           <Button 
             size="sm" 
@@ -696,14 +704,6 @@ export default function Reports() {
               </>
             )}
           </Button>
-          {/* Show current tab when header is hidden */}
-          {isHeaderHidden && (
-            <span className="text-xs font-medium text-muted-foreground">
-              {reportTabs.find(t => t.id === activeTab)?.label}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
           {/* Delete Buttons */}
           <Button 
             size="sm" 
