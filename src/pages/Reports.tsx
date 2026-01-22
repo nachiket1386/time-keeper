@@ -908,10 +908,10 @@ export default function Reports() {
                               className="h-9 text-sm"
                               onChange={(e) => {
                                 const searchTerm = e.target.value.toLowerCase();
-                                // Filter visibility
-                                const container = e.target.closest('.accordion-content-wrapper');
-                                if (container) {
-                                  container.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
+                                // Filter visibility - find sibling chips container
+                                const accordionContent = e.target.closest('[data-state]');
+                                if (accordionContent) {
+                                  accordionContent.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
                                     const value = chip.getAttribute('data-filter-value')?.toLowerCase() || '';
                                     (chip as HTMLElement).style.display = value.includes(searchTerm) ? '' : 'none';
                                   });
@@ -931,9 +931,9 @@ export default function Reports() {
                                       updateFilter(col.key, { selectedValues: newSelected });
                                       (e.target as HTMLInputElement).value = '';
                                       // Reset visibility
-                                      const container = (e.target as HTMLElement).closest('.accordion-content-wrapper');
-                                      if (container) {
-                                        container.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
+                                      const accordionContent = (e.target as HTMLElement).closest('[data-state]');
+                                      if (accordionContent) {
+                                        accordionContent.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
                                           (chip as HTMLElement).style.display = '';
                                         });
                                       }
