@@ -284,9 +284,7 @@ const attendanceColumns = [
   { key: 'employeeName', label: 'NAME', align: 'left' as const },
   { key: 'date', label: 'DATE', align: 'center' as const },
   { key: 'shift', label: 'SHIFT', align: 'center' as const },
-  { key: 'timePair1', label: 'IN - OUT', align: 'center' as const, isTimePair: true },
-  { key: 'timePair2', label: 'IN - OUT', align: 'center' as const, isTimePair: true },
-  { key: 'timePair3', label: 'IN - OUT', align: 'center' as const, isTimePair: true },
+  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const },
   { key: 'hrs', label: 'HRS', align: 'center' as const },
   { key: 'overstay', label: 'OVERSTAY', align: 'center' as const },
   { key: 'status', label: 'STATUS', align: 'center' as const },
@@ -472,6 +470,10 @@ export default function Reports() {
       const timePair2 = formatTimePair(punches.punch3, punches.punch4);
       const timePair3 = formatTimePair(punches.punch5, punches.punch6);
 
+      // Combine all time pairs into single field with | separator
+      const timePairsList = [timePair1, timePair2, timePair3].filter(tp => tp !== '--');
+      const timePairs = timePairsList.length > 0 ? timePairsList.join(' | ') : '--';
+
       // Format date as DD-MM-YYYY
       const formatDate = (dateStr: string) => {
         if (!dateStr) return '-';
@@ -487,9 +489,7 @@ export default function Reports() {
         employeeName: employee?.name || '-',
         date: formatDate(record.date),
         shift,
-        timePair1,
-        timePair2,
-        timePair3,
+        timePairs,
         hrs,
         overstay,
         status,
