@@ -710,26 +710,28 @@ export default function Reports() {
             </Button>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Delete Buttons */}
-          <Button 
-            size="sm" 
-            className="gap-1.5 h-8 text-xs bg-foreground hover:bg-foreground/90 text-background rounded-full px-4"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Delete {activeTab === 'arc' ? 'ARC Summary' : reportTabs.find(t => t.id === activeTab)?.label} Data
-          </Button>
-          {activeTab === 'attendance' && (
+        {!isHeaderHidden && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Delete Buttons */}
             <Button 
               size="sm" 
-              variant="destructive"
-              className="gap-1.5 h-8 text-xs rounded-full px-4"
+              className="gap-1.5 h-8 text-xs bg-foreground hover:bg-foreground/90 text-background rounded-full px-4"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Delete All Reports
+              Delete {activeTab === 'arc' ? 'ARC Summary' : reportTabs.find(t => t.id === activeTab)?.label} Data
             </Button>
-          )}
-        </div>
+            {activeTab === 'attendance' && (
+              <Button 
+                size="sm" 
+                variant="destructive"
+                className="gap-1.5 h-8 text-xs rounded-full px-4"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete All Reports
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Records Count */}
