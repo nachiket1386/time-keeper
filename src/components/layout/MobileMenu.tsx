@@ -1,15 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard,
   Users,
-  FileText,
-  Upload,
   Settings,
   Building2,
   UserCog,
   History,
   LogOut,
   Bell,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -18,11 +16,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-const mainMenuItems = [
-  { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, color: 'bg-blue-500' },
-  { title: 'Reports', href: '/reports', icon: FileText, color: 'bg-green-500' },
-  { title: 'Import Data', href: '/import', icon: Upload, color: 'bg-purple-500' },
-  { title: 'Settings', href: '/settings', icon: Settings, color: 'bg-gray-500' },
+// Items that are shown in the bottom navbar (to exclude from More menu)
+const bottomNavItems = ['/dashboard', '/attendance', '/reports', '/import'];
+
+// Additional menu items NOT in bottom navbar
+const additionalMenuItems = [
+  { title: 'Settings', href: '/settings', icon: Settings, color: 'bg-slate-500' },
 ];
 
 const managementItems = [
@@ -114,18 +113,39 @@ export function MobileMenu() {
 
         <Separator />
 
-        {/* Main Navigation Grid */}
+        {/* Additional Menu Items (NOT in bottom navbar) */}
         <div>
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-            Main Menu
+            Quick Access
           </h3>
-          <div className="grid grid-cols-4 gap-3">
-            {mainMenuItems.map((item) => (
+          <div className="grid grid-cols-3 gap-3">
+            {additionalMenuItems.map((item) => (
               <MenuCard key={item.href} {...item} />
             ))}
+            {/* Notifications */}
+            <Link
+              to="/notifications"
+              className={cn(
+                'flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all duration-200 border-2 relative',
+                isActive('/notifications')
+                  ? 'bg-primary text-primary-foreground border-primary shadow-lg scale-105'
+                  : 'bg-card hover:bg-muted border-border hover:border-primary/50 hover:shadow-md'
+              )}
+            >
+              <div className={cn(
+                'p-3 rounded-xl',
+                isActive('/notifications') ? 'bg-primary-foreground/20' : 'bg-amber-500'
+              )}>
+                <Bell className={cn('h-6 w-6', isActive('/notifications') ? 'text-primary-foreground' : 'text-white')} />
+              </div>
+              <span className={cn(
+                'text-xs font-medium text-center leading-tight',
+                isActive('/notifications') ? 'text-primary-foreground' : 'text-foreground'
+              )}>Notifications</span>
+              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 text-[10px] px-1.5">3</Badge>
+            </Link>
           </div>
         </div>
-
 
         {/* Management Grid (Admin/Root only) */}
         {(user.role === 'root' || user.role === 'admin') && (
@@ -152,18 +172,6 @@ export function MobileMenu() {
         )}
 
         <Separator />
-
-        {/* Notifications */}
-        <Link
-          to="/notifications"
-          className="flex items-center gap-3 p-4 rounded-xl bg-card border-2 border-border hover:border-primary/50 hover:bg-muted transition-all"
-        >
-          <div className="p-3 rounded-xl bg-yellow-500">
-            <Bell className="h-5 w-5 text-white" />
-          </div>
-          <span className="flex-1 font-medium">Notifications</span>
-          <Badge variant="destructive" className="text-xs">3</Badge>
-        </Link>
 
         {/* Logout */}
         <button

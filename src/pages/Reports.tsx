@@ -901,6 +901,25 @@ export default function Reports() {
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="pb-3">
+                          {/* Search Input */}
+                          <div className="mb-3">
+                            <Input
+                              placeholder={`Search ${col.label.toLowerCase()}...`}
+                              className="h-9 text-sm"
+                              onChange={(e) => {
+                                // Store search term in a data attribute for filtering
+                                const searchTerm = e.target.value.toLowerCase();
+                                const container = e.target.closest('.filter-chips-container');
+                                if (container) {
+                                  container.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
+                                    const value = chip.getAttribute('data-filter-value')?.toLowerCase() || '';
+                                    (chip as HTMLElement).style.display = value.includes(searchTerm) ? '' : 'none';
+                                  });
+                                }
+                              }}
+                            />
+                          </div>
+
                           {/* Quick Actions */}
                           <div className="flex gap-2 mb-3">
                             <Button 
@@ -926,12 +945,13 @@ export default function Reports() {
                           </div>
                           
                           {/* Filter Chips */}
-                          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                          <div className="filter-chips-container flex flex-wrap gap-2 max-h-40 overflow-y-auto">
                             {allVals.map((value) => {
                               const isSelected = filters[col.key]?.selectedValues.has(value);
                               return (
                                 <button
                                   key={value}
+                                  data-filter-value={value}
                                   className={cn(
                                     "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border",
                                     isSelected 
@@ -986,26 +1006,65 @@ export default function Reports() {
                 return (
                   <Card 
                     key={`${record.epNumber}-${record.date}-${index}`} 
-                    className="overflow-hidden border-l-4 border-l-primary"
+                    className="overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                   >
                     {/* Card Header */}
-                    <div className="bg-[#1a4480] text-white px-3 py-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm">{record.epNumber}</span>
-                        <span className="text-white/80 text-xs">•</span>
-                        <span className="text-sm truncate max-w-[150px]">{displayName}</span>
+                    <div className="bg-gradient-to-r from-[#1a4480] to-[#2c5aa0] text-white px-4 py-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-base">{record.epNumber}</span>
+                        {getStatusBadge(record.status)}
                       </div>
-                      {getStatusBadge(record.status)}
+                      <span className="text-sm text-white/90 truncate block">{displayName}</span>
                     </div>
                     
-                    {/* Card Body - Dynamic Grid Layout */}
-                    <div className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      {columns.slice(2).map((col) => (
-                        <div key={col.key} className="flex justify-between items-center">
-                          <span className="text-muted-foreground text-xs">{col.label}</span>
-                          <span className="font-medium text-xs">{recordAny[col.key] || '-'}</span>
+                    {/* Card Body - Improved Layout */}
+                    <div className="p-4 space-y-3">
+                      {/* Date & Shift Row */}
+                      <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Date:</span>
+                          <span className="text-sm font-medium">{recordAny.date || '-'}</span>
                         </div>
-                      ))}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Shift:</span>
+                          <Badge variant="outline" className="text-xs font-semibold">
+                            {recordAny.shift || '-'}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Time Pairs Section */}
+                      <div className="space-y-2">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Punch Times</span>
+                        <div className="grid grid-cols-3 gap-2">
+                          {['timePair1', 'timePair2', 'timePair3'].map((key, idx) => (
+                            <div key={key} className="bg-muted/30 rounded-lg p-2 text-center">
+                              <div className="text-[10px] text-muted-foreground mb-1">Pair {idx + 1}</div>
+                              <div className="text-xs font-medium">{recordAny[key] || '-'}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Hours & OT Section */}
+                      <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border/50">
+                        <div className="text-center">
+                          <div className="text-[10px] text-muted-foreground">HRS</div>
+                          <div className="text-sm font-semibold text-emerald-600">{recordAny.hrs || '-'}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-[10px] text-muted-foreground">OVERSTAY</div>
+                          <div className="text-sm font-semibold text-amber-600">{recordAny.overstay || '-'}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-[10px] text-muted-foreground">OT</div>
+                          <div className="text-sm font-semibold text-blue-600">{recordAny.ot || '-'}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-[10px] text-muted-foreground">OT DAYS</div>
+                          <div className="text-sm font-semibold text-purple-600">{recordAny.otDays || '-'}</div>
+                        </div>
+                      </div>
                     </div>
                   </Card>
                 );
