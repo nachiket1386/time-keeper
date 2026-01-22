@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, AlertTriangle, BarChart3, Timer, Calendar, Edit, Search, ClipboardList, FileText, CheckSquare, Lightbulb } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, BarChart3, Timer, Calendar, Edit, Search, ClipboardList, FileText, CheckSquare, Lightbulb, ArrowLeft, Info } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -204,196 +204,177 @@ export default function Import() {
         </TabsList>
 
         <TabsContent value="upload" className="space-y-6">
-          {/* Type Selection Header */}
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight">Excel File Upload</h1>
-            <p className="text-muted-foreground">Select the type of attendance data you want to upload</p>
-          </div>
+          {/* Type Selection View */}
+          {!selectedType && (
+            <>
+              <div className="space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight">Excel File Upload</h1>
+                <p className="text-muted-foreground">Select the type of attendance data you want to upload</p>
+              </div>
 
-          {/* Upload Type Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {uploadTypes.map((type) => {
-              const Icon = type.icon;
-              const isSelected = selectedType === type.id;
-              
-              return (
-                <Card 
-                  key={type.id}
-                  onClick={() => handleTypeSelect(type.id)}
-                  className={`
-                    relative cursor-pointer transition-all duration-200 hover:shadow-md
-                    ${isSelected 
-                      ? 'ring-2 ring-primary border-primary bg-primary/5' 
-                      : 'hover:border-primary/50 bg-muted/30'
-                    }
-                  `}
-                >
-                  {type.badge && (
-                    <Badge 
-                      variant={type.badgeVariant || 'default'}
-                      className={`absolute top-3 right-3 text-[10px] px-2 py-0.5 ${
-                        type.badge === 'SMART' 
-                          ? 'bg-emerald-500 text-white hover:bg-emerald-500' 
-                          : 'bg-primary text-primary-foreground'
-                      }`}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {uploadTypes.map((type) => {
+                  const Icon = type.icon;
+                  
+                  return (
+                    <Card 
+                      key={type.id}
+                      onClick={() => handleTypeSelect(type.id)}
+                      className="relative cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50 bg-muted/30"
                     >
-                      {type.badge}
-                    </Badge>
-                  )}
-                  <CardContent className="pt-8 pb-6 flex flex-col items-center text-center">
-                    <div className={`p-4 rounded-2xl ${type.iconBg} mb-4`}>
-                      <Icon className={`h-8 w-8 ${type.iconColor}`} />
-                    </div>
-                    <h3 className="font-semibold text-foreground mb-1">{type.name}</h3>
-                    <p className="text-sm text-muted-foreground">{type.description}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-
-          {/* Format Requirements Panel */}
-          {selectedType && formatRequirements[selectedType] && (
-            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Format Requirements</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Required Columns */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                      <ClipboardList className="h-4 w-4 text-primary" />
-                      <span>Required Columns</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {formatRequirements[selectedType].required.map((col, idx) => (
-                        <Badge key={idx} variant="outline" className="bg-background text-xs font-mono">
-                          {col}
+                      {type.badge && (
+                        <Badge 
+                          variant={type.badgeVariant || 'default'}
+                          className={`absolute top-3 right-3 text-[10px] px-2 py-0.5 ${
+                            type.badge === 'SMART' 
+                              ? 'bg-emerald-500 text-white hover:bg-emerald-500' 
+                              : 'bg-primary text-primary-foreground'
+                          }`}
+                        >
+                          {type.badge}
                         </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Optional Columns */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span>Optional Columns</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {formatRequirements[selectedType].optional.map((col, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs font-mono">
-                          {col}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Format Rules */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <CheckSquare className="h-4 w-4 text-emerald-500" />
-                    <span>Format Rules</span>
-                  </div>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                    {formatRequirements[selectedType].rules.map((rule, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <span className="text-emerald-500 mt-0.5">•</span>
-                        <span>{rule}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Tip */}
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                  <Lightbulb className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    <span className="font-medium">Tip:</span> {formatRequirements[selectedType].tip}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                      )}
+                      <CardContent className="pt-8 pb-6 flex flex-col items-center text-center">
+                        <div className={`p-4 rounded-2xl ${type.iconBg} mb-4`}>
+                          <Icon className={`h-8 w-8 ${type.iconColor}`} />
+                        </div>
+                        <h3 className="font-semibold text-foreground mb-1">{type.name}</h3>
+                        <p className="text-sm text-muted-foreground">{type.description}</p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
           )}
 
-          {/* Upload Zone - Shows after type selection */}
-          {selectedType && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="text-base">
-                  Upload {uploadTypes.find(t => t.id === selectedType)?.name} File
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`
-                    border-2 border-dashed rounded-xl p-12 text-center transition-colors
-                    ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
-                  `}
-                >
-                  <div className="flex flex-col items-center gap-4">
-                    <div className={`p-4 rounded-full ${isDragging ? 'bg-primary/10' : 'bg-muted'}`}>
-                      <Upload className={`h-8 w-8 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
-                    </div>
-                    <div>
-                      <p className="text-lg font-medium">
-                        {isDragging ? 'Drop your file here' : 'Drag and drop your file here'}
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        or click to browse. Supports CSV, XLS, XLSX (max 20MB)
-                      </p>
-                    </div>
-                    <Button variant="outline" onClick={simulateUpload}>
-                      <FileSpreadsheet className="h-4 w-4 mr-2" />
-                      Browse Files
-                    </Button>
-                  </div>
+          {/* Upload View - Shows after type selection */}
+          {selectedType && formatRequirements[selectedType] && (
+            <>
+              {/* Header with Back Button */}
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    Upload {uploadTypes.find(t => t.id === selectedType)?.name}
+                  </h1>
+                  <p className="text-muted-foreground">Upload your Excel file for processing</p>
                 </div>
+                <Button 
+                  onClick={() => {
+                    setSelectedType(null);
+                    setUploadProgress(null);
+                  }}
+                  className="shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Selection
+                </Button>
+              </div>
 
-                {/* Upload Progress */}
-                {uploadProgress !== null && (
-                  <div className="mt-6 space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">Uploading file...</span>
-                      <span className="text-muted-foreground">{uploadProgress}%</span>
+              {/* Two Column Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6">
+                {/* Left: Upload Zone */}
+                <Card>
+                  <CardContent className="p-6">
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className={`
+                        border-2 border-dashed rounded-xl p-16 text-center transition-colors min-h-[300px] flex items-center justify-center
+                        ${isDragging ? 'border-primary bg-primary/5' : 'border-primary/30 hover:border-primary/50'}
+                      `}
+                    >
+                      <div className="flex flex-col items-center gap-5">
+                        <Upload className={`h-12 w-12 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+                        <Button onClick={simulateUpload} size="lg" className="px-8">
+                          Upload File
+                        </Button>
+                        <div className="space-y-1 text-center">
+                          <p className="text-sm text-muted-foreground">or drag and drop</p>
+                          <p className="text-xs text-muted-foreground">XLS or XLSX up to 50MB</p>
+                        </div>
+                      </div>
                     </div>
-                    <Progress value={uploadProgress} className="h-2" />
-                    {uploadProgress === 100 && (
-                      <div className="flex items-center gap-2 text-green-600">
-                        <CheckCircle className="h-4 w-4" />
-                        <span className="text-sm font-medium">Upload complete! Processing data...</span>
+
+                    {/* Upload Progress */}
+                    {uploadProgress !== null && (
+                      <div className="mt-6 space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium">Uploading file...</span>
+                          <span className="text-muted-foreground">{uploadProgress}%</span>
+                        </div>
+                        <Progress value={uploadProgress} className="h-2" />
+                        {uploadProgress === 100 && (
+                          <div className="flex items-center gap-2 text-emerald-600">
+                            <CheckCircle className="h-4 w-4" />
+                            <span className="text-sm font-medium">Upload complete! Processing data...</span>
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+                  </CardContent>
+                </Card>
 
-          {/* Instructions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                Import Guidelines
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Ensure your file follows the template format for the selected import type</li>
-                <li>• Date format should be DD/MM/YYYY or YYYY-MM-DD</li>
-                <li>• Time format should be HH:MM (24-hour format)</li>
-                <li>• EP Numbers must match existing employee records</li>
-                <li>• Duplicate records will be skipped or updated based on settings</li>
-                <li>• Maximum file size is 20MB</li>
-              </ul>
-            </CardContent>
-          </Card>
+                {/* Right: Format Requirements Sidebar */}
+                <Card className="bg-primary/10 border-primary/20">
+                  <CardContent className="p-5 space-y-5">
+                    {/* Header */}
+                    <div className="flex items-center gap-2">
+                      <Info className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold text-foreground">Format Requirements</h3>
+                    </div>
+
+                    {/* Required Columns */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <ClipboardList className="h-4 w-4 text-amber-600" />
+                        <span>Required Columns</span>
+                      </div>
+                      <p className="text-sm text-foreground/80 font-mono leading-relaxed">
+                        {formatRequirements[selectedType].required.join(', ')}
+                      </p>
+                    </div>
+
+                    {/* Optional Columns */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <FileText className="h-4 w-4 text-orange-500" />
+                        <span>Optional Columns</span>
+                      </div>
+                      <p className="text-sm text-foreground/80 font-mono leading-relaxed">
+                        {formatRequirements[selectedType].optional.join(', ')}
+                      </p>
+                    </div>
+
+                    {/* Format Rules */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                        <CheckSquare className="h-4 w-4 text-emerald-600" />
+                        <span>Format Rules</span>
+                      </div>
+                      <ul className="space-y-1.5 text-sm text-foreground/80">
+                        {formatRequirements[selectedType].rules.map((rule, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-foreground/60">•</span>
+                            <span>{rule}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Tip */}
+                    <div className="flex items-start gap-2 pt-2 border-t border-primary/20">
+                      <Lightbulb className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                      <p className="text-sm text-foreground/80">
+                        <span className="font-medium text-foreground">Tip:</span> {formatRequirements[selectedType].tip}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="history">
