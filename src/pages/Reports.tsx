@@ -901,15 +901,15 @@ export default function Reports() {
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="pb-3">
-                          {/* Search Input */}
-                          <div className="mb-3">
+                          {/* Search Input with Auto-Select */}
+                          <div className="mb-3 space-y-2">
                             <Input
                               placeholder={`Search ${col.label.toLowerCase()}...`}
                               className="h-9 text-sm"
                               onChange={(e) => {
-                                // Store search term in a data attribute for filtering
                                 const searchTerm = e.target.value.toLowerCase();
-                                const container = e.target.closest('.filter-chips-container');
+                                // Filter visibility
+                                const container = e.target.closest('.accordion-content-wrapper');
                                 if (container) {
                                   container.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
                                     const value = chip.getAttribute('data-filter-value')?.toLowerCase() || '';
@@ -917,7 +917,32 @@ export default function Reports() {
                                   });
                                 }
                               }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
+                                  if (searchTerm) {
+                                    // Auto-select all matching values
+                                    const matchingValues = allVals.filter(v => 
+                                      v.toLowerCase().includes(searchTerm)
+                                    );
+                                    if (matchingValues.length > 0) {
+                                      const newSelected = new Set(filters[col.key]?.selectedValues || []);
+                                      matchingValues.forEach(v => newSelected.add(v));
+                                      updateFilter(col.key, { selectedValues: newSelected });
+                                      (e.target as HTMLInputElement).value = '';
+                                      // Reset visibility
+                                      const container = (e.target as HTMLElement).closest('.accordion-content-wrapper');
+                                      if (container) {
+                                        container.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
+                                          (chip as HTMLElement).style.display = '';
+                                        });
+                                      }
+                                    }
+                                  }
+                                }
+                              }}
                             />
+                            <p className="text-[10px] text-muted-foreground">Press Enter to auto-select matching options</p>
                           </div>
 
                           {/* Quick Actions */}
@@ -945,7 +970,7 @@ export default function Reports() {
                           </div>
                           
                           {/* Filter Chips */}
-                          <div className="filter-chips-container flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                          <div className="accordion-content-wrapper flex flex-wrap gap-2 max-h-40 overflow-y-auto">
                             {allVals.map((value) => {
                               const isSelected = filters[col.key]?.selectedValues.has(value);
                               return (
