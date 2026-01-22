@@ -472,10 +472,20 @@ export default function Reports() {
       const timePair2 = formatTimePair(punches.punch3, punches.punch4);
       const timePair3 = formatTimePair(punches.punch5, punches.punch6);
 
+      // Format date as DD-MM-YYYY
+      const formatDate = (dateStr: string) => {
+        if (!dateStr) return '-';
+        const parts = dateStr.split('-'); // Assuming YYYY-MM-DD format
+        if (parts.length === 3) {
+          return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return dateStr;
+      };
+
       return {
         epNumber: record.epNumber,
         employeeName: employee?.name || '-',
-        date: record.date,
+        date: formatDate(record.date),
         shift,
         timePair1,
         timePair2,
