@@ -682,6 +682,12 @@ export default function Reports() {
               {reportTabs.find(t => t.id === activeTab)?.label}
             </span>
           )}
+          {hasActiveFilters && (
+            <Button size="sm" variant="outline" onClick={clearAllFilters} className="gap-1.5 h-7 text-xs">
+              <FilterX className="h-3 w-3" />
+              Clear All
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Toggle Header Button */}
@@ -689,7 +695,7 @@ export default function Reports() {
             size="sm" 
             variant={isHeaderHidden ? "default" : "outline"}
             onClick={() => setIsHeaderHidden(!isHeaderHidden)} 
-            className="gap-1.5 h-7 text-xs"
+            className="gap-1.5 h-8 text-xs"
             title={isHeaderHidden ? "Show Header & Tabs" : "Hide Header & Tabs"}
           >
             {isHeaderHidden ? (
@@ -720,12 +726,6 @@ export default function Reports() {
             >
               <Trash2 className="h-3.5 w-3.5" />
               Delete All Reports
-            </Button>
-          )}
-          {hasActiveFilters && (
-            <Button size="sm" variant="outline" onClick={clearAllFilters} className="gap-1.5 h-7 text-xs">
-              <FilterX className="h-3 w-3" />
-              Clear All
             </Button>
           )}
         </div>
