@@ -355,15 +355,23 @@ export default function Reports() {
     return attendanceRecords.map((record, index) => {
       const employee = employees.find(e => e.epNumber === record.epNumber);
       
+      // Shift codes: A, B, C, D, N (Night)
+      const shiftCodes = ['A', 'B', 'C', 'D', 'N'];
+      const shift = shiftCodes[index % shiftCodes.length];
+      
+      // Status values: P (Present), A (Absent), .05, -1, PH (Public Holiday), L (Leave)
+      const statusValues = ['P', 'P', 'P', 'A', '.05', '-1', 'PH', 'L', 'P', 'P'];
+      const status = statusValues[index % statusValues.length];
+      
       // Generate realistic multiple punch data
       const generatePunches = () => {
-        if (!record.punchIn || !record.punchOut) {
+        if (!record.punchIn || !record.punchOut || status === 'A' || status === 'PH' || status === 'L') {
           return { punch1: '', punch2: '', punch3: '', punch4: '', punch5: '', punch6: '' };
         }
         
         // Simulate different punch patterns based on index
         const pattern = index % 5;
-        const isNightShift = parseInt(record.punchOut.split(':')[0]) < 6;
+        const isNightShift = shift === 'N';
         const nightSuffix = isNightShift ? ' (N)' : '';
         
         switch (pattern) {
@@ -432,20 +440,40 @@ export default function Reports() {
         }
       });
       
-      const hrs = totalMins > 0 ? (totalMins / 60).toFixed(1) : '-';
-      const overstay = hrs !== '-' && parseFloat(hrs) > 8 ? (parseFloat(hrs) - 8).toFixed(1) : '0.0';
+      // Format HRS as HH:MM
+      const hrsHH = Math.floor(totalMins / 60);
+      const hrsMM = totalMins % 60;
+      const hrs = totalMins > 0 ? `${hrsHH.toString().padStart(2, '0')}:${hrsMM.toString().padStart(2, '0')}` : '-';
+      
+      // Calculate overstay (anything over 8 hours = 480 mins) in HH:MM
+      const overstayMins = totalMins > 480 ? totalMins - 480 : 0;
+      const overstayHH = Math.floor(overstayMins / 60);
+      const overstayMM = overstayMins % 60;
+      const overstay = `${overstayHH.toString().padStart(2, '0')}:${overstayMM.toString().padStart(2, '0')}`;
+      
+      // OT in HH:MM format
+      const otMins = (record.overtime || 0) * 60;
+      const otHH = Math.floor(otMins / 60);
+      const otMM = otMins % 60;
+      const ot = `${otHH.toString().padStart(2, '0')}:${otMM.toString().padStart(2, '0')}`;
+      
+      // OT Days in HH:MM format (mandays * 8 hours)
+      const otDaysMins = Math.round((record.mandays || 0) * 480);
+      const otDaysHH = Math.floor(otDaysMins / 60);
+      const otDaysMM = otDaysMins % 60;
+      const otDays = `${otDaysHH.toString().padStart(2, '0')}:${otDaysMM.toString().padStart(2, '0')}`;
       
       return {
         epNumber: record.epNumber,
         employeeName: employee?.name || '-',
         date: record.date,
-        shift: 'General',
+        shift,
         ...punches,
         hrs,
         overstay,
-        status: record.status,
-        ot: record.overtime?.toString() || '0',
-        otDays: record.mandays?.toFixed(1) || '0.0',
+        status,
+        ot,
+        otDays,
         actions: 'actions',
       };
     });
