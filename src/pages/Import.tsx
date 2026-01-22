@@ -1,17 +1,10 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, AlertTriangle, Download, Clock, File } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, AlertTriangle, BarChart3, Timer, Calendar, Edit, Search } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -21,6 +14,69 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+const uploadTypes = [
+  { 
+    id: 'punchrecord', 
+    name: 'Punchrecord', 
+    description: 'Upload punch time records',
+    icon: Timer,
+    badge: 'MOST COMMON',
+    badgeVariant: 'default' as const,
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-600'
+  },
+  { 
+    id: 'arc-summary', 
+    name: 'ARC Summary', 
+    description: 'Upload attendance summary reports',
+    icon: BarChart3,
+    badge: null,
+    badgeVariant: null,
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600'
+  },
+  { 
+    id: 'overtime', 
+    name: 'Overtime', 
+    description: 'Upload overtime records',
+    icon: Clock,
+    badge: null,
+    badgeVariant: null,
+    iconBg: 'bg-rose-50',
+    iconColor: 'text-rose-500'
+  },
+  { 
+    id: 'partial-day', 
+    name: 'Partial Day', 
+    description: 'Upload partial day attendance',
+    icon: Calendar,
+    badge: null,
+    badgeVariant: null,
+    iconBg: 'bg-sky-50',
+    iconColor: 'text-sky-500'
+  },
+  { 
+    id: 'regularization', 
+    name: 'Regularization', 
+    description: 'Upload attendance regularization requests',
+    icon: Edit,
+    badge: null,
+    badgeVariant: null,
+    iconBg: 'bg-orange-50',
+    iconColor: 'text-orange-500'
+  },
+  { 
+    id: 'auto-detect', 
+    name: 'Auto-Detect', 
+    description: 'Let the system detect file type automatically',
+    icon: Search,
+    badge: 'SMART',
+    badgeVariant: 'secondary' as const,
+    iconBg: 'bg-violet-50',
+    iconColor: 'text-violet-500'
+  },
+];
 
 const uploadHistory = [
   { id: 1, filename: 'attendance_jan_2024.xlsx', type: 'Attendance', rows: 1250, success: 1245, errors: 5, date: '2024-01-15 09:30', status: 'completed' },
@@ -41,7 +97,7 @@ const templates = [
 export default function Import() {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [selectedType, setSelectedType] = useState('attendance');
+  const [selectedType, setSelectedType] = useState<string | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -56,7 +112,6 @@ export default function Import() {
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    // Simulate upload
     simulateUpload();
   }, []);
 
@@ -89,13 +144,12 @@ export default function Import() {
     );
   };
 
+  const handleTypeSelect = (typeId: string) => {
+    setSelectedType(typeId);
+  };
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Import Data"
-        description="Upload Excel/CSV files to import attendance and employee data"
-      />
-
       <Tabs defaultValue="upload" className="space-y-6">
         <TabsList>
           <TabsTrigger value="upload">Upload Files</TabsTrigger>
@@ -104,76 +158,110 @@ export default function Import() {
         </TabsList>
 
         <TabsContent value="upload" className="space-y-6">
-          {/* File Type Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Select Import Type</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger className="max-w-md">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="attendance">Attendance Records</SelectItem>
-                  <SelectItem value="employees">Employee Master</SelectItem>
-                  <SelectItem value="punch">Punch Data</SelectItem>
-                  <SelectItem value="overtime">Overtime Requests</SelectItem>
-                  <SelectItem value="contractors">Contractors</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
+          {/* Type Selection Header */}
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight">Excel File Upload</h1>
+            <p className="text-muted-foreground">Select the type of attendance data you want to upload</p>
+          </div>
 
-          {/* Upload Zone */}
-          <Card>
-            <CardContent className="pt-6">
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`
-                  border-2 border-dashed rounded-xl p-12 text-center transition-colors
-                  ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
-                `}
-              >
-                <div className="flex flex-col items-center gap-4">
-                  <div className={`p-4 rounded-full ${isDragging ? 'bg-primary/10' : 'bg-muted'}`}>
-                    <Upload className={`h-8 w-8 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
-                  </div>
-                  <div>
-                    <p className="text-lg font-medium">
-                      {isDragging ? 'Drop your file here' : 'Drag and drop your file here'}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      or click to browse. Supports CSV, XLS, XLSX (max 20MB)
-                    </p>
-                  </div>
-                  <Button variant="outline" onClick={simulateUpload}>
-                    <FileSpreadsheet className="h-4 w-4 mr-2" />
-                    Browse Files
-                  </Button>
-                </div>
-              </div>
-
-              {/* Upload Progress */}
-              {uploadProgress !== null && (
-                <div className="mt-6 space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">Uploading attendance_data.xlsx</span>
-                    <span className="text-muted-foreground">{uploadProgress}%</span>
-                  </div>
-                  <Progress value={uploadProgress} className="h-2" />
-                  {uploadProgress === 100 && (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm font-medium">Upload complete! Processing data...</span>
-                    </div>
+          {/* Upload Type Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {uploadTypes.map((type) => {
+              const Icon = type.icon;
+              const isSelected = selectedType === type.id;
+              
+              return (
+                <Card 
+                  key={type.id}
+                  onClick={() => handleTypeSelect(type.id)}
+                  className={`
+                    relative cursor-pointer transition-all duration-200 hover:shadow-md
+                    ${isSelected 
+                      ? 'ring-2 ring-primary border-primary bg-primary/5' 
+                      : 'hover:border-primary/50 bg-muted/30'
+                    }
+                  `}
+                >
+                  {type.badge && (
+                    <Badge 
+                      variant={type.badgeVariant || 'default'}
+                      className={`absolute top-3 right-3 text-[10px] px-2 py-0.5 ${
+                        type.badge === 'SMART' 
+                          ? 'bg-emerald-500 text-white hover:bg-emerald-500' 
+                          : 'bg-primary text-primary-foreground'
+                      }`}
+                    >
+                      {type.badge}
+                    </Badge>
                   )}
+                  <CardContent className="pt-8 pb-6 flex flex-col items-center text-center">
+                    <div className={`p-4 rounded-2xl ${type.iconBg} mb-4`}>
+                      <Icon className={`h-8 w-8 ${type.iconColor}`} />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1">{type.name}</h3>
+                    <p className="text-sm text-muted-foreground">{type.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Upload Zone - Shows after type selection */}
+          {selectedType && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle className="text-base">
+                  Upload {uploadTypes.find(t => t.id === selectedType)?.name} File
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`
+                    border-2 border-dashed rounded-xl p-12 text-center transition-colors
+                    ${isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
+                  `}
+                >
+                  <div className="flex flex-col items-center gap-4">
+                    <div className={`p-4 rounded-full ${isDragging ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <Upload className={`h-8 w-8 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+                    </div>
+                    <div>
+                      <p className="text-lg font-medium">
+                        {isDragging ? 'Drop your file here' : 'Drag and drop your file here'}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        or click to browse. Supports CSV, XLS, XLSX (max 20MB)
+                      </p>
+                    </div>
+                    <Button variant="outline" onClick={simulateUpload}>
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                      Browse Files
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+
+                {/* Upload Progress */}
+                {uploadProgress !== null && (
+                  <div className="mt-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">Uploading file...</span>
+                      <span className="text-muted-foreground">{uploadProgress}%</span>
+                    </div>
+                    <Progress value={uploadProgress} className="h-2" />
+                    {uploadProgress === 100 && (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="text-sm font-medium">Upload complete! Processing data...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Instructions */}
           <Card>
