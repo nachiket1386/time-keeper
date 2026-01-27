@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, X, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { attendanceRecords, employees } from '@/data/mockData';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 interface AttendanceCalendarProps {
   companyId?: string;
@@ -14,15 +15,7 @@ interface AttendanceCalendarProps {
 
 type AttendanceStatus = 'Present' | 'Absent' | 'Partial Day' | 'On Leave' | 'Holiday';
 
-const statusConfig: Record<AttendanceStatus, { label: string; shortLabel: string; bg: string; text: string }> = {
-  'Present': { label: 'Present', shortLabel: 'P', bg: 'bg-emerald-500', text: 'text-white' },
-  'Absent': { label: 'Absent', shortLabel: 'A', bg: 'bg-red-500', text: 'text-white' },
-  'Partial Day': { label: 'Half', shortLabel: '½', bg: 'bg-amber-400', text: 'text-amber-900' },
-  'On Leave': { label: 'Leave', shortLabel: 'L', bg: 'bg-violet-500', text: 'text-white' },
-  'Holiday': { label: 'Holiday', shortLabel: 'H', bg: 'bg-blue-400', text: 'text-white' },
-};
-
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: AttendanceCalendarProps) {
@@ -52,19 +45,25 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
   }, [filteredEmployees, search]);
 
   const selectedEmployee = useMemo(() => {
-    return filteredEmployees.find(e => e.epNumber === selectedEP) || filteredEmployees[0];
-  }, [filteredEmployees, selectedEP]);
+    if (selectedEP) {
+      return filteredEmployees.find(e => e.epNumber === selectedEP);
+    }
+    if (search && searchedEmployees.length > 0) {
+      return searchedEmployees[0];
+    }
+    return filteredEmployees[0];
+  }, [filteredEmployees, selectedEP, search, searchedEmployees]);
 
   const calendarData = useMemo(() => {
-    if (!selectedEmployee) return { days: [], firstDayOffset: 0, stats: { present: 0, absent: 0, partial: 0, leave: 0, holiday: 0, totalMandays: 0 } };
+    if (!selectedEmployee) return { days: [], firstDayOffset: 0, stats: { present: 0, absent: 0, exceptions: 0, total: 0 } };
     
     const year = selectedYear;
     const month = selectedMonth;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
     
-    const days: { day: number; status: AttendanceStatus | null; mandays: number }[] = [];
-    const stats = { present: 0, absent: 0, partial: 0, leave: 0, holiday: 0, totalMandays: 0 };
+    const days: { day: number; status: AttendanceStatus | null; isWeekend: boolean }[] = [];
+    const stats = { present: 0, absent: 0, exceptions: 0, total: 0 };
     
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -72,15 +71,17 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
         r => r.epNumber === selectedEmployee.epNumber && r.date === dateStr
       );
       
+      const dayOfWeek = (firstDay + day - 1) % 7;
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      
       const status = record ? (record.status as AttendanceStatus) : null;
       if (status === 'Present') stats.present++;
       else if (status === 'Absent') stats.absent++;
-      else if (status === 'Partial Day') stats.partial++;
-      else if (status === 'On Leave') stats.leave++;
-      else if (status === 'Holiday') stats.holiday++;
-      stats.totalMandays += record?.mandays || 0;
+      else if (status === 'Partial Day' || status === 'On Leave') stats.exceptions++;
       
-      days.push({ day, status, mandays: record?.mandays || 0 });
+      stats.total = stats.present + stats.absent + stats.exceptions;
+      
+      days.push({ day, status, isWeekend });
     }
     
     return { days, firstDayOffset: firstDay, stats };
@@ -109,49 +110,95 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
     }
   };
 
+  const handleClearSearch = () => {
+    setSearch('');
+    setSelectedEP('');
+  };
+
+  const handleSearch = () => {
+    if (searchedEmployees.length > 0) {
+      setSelectedEP(searchedEmployees[0].epNumber);
+    }
+  };
+
+  const getStatusColor = (status: AttendanceStatus | null, isWeekend: boolean) => {
+    if (!status) {
+      return isWeekend ? 'text-muted-foreground' : 'text-foreground';
+    }
+    switch (status) {
+      case 'Present':
+        return 'bg-emerald-500 text-white';
+      case 'Absent':
+        return 'bg-red-500 text-white';
+      case 'Partial Day':
+      case 'On Leave':
+        return 'bg-amber-500 text-white';
+      case 'Holiday':
+        return 'bg-blue-500 text-white';
+      default:
+        return isWeekend ? 'text-muted-foreground' : 'text-foreground';
+    }
+  };
+
   return (
-    <Card className="overflow-hidden w-fit">
-      <CardHeader className="py-2 px-3 bg-muted/30">
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle className="text-sm font-medium flex items-center gap-1.5">
-            <CalendarIcon className="h-4 w-4 text-primary" />
-            Calendar
-          </CardTitle>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search employee..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-8 text-sm w-40"
-            />
+    <Card className="overflow-hidden w-full max-w-sm">
+      {/* Header */}
+      <div className="bg-primary/5 border-b px-4 py-3">
+        <div className="flex items-center gap-2">
+          <CalendarIcon className="h-5 w-5 text-primary" />
+          <div>
+            <h3 className="font-semibold text-foreground">Attendance Calendar</h3>
+            <p className="text-xs text-muted-foreground">
+              Dashboard: {months[selectedMonth]} {selectedYear}
+            </p>
           </div>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent className="p-3">
-        {/* Employee Info + Month Navigation */}
-        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-border/40">
-          {selectedEmployee && (
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                <span className="text-primary font-semibold text-sm">
-                  {selectedEmployee.name.charAt(0)}
-                </span>
-              </div>
-              <div className="min-w-0">
-                <p className="font-medium text-sm truncate">{selectedEmployee.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{selectedEmployee.trade}</p>
-              </div>
-            </div>
-          )}
-          
-          <div className="flex items-center gap-0.5">
-            <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-6 w-6">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+      <CardContent className="p-4 space-y-4">
+        {/* Search Input */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Input
+              placeholder="PP5000039084"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pr-8 h-10 font-mono text-sm border-2"
+            />
+            {search && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleClearSearch}
+            className="h-10 w-10 shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            onClick={handleSearch}
+            className="h-10 w-10 shrink-0 bg-primary hover:bg-primary/90"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Month Navigation */}
+        <div className="flex items-center justify-between bg-muted/30 rounded-lg px-2 py-1">
+          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-2">
             <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
-              <SelectTrigger className="w-14 h-6 text-xs px-2 border-0 bg-transparent">
+              <SelectTrigger className="w-auto h-8 text-sm px-3 border-0 bg-transparent font-medium">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -160,8 +207,9 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
                 ))}
               </SelectContent>
             </Select>
+            <span className="text-sm font-medium">,</span>
             <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
-              <SelectTrigger className="w-16 h-6 text-xs px-2 border-0 bg-transparent">
+              <SelectTrigger className="w-auto h-8 text-sm px-2 border-0 bg-transparent font-medium">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -170,20 +218,54 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-6 w-6">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          </div>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <CalendarIcon className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Employee Name */}
+        {selectedEmployee && (
+          <div className="flex items-center gap-2 py-2 border-b">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <span className="font-semibold text-sm uppercase tracking-wide">
+              {selectedEmployee.name}
+            </span>
+          </div>
+        )}
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-4 gap-2 text-center">
+          <div>
+            <p className="text-xl font-bold text-emerald-600">{calendarData.stats.present}</p>
+            <p className="text-xs text-muted-foreground">Present</p>
+          </div>
+          <div>
+            <p className="text-xl font-bold text-red-500">{calendarData.stats.absent}</p>
+            <p className="text-xs text-muted-foreground">Absent</p>
+          </div>
+          <div>
+            <p className="text-xl font-bold text-amber-500">{calendarData.stats.exceptions}</p>
+            <p className="text-xs text-muted-foreground">Exceptions</p>
+          </div>
+          <div>
+            <p className="text-xl font-bold text-muted-foreground">{calendarData.stats.total}</p>
+            <p className="text-xs text-muted-foreground">Total</p>
           </div>
         </div>
 
         {/* Calendar Grid */}
-        <div>
+        <div className="space-y-2">
+          {/* Weekday Headers */}
           <div className="grid grid-cols-7 gap-1">
             {weekDays.map((day, idx) => (
               <div 
                 key={idx} 
                 className={cn(
-                  "text-center text-xs font-semibold py-1",
+                  "text-center text-xs font-semibold py-2",
                   idx === 0 || idx === 6 ? "text-muted-foreground" : "text-foreground"
                 )}
               >
@@ -191,62 +273,36 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1 mt-1">
+          
+          {/* Days Grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {/* Empty cells for offset */}
             {Array.from({ length: calendarData.firstDayOffset }).map((_, idx) => (
               <div key={`empty-${idx}`} className="aspect-square" />
             ))}
-            {calendarData.days.map(({ day, status, mandays }) => {
-              const config = status ? statusConfig[status] : null;
-              const isWeekend = (calendarData.firstDayOffset + day - 1) % 7 === 0 || 
-                                (calendarData.firstDayOffset + day - 1) % 7 === 6;
+            
+            {/* Day cells */}
+            {calendarData.days.map(({ day, status, isWeekend }) => {
+              const hasStatus = status !== null;
+              const colorClass = getStatusColor(status, isWeekend);
+              
               return (
                 <div
                   key={day}
-                  className={cn(
-                    "aspect-square rounded flex items-center justify-center text-xs font-semibold cursor-pointer transition-transform hover:scale-105",
-                    config 
-                      ? cn(config.bg, config.text, "shadow-sm") 
-                      : cn("bg-muted/40 text-muted-foreground border border-border/50", isWeekend && "bg-muted/60")
-                  )}
-                  title={status ? `Day ${day}: ${status} - ${mandays} mandays` : `Day ${day}: No data`}
+                  className="aspect-square flex items-center justify-center"
                 >
-                  {config ? config.shortLabel : day}
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-transform hover:scale-110 cursor-pointer",
+                      hasStatus ? colorClass : (isWeekend ? "text-muted-foreground" : "text-foreground hover:bg-muted")
+                    )}
+                    title={status ? `Day ${day}: ${status}` : `Day ${day}`}
+                  >
+                    {day}
+                  </div>
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Legend + Stats */}
-        <div className="mt-3 pt-2 border-t border-border/30 space-y-2">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {Object.entries(statusConfig).map(([key, config]) => (
-              <div key={key} className="flex items-center gap-1">
-                <div className={cn(
-                  "w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold",
-                  config.bg, config.text
-                )}>
-                  {config.shortLabel}
-                </div>
-                <span className="text-xs text-muted-foreground">{config.label}</span>
-              </div>
-            ))}
-          </div>
-          
-          {/* Monthly Stats */}
-          <div className="grid grid-cols-3 gap-2 bg-muted/30 rounded-lg p-2">
-            <div className="text-center">
-              <p className="text-base font-bold text-emerald-600">{calendarData.stats.present}</p>
-              <p className="text-[10px] text-muted-foreground">Present</p>
-            </div>
-            <div className="text-center">
-              <p className="text-base font-bold text-red-500">{calendarData.stats.absent}</p>
-              <p className="text-[10px] text-muted-foreground">Absent</p>
-            </div>
-            <div className="text-center">
-              <p className="text-base font-bold text-primary">{calendarData.stats.totalMandays.toFixed(1)}</p>
-              <p className="text-[10px] text-muted-foreground">Mandays</p>
-            </div>
           </div>
         </div>
       </CardContent>
