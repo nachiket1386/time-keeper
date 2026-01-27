@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import loginHero from '@/assets/login-hero.jpg';
+import loginMobileBg from '@/assets/login-mobile-bg.jpg';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -93,8 +94,17 @@ export default function Login() {
       </div>
       
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-background">
-        <div className="w-full max-w-md">
+      <div 
+        className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-background relative"
+        style={{
+          backgroundImage: `url(${loginMobileBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        {/* Light overlay for mobile/tablet */}
+        <div className="absolute inset-0 bg-background/80 lg:bg-background lg:relative lg:inset-auto" />
+        <div className="w-full max-w-md relative z-10">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
