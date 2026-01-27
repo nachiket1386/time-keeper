@@ -50,8 +50,13 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-muted/30">
       {/* Top Banner for Mobile/Tablet */}
-      <div className="lg:hidden relative h-44 sm:h-52 flex-shrink-0 bg-primary">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
+      <div className="lg:hidden relative h-44 sm:h-52 flex-shrink-0 overflow-hidden">
+        <img 
+          src={loginHero} 
+          alt="Office building" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/85 via-primary/75 to-primary/90" />
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-primary-foreground px-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="h-11 w-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
