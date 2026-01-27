@@ -48,25 +48,18 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-muted/30">
       {/* Top Banner for Mobile/Tablet */}
-      <div 
-        className="lg:hidden relative h-48 sm:h-56 flex-shrink-0"
-        style={{
-          backgroundImage: `url(${loginHero})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/70 to-primary/90" />
-        <div className="relative z-10 h-full flex flex-col items-center justify-center text-white px-6">
+      <div className="lg:hidden relative h-44 sm:h-52 flex-shrink-0 bg-primary">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80" />
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-primary-foreground px-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Clock className="h-7 w-7" />
+            <div className="h-11 w-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Clock className="h-6 w-6" />
             </div>
-            <span className="text-2xl font-bold">AttendanceMS</span>
+            <span className="text-xl font-bold">AttendanceMS</span>
           </div>
-          <p className="text-white/90 text-center text-sm sm:text-base">
+          <p className="text-primary-foreground/90 text-center text-sm">
             Streamline Your Workforce Management
           </p>
         </div>
@@ -116,9 +109,9 @@ export default function Login() {
       </div>
       
       {/* Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-background">
-        <div className="w-full max-w-sm sm:max-w-md">
-          <div className="bg-card rounded-2xl shadow-lg border p-6 sm:p-8">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12 bg-muted/30 lg:bg-background">
+        <div className="w-full max-w-sm sm:max-w-md -mt-8 lg:mt-0">
+          <div className="bg-card rounded-2xl shadow-xl border p-5 sm:p-8">
             <div className="text-center lg:text-left mb-6">
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2">
                 Welcome back
