@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { MainLayout } from "./components/layout/MainLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Attendance from "./pages/Attendance";
 import Reports from "./pages/Reports";
 import Import from "./pages/Import";
 import Users from "./pages/Users";
@@ -14,6 +15,8 @@ import Companies from "./pages/Companies";
 import Employees from "./pages/Employees";
 import Settings from "./pages/Settings";
 import AuditLogs from "./pages/AuditLogs";
+import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,7 +40,15 @@ const App = () => (
               }
             />
             <Route
-              path="/reports"
+              path="/attendance"
+              element={
+                <MainLayout>
+                  <Attendance />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/reports/*"
               element={
                 <MainLayout>
                   <Reports />
@@ -89,6 +100,22 @@ const App = () => (
               element={
                 <MainLayout>
                   <AuditLogs />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <MainLayout>
+                  <Notifications />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <MainLayout>
+                  <Profile />
                 </MainLayout>
               }
             />
