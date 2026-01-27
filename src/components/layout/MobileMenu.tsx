@@ -68,7 +68,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-6">
+      <DialogContent className="sm:max-w-md p-6 top-auto bottom-0 translate-y-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom rounded-t-3xl rounded-b-none">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Menu</DialogTitle>
         </DialogHeader>
