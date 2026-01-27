@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Bell, Check, CheckCheck, Clock, FileText, Users, AlertCircle, Trash2 } from 'lucide-react';
+import { Bell, Check, CheckCheck, Clock, FileText, Users, AlertCircle, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SwipeableCard } from '@/components/shared/SwipeableCard';
 import { cn } from '@/lib/utils';
+import { useIsMobileOrTablet } from '@/hooks/use-mobile';
 
 interface Notification {
   id: string;
@@ -67,6 +69,7 @@ const typeConfig = {
 export default function Notifications() {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const isMobile = useIsMobileOrTablet();
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -86,6 +89,37 @@ export default function Notifications() {
 
   const deleteNotification = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const NotificationContent = ({ notification }: { notification: Notification }) => {
+    const config = typeConfig[notification.type];
+    const Icon = config.icon;
+
+    return (
+      <CardContent className="p-4">
+        <div className="flex gap-4">
+          <div className={cn('p-3 rounded-2xl shrink-0', config.bg)}>
+            <Icon className={cn('h-5 w-5', config.color)} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="font-semibold truncate">{notification.title}</h3>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {notification.message}
+                </p>
+              </div>
+              {!notification.read && (
+                <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0 mt-1.5" />
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {notification.time}
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    );
   };
 
   return (
@@ -129,6 +163,13 @@ export default function Notifications() {
         </Button>
       </div>
 
+      {/* Swipe Hint (mobile only) */}
+      {isMobile && filteredNotifications.length > 0 && (
+        <p className="text-xs text-muted-foreground text-center">
+          ← Swipe left to delete • Swipe right to mark as read →
+        </p>
+      )}
+
       {/* Notifications List */}
       <div className="space-y-3">
         {filteredNotifications.length === 0 ? (
@@ -140,22 +181,58 @@ export default function Notifications() {
           </Card>
         ) : (
           filteredNotifications.map((notification) => {
-            const config = typeConfig[notification.type];
-            const Icon = config.icon;
+            // Mobile: Use swipeable cards
+            if (isMobile) {
+              return (
+                <SwipeableCard
+                  key={notification.id}
+                  leftActions={
+                    !notification.read
+                      ? [
+                          {
+                            icon: <Check className="h-5 w-5 text-white" />,
+                            label: 'Read',
+                            color: 'bg-emerald-500',
+                            onClick: () => markAsRead(notification.id),
+                          },
+                        ]
+                      : []
+                  }
+                  rightActions={[
+                    {
+                      icon: <Trash2 className="h-5 w-5 text-white" />,
+                      label: 'Delete',
+                      color: 'bg-destructive',
+                      onClick: () => deleteNotification(notification.id),
+                    },
+                  ]}
+                  className={cn(
+                    'border',
+                    !notification.read && 'border-l-4 border-l-primary'
+                  )}
+                >
+                  <NotificationContent notification={notification} />
+                </SwipeableCard>
+              );
+            }
 
+            // Desktop: Regular cards with hover actions
             return (
               <Card
                 key={notification.id}
                 className={cn(
-                  'transition-all hover:shadow-md cursor-pointer',
+                  'transition-all hover:shadow-md cursor-pointer group',
                   !notification.read && 'border-l-4 border-l-primary bg-primary/5'
                 )}
                 onClick={() => markAsRead(notification.id)}
               >
                 <CardContent className="p-4">
                   <div className="flex gap-4">
-                    <div className={cn('p-3 rounded-2xl shrink-0', config.bg)}>
-                      <Icon className={cn('h-5 w-5', config.color)} />
+                    <div className={cn('p-3 rounded-2xl shrink-0', typeConfig[notification.type].bg)}>
+                      {(() => {
+                        const Icon = typeConfig[notification.type].icon;
+                        return <Icon className={cn('h-5 w-5', typeConfig[notification.type].color)} />;
+                      })()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
@@ -172,7 +249,7 @@ export default function Notifications() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
                             onClick={(e) => {
                               e.stopPropagation();
                               deleteNotification(notification.id);
