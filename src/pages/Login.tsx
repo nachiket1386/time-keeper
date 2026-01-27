@@ -44,9 +44,7 @@ export default function Login() {
 
   const features = [
     'Real-time attendance tracking',
-    'Automated shift management',
-    'Comprehensive reporting',
-    'Multi-company support'
+    'Comprehensive reporting'
   ];
 
   return (
