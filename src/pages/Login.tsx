@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Eye, EyeOff, User, Lock } from 'lucide-react';
+import { Clock, Eye, EyeOff, User, Lock, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import loginBg from '@/assets/login-bg.jpg';
+import loginHero from '@/assets/login-hero.jpg';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -42,109 +42,170 @@ export default function Login() {
     }
   };
 
+  const features = [
+    'Real-time attendance tracking',
+    'Automated shift management',
+    'Comprehensive reporting',
+    'Multi-company support'
+  ];
+
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4 relative"
-      style={{
-        backgroundImage: `url(${loginBg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      {/* Overlay for better contrast */}
-      <div className="absolute inset-0 bg-background/30 backdrop-blur-[2px]" />
-      
-      {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="bg-card/95 backdrop-blur-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden">
-          {/* Header Section */}
-          <div className="bg-primary/10 px-8 py-8 text-center border-b border-border/30">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary shadow-lg">
-              <Shield className="h-8 w-8 text-primary-foreground" />
+    <div className="min-h-screen flex">
+      {/* Left Side - Hero Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative">
+        <img 
+          src={loginHero} 
+          alt="Office building" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-transparent" />
+        
+        <div className="relative z-10 flex flex-col justify-between p-12 text-white">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                <Clock className="h-6 w-6" />
+              </div>
+              <span className="text-xl font-bold">AttendanceMS</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Attendance Management</h1>
-            <p className="text-sm text-muted-foreground mt-1">Sign in to access your dashboard</p>
           </div>
           
-          {/* Form Section */}
-          <div className="px-8 py-8">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="username" className="text-sm font-medium">Username</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
-                    className="pl-10 h-11 bg-background/50 border-border/60 focus:border-primary"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    className="pl-10 pr-10 h-11 bg-background/50 border-border/60 focus:border-primary"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-                  </Button>
-                </div>
-              </div>
-              
-              {error && (
-                <div className="bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
-                  <p className="text-sm text-destructive text-center">{error}</p>
-                </div>
-              )}
-              
-              <Button type="submit" className="w-full h-11 text-base font-medium shadow-md" disabled={isLoading}>
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </Button>
-            </form>
+          <div className="max-w-md">
+            <h1 className="text-4xl font-bold mb-6 leading-tight">
+              Streamline Your Workforce Management
+            </h1>
+            <p className="text-white/80 text-lg mb-8">
+              The complete attendance solution for modern businesses. Track, manage, and optimize your team's productivity.
+            </p>
             
-            {/* Demo credentials hint */}
-            <div className="mt-6 p-4 bg-muted/50 rounded-xl border border-border/40">
-              <p className="font-semibold text-foreground text-sm mb-3">Demo Credentials</p>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-center py-1.5 px-2 bg-background/50 rounded-md">
-                  <span className="font-medium text-primary">Root</span>
-                  <span className="text-muted-foreground font-mono">root / root123</span>
+            <div className="space-y-3">
+              {features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-white/90" />
+                  <span className="text-white/90">{feature}</span>
                 </div>
-                <div className="flex justify-between items-center py-1.5 px-2 bg-background/50 rounded-md">
-                  <span className="font-medium text-primary">Admin</span>
-                  <span className="text-muted-foreground font-mono">admin / admin123</span>
-                </div>
-                <div className="flex justify-between items-center py-1.5 px-2 bg-background/50 rounded-md">
-                  <span className="font-medium text-primary">Supervisor</span>
-                  <span className="text-muted-foreground font-mono">supervisor / user123</span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
+          
+          <p className="text-white/60 text-sm">
+            © 2024 Attendance Management System
+          </p>
         </div>
-        
-        {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          © 2024 Attendance Management System
-        </p>
+      </div>
+      
+      {/* Right Side - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-background">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
+            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
+              <Clock className="h-7 w-7 text-primary-foreground" />
+            </div>
+            <span className="text-2xl font-bold text-foreground">AttendanceMS</span>
+          </div>
+          
+          <div className="text-center lg:text-left mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              Welcome back
+            </h2>
+            <p className="text-muted-foreground">
+              Enter your credentials to access your account
+            </p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-sm font-medium">
+                Username
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  className="pl-11 h-12 text-base"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="pl-11 pr-11 h-12 text-base"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/30 rounded-lg px-4 py-3">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full h-12 text-base font-semibold" 
+              disabled={isLoading}
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
+          
+          {/* Demo credentials */}
+          <div className="mt-8 p-5 bg-muted/50 rounded-xl border">
+            <p className="font-semibold text-foreground text-sm mb-4">
+              Demo Credentials
+            </p>
+            <div className="grid gap-2.5">
+              {[
+                { role: 'Root', credentials: 'root / root123' },
+                { role: 'Admin', credentials: 'admin / admin123' },
+                { role: 'Supervisor', credentials: 'supervisor / user123' }
+              ].map((item) => (
+                <div 
+                  key={item.role}
+                  className="flex items-center justify-between py-2 px-3 bg-background rounded-lg"
+                >
+                  <span className="font-medium text-sm text-primary">{item.role}</span>
+                  <code className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    {item.credentials}
+                  </code>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Mobile Footer */}
+          <p className="lg:hidden text-center text-xs text-muted-foreground mt-8">
+            © 2024 Attendance Management System
+          </p>
+        </div>
       </div>
     </div>
   );
