@@ -7,30 +7,33 @@ import {
   History,
   LogOut,
   Bell,
-  Clock,
+  ChevronRight,
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { SheetClose } from '@/components/ui/sheet';
 
-// Items that are shown in the bottom navbar (to exclude from More menu)
-const bottomNavItems = ['/dashboard', '/attendance', '/reports', '/import'];
-
-// Additional menu items NOT in bottom navbar
-const additionalMenuItems = [
-  { title: 'Settings', href: '/settings', icon: Settings, color: 'bg-slate-500' },
+const menuItems = [
+  { title: 'Settings', href: '/settings', icon: Settings },
+  { title: 'Notifications', href: '/notifications', icon: Bell, badge: 3 },
 ];
 
 const managementItems = [
-  { title: 'Users', href: '/users', icon: Users, color: 'bg-teal-500' },
-  { title: 'Companies', href: '/companies', icon: Building2, color: 'bg-red-500', rootOnly: true },
-  { title: 'Employees', href: '/employees', icon: UserCog, color: 'bg-emerald-500' },
+  { title: 'Users', href: '/users', icon: Users },
+  { title: 'Companies', href: '/companies', icon: Building2, rootOnly: true },
+  { title: 'Employees', href: '/employees', icon: UserCog },
+  { title: 'Audit Logs', href: '/audit-logs', icon: History, rootOnly: true },
 ];
 
-export function MobileMenu() {
+interface MobileMenuProps {
+  onClose?: () => void;
+}
+
+export function MobileMenu({ onClose }: MobileMenuProps) {
   const { user, switchRole, logout } = useAuth();
   const location = useLocation();
 
@@ -44,146 +47,111 @@ export function MobileMenu() {
 
   const isActive = (href: string) => location.pathname === href;
 
-  const MenuCard = ({ href, icon: Icon, title, color }: { href: string; icon: any; title: string; color: string }) => (
-    <Link
-      to={href}
-      className={cn(
-        'flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all duration-200 border-2',
-        isActive(href)
-          ? 'bg-primary text-primary-foreground border-primary shadow-lg scale-105'
-          : 'bg-card hover:bg-muted border-border hover:border-primary/50 hover:shadow-md'
-      )}
-    >
-      <div className={cn(
-        'p-3 rounded-xl',
-        isActive(href) ? 'bg-primary-foreground/20' : color
-      )}>
-        <Icon className={cn('h-6 w-6', isActive(href) ? 'text-primary-foreground' : 'text-white')} />
-      </div>
-      <span className={cn(
-        'text-xs font-medium text-center leading-tight',
-        isActive(href) ? 'text-primary-foreground' : 'text-foreground'
-      )}>{title}</span>
-    </Link>
+  const MenuItem = ({ href, icon: Icon, title, badge }: { href: string; icon: any; title: string; badge?: number }) => (
+    <SheetClose asChild>
+      <Link
+        to={href}
+        className={cn(
+          'flex items-center justify-between py-3.5 px-4 rounded-xl transition-colors',
+          isActive(href)
+            ? 'bg-primary text-primary-foreground'
+            : 'hover:bg-muted active:bg-muted'
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <Icon className="h-5 w-5" />
+          <span className="font-medium">{title}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {badge && (
+            <Badge variant="destructive" className="h-5 min-w-5 text-[10px] px-1.5">
+              {badge}
+            </Badge>
+          )}
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </Link>
+    </SheetClose>
   );
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-6">
-        {/* User Profile Section */}
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
-          <Avatar className="h-14 w-14 ring-2 ring-primary/20">
-            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+    <div className="flex flex-col h-full bg-background">
+      {/* User Profile Card */}
+      <div className="p-4 bg-primary/5">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12">
+            <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
               {userInitials}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <p className="font-semibold text-lg">{user.name}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="secondary" className="text-xs capitalize bg-primary/10 text-primary border-primary/20">
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-foreground truncate">{user.name}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <Badge variant="secondary" className="text-xs capitalize">
                 {user.role}
               </Badge>
               {user.company && (
-                <span className="text-xs text-muted-foreground">{user.company}</span>
+                <span className="text-xs text-muted-foreground truncate">{user.company}</span>
               )}
             </div>
           </div>
         </div>
 
         {/* Role Switch */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="flex gap-2 mt-4">
           {['root', 'admin', 'user1'].map((role) => (
             <button
               key={role}
               onClick={() => switchRole(role as 'root' | 'admin' | 'user1')}
               className={cn(
-                'flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition-all border-2',
+                'flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-colors',
                 user.role === role 
-                  ? 'bg-primary text-primary-foreground border-primary shadow-md' 
-                  : 'bg-card border-border hover:border-primary/50 hover:bg-muted'
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-card border border-border hover:bg-muted'
               )}
             >
-              {role === 'root' && <Users className="h-4 w-4" />}
-              {role === 'admin' && <Building2 className="h-4 w-4" />}
-              {role === 'user1' && <UserCog className="h-4 w-4" />}
-              <span className="capitalize">{role}</span>
+              {role.charAt(0).toUpperCase() + role.slice(1)}
             </button>
           ))}
         </div>
+      </div>
 
-        <Separator />
+      {/* Menu Items */}
+      <div className="flex-1 px-4 py-4 space-y-1">
+        {menuItems.map((item) => (
+          <MenuItem key={item.href} {...item} />
+        ))}
 
-        {/* Additional Menu Items (NOT in bottom navbar) */}
-        <div>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-            Quick Access
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            {additionalMenuItems.map((item) => (
-              <MenuCard key={item.href} {...item} />
-            ))}
-            {/* Notifications */}
-            <Link
-              to="/notifications"
-              className={cn(
-                'flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all duration-200 border-2 relative',
-                isActive('/notifications')
-                  ? 'bg-primary text-primary-foreground border-primary shadow-lg scale-105'
-                  : 'bg-card hover:bg-muted border-border hover:border-primary/50 hover:shadow-md'
-              )}
-            >
-              <div className={cn(
-                'p-3 rounded-xl',
-                isActive('/notifications') ? 'bg-primary-foreground/20' : 'bg-amber-500'
-              )}>
-                <Bell className={cn('h-6 w-6', isActive('/notifications') ? 'text-primary-foreground' : 'text-white')} />
-              </div>
-              <span className={cn(
-                'text-xs font-medium text-center leading-tight',
-                isActive('/notifications') ? 'text-primary-foreground' : 'text-foreground'
-              )}>Notifications</span>
-              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 min-w-5 text-[10px] px-1.5">3</Badge>
-            </Link>
-          </div>
-        </div>
-
-        {/* Management Grid (Admin/Root only) */}
+        {/* Management Section */}
         {(user.role === 'root' || user.role === 'admin') && (
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-              Management
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              {managementItems
-                .filter((item) => !item.rootOnly || user.role === 'root')
-                .map((item) => (
-                  <MenuCard key={item.href} {...item} />
-                ))}
-              {user.role === 'root' && (
-                <MenuCard 
-                  href="/audit-logs" 
-                  icon={History} 
-                  title="Audit Logs" 
-                  color="bg-slate-600" 
-                />
-              )}
+          <>
+            <div className="pt-4 pb-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4">
+                Management
+              </p>
             </div>
-          </div>
+            {managementItems
+              .filter((item) => !item.rootOnly || user.role === 'root')
+              .map((item) => (
+                <MenuItem key={item.href} {...item} />
+              ))}
+          </>
         )}
+      </div>
 
-        <Separator />
-
-        {/* Logout */}
+      {/* Logout Button */}
+      <div className="p-4 border-t border-border">
         <button
-          onClick={logout}
-          className="flex items-center gap-3 p-4 rounded-xl w-full bg-destructive/5 border-2 border-destructive/20 text-destructive hover:bg-destructive/10 transition-all"
+          onClick={() => {
+            logout();
+            onClose?.();
+          }}
+          className="flex items-center gap-3 w-full py-3 px-4 rounded-xl text-destructive hover:bg-destructive/10 active:bg-destructive/15 transition-colors"
         >
-          <div className="p-3 rounded-xl bg-destructive/20">
-            <LogOut className="h-5 w-5" />
-          </div>
+          <LogOut className="h-5 w-5" />
           <span className="font-medium">Sign Out</span>
         </button>
       </div>
-    </ScrollArea>
+    </div>
   );
 }
