@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import loginHero from '@/assets/login-hero.jpg';
-import loginMobileBg from '@/assets/login-mobile-bg.jpg';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -49,8 +48,31 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Hero Image */}
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Top Banner for Mobile/Tablet */}
+      <div 
+        className="lg:hidden relative h-48 sm:h-56 flex-shrink-0"
+        style={{
+          backgroundImage: `url(${loginHero})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/70 to-primary/90" />
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-white px-6">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-12 w-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Clock className="h-7 w-7" />
+            </div>
+            <span className="text-2xl font-bold">AttendanceMS</span>
+          </div>
+          <p className="text-white/90 text-center text-sm sm:text-base">
+            Streamline Your Workforce Management
+          </p>
+        </div>
+      </div>
+
+      {/* Left Side - Hero Image (Desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 relative">
         <img 
           src={loginHero} 
@@ -93,101 +115,85 @@ export default function Login() {
         </div>
       </div>
       
-      {/* Right Side - Login Form */}
-      <div 
-        className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-background relative"
-        style={{
-          backgroundImage: `url(${loginMobileBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        {/* Light overlay for mobile/tablet */}
-        <div className="absolute inset-0 bg-background/80 lg:bg-background lg:relative lg:inset-auto" />
-        <div className="w-full max-w-md relative z-10">
-          {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
-              <Clock className="h-7 w-7 text-primary-foreground" />
+      {/* Login Form */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-background">
+        <div className="w-full max-w-sm sm:max-w-md">
+          <div className="bg-card rounded-2xl shadow-lg border p-6 sm:p-8">
+            <div className="text-center lg:text-left mb-6">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2">
+                Welcome back
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Enter your credentials to access your account
+              </p>
             </div>
-            <span className="text-2xl font-bold text-foreground">AttendanceMS</span>
+            
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium">
+                  Username
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter your username"
+                    className="pl-10 sm:pl-11 h-11 sm:h-12 text-sm sm:text-base"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className="pl-10 sm:pl-11 pr-10 sm:pr-11 h-11 sm:h-12 text-sm sm:text-base"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 sm:h-10 sm:w-10 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              {error && (
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2 sm:px-4 sm:py-3">
+                  <p className="text-xs sm:text-sm text-destructive">{error}</p>
+                </div>
+              )}
+              
+              <Button 
+                type="submit" 
+                className="w-full h-11 sm:h-12 text-sm sm:text-base font-semibold" 
+                disabled={isLoading}
+              >
+                {isLoading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </form>
           </div>
           
-          <div className="text-center lg:text-left mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-              Welcome back
-            </h2>
-            <p className="text-muted-foreground">
-              Enter your credentials to access your account
-            </p>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="username" className="text-sm font-medium">
-                Username
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your username"
-                  className="pl-11 h-12 text-base"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
-                  className="pl-11 pr-11 h-12 text-base"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/30 rounded-lg px-4 py-3">
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
-            )}
-            
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-base font-semibold" 
-              disabled={isLoading}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-          
-          
-          {/* Mobile Footer */}
-          <p className="lg:hidden text-center text-xs text-muted-foreground mt-8">
+          {/* Footer */}
+          <p className="lg:hidden text-center text-xs text-muted-foreground mt-6">
             © 2024 Attendance Management System
           </p>
         </div>
