@@ -7,7 +7,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { MobileMenu } from './MobileMenu';
 
 const navItems = [
@@ -59,7 +59,8 @@ export function MobileBottomNav() {
               <span className="text-[10px] font-medium">More</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:w-80 p-0">
+          <SheetContent side="bottom" className="rounded-t-3xl p-0 max-h-[70vh]">
+            <div className="w-12 h-1.5 bg-muted-foreground/30 rounded-full mx-auto mt-3" />
             <MobileMenu />
           </SheetContent>
         </Sheet>
