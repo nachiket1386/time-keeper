@@ -59,10 +59,7 @@ export function MobileBottomNav() {
               <span className="text-[10px] font-medium">More</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl">
-            <SheetHeader>
-              <SheetTitle>Menu</SheetTitle>
-            </SheetHeader>
+          <SheetContent side="right" className="w-full sm:w-80 p-0">
             <MobileMenu />
           </SheetContent>
         </Sheet>
