@@ -177,29 +177,6 @@ export default function Login() {
             </Button>
           </form>
           
-          {/* Demo credentials */}
-          <div className="mt-8 p-5 bg-muted/50 rounded-xl border">
-            <p className="font-semibold text-foreground text-sm mb-4">
-              Demo Credentials
-            </p>
-            <div className="grid gap-2.5">
-              {[
-                { role: 'Root', credentials: 'root / root123' },
-                { role: 'Admin', credentials: 'admin / admin123' },
-                { role: 'Supervisor', credentials: 'supervisor / user123' }
-              ].map((item) => (
-                <div 
-                  key={item.role}
-                  className="flex items-center justify-between py-2 px-3 bg-background rounded-lg"
-                >
-                  <span className="font-medium text-sm text-primary">{item.role}</span>
-                  <code className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                    {item.credentials}
-                  </code>
-                </div>
-              ))}
-            </div>
-          </div>
           
           {/* Mobile Footer */}
           <p className="lg:hidden text-center text-xs text-muted-foreground mt-8">
