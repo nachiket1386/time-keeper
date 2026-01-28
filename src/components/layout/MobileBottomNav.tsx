@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Clock,
   FileText,
   Upload,
   Menu,
@@ -12,7 +11,6 @@ import { MobileMenu } from './MobileMenu';
 
 const navItems = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { title: 'Attendance', href: '/attendance', icon: Clock },
   { title: 'Reports', href: '/reports', icon: FileText },
   { title: 'Import', href: '/import', icon: Upload },
 ];
