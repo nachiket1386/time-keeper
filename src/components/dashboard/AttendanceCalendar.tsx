@@ -141,7 +141,7 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
   };
 
   return (
-    <Card className="overflow-hidden w-full max-w-sm">
+    <Card className="overflow-hidden w-full md:w-[340px] lg:w-[360px]">
       {/* Header */}
       <div className="bg-primary/5 border-b px-4 py-3">
         <div className="flex items-center gap-2">

@@ -93,9 +93,9 @@ export default function Dashboard() {
         </Popover>
       </div>
 
-      {/* Calendar + ARC Summary Side by Side on Desktop */}
-      <div className="flex flex-col lg:flex-row gap-3">
-        <div className="shrink-0">
+      {/* Calendar + ARC Summary Side by Side on Tablet+ */}
+      <div className="flex flex-col md:flex-row gap-3">
+        <div className="shrink-0 w-full md:w-auto">
           <AttendanceCalendar companyId={user?.companyId} selectedMonth={selectedDate} />
         </div>
         <div className="flex-1 min-w-0">
@@ -104,7 +104,7 @@ export default function Dashboard() {
       </div>
 
       {/* Status Summary Tables */}
-      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
         <StatusSummaryTable companyId={user?.companyId} type="overtime" dateRange={dateRange} />
         <StatusSummaryTable companyId={user?.companyId} type="regularization" dateRange={dateRange} />
         <StatusSummaryTable companyId={user?.companyId} type="partialday" dateRange={dateRange} />
