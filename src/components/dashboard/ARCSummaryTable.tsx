@@ -90,7 +90,7 @@ export function ARCSummaryTable({ companyId, dateRange }: ARCSummaryTableProps) 
       </CardHeader>
       <CardContent className="p-2 md:p-2 lg:p-3">
         <div className="overflow-x-auto -mx-2 px-2">
-          <table className="w-full text-xs md:text-[10px] lg:text-sm">
+          <table className="w-full text-xs md:text-xs lg:text-sm">
             <thead>
               <tr className="border-b-2 border-primary/30">
                 <th className="text-left p-1.5 md:p-1 lg:p-2 font-semibold bg-muted/50 sticky left-0 z-10 min-w-[70px] md:min-w-[60px] lg:min-w-[100px]">

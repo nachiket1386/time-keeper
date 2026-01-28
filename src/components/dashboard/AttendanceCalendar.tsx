@@ -234,22 +234,22 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
         )}
 
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-1 md:gap-0.5 lg:gap-2 text-center">
+        <div className="grid grid-cols-4 gap-1 md:gap-1 lg:gap-2 text-center">
           <div>
-            <p className="text-lg md:text-base lg:text-xl font-bold text-emerald-600">{calendarData.stats.present}</p>
-            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Present</p>
+            <p className="text-lg md:text-lg lg:text-xl font-bold text-emerald-600">{calendarData.stats.present}</p>
+            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Present</p>
           </div>
           <div>
-            <p className="text-lg md:text-base lg:text-xl font-bold text-red-500">{calendarData.stats.absent}</p>
-            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Absent</p>
+            <p className="text-lg md:text-lg lg:text-xl font-bold text-red-500">{calendarData.stats.absent}</p>
+            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Absent</p>
           </div>
           <div>
-            <p className="text-lg md:text-base lg:text-xl font-bold text-amber-500">{calendarData.stats.exceptions}</p>
-            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Exc</p>
+            <p className="text-lg md:text-lg lg:text-xl font-bold text-amber-500">{calendarData.stats.exceptions}</p>
+            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Exc</p>
           </div>
           <div>
-            <p className="text-lg md:text-base lg:text-xl font-bold text-muted-foreground">{calendarData.stats.total}</p>
-            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Total</p>
+            <p className="text-lg md:text-lg lg:text-xl font-bold text-muted-foreground">{calendarData.stats.total}</p>
+            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Total</p>
           </div>
         </div>
 
@@ -261,7 +261,7 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
               <div 
                 key={idx} 
                 className={cn(
-                  "text-center text-[10px] md:text-[9px] lg:text-xs font-semibold py-1 md:py-0.5 lg:py-2",
+                  "text-center text-[10px] md:text-xs lg:text-xs font-semibold py-1 md:py-1 lg:py-2",
                   idx === 0 || idx === 6 ? "text-muted-foreground" : "text-foreground"
                 )}
               >
@@ -289,7 +289,7 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
                 >
                   <div
                     className={cn(
-                      "w-6 h-6 md:w-5 md:h-5 lg:w-7 lg:h-7 rounded-full flex items-center justify-center text-[11px] md:text-[10px] lg:text-sm font-medium transition-transform hover:scale-110 cursor-pointer",
+                      "w-6 h-6 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full flex items-center justify-center text-[11px] md:text-xs lg:text-sm font-medium transition-transform hover:scale-110 cursor-pointer",
                       hasStatus ? colorClass : (isWeekend ? "text-muted-foreground" : "text-foreground hover:bg-muted")
                     )}
                     title={status ? `Day ${day}: ${status}` : `Day ${day}`}
