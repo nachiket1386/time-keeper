@@ -141,36 +141,36 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
   };
 
   return (
-    <Card className="overflow-hidden w-full md:w-[340px] lg:w-[360px]">
+    <Card className="overflow-hidden w-full md:w-[280px] lg:w-[320px] xl:w-[360px]">
       {/* Header */}
-      <div className="bg-primary/5 border-b px-4 py-3">
+      <div className="bg-primary/5 border-b px-3 md:px-2 lg:px-4 py-2 md:py-2 lg:py-3">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="h-5 w-5 text-primary" />
+          <CalendarIcon className="h-4 w-4 md:h-4 md:w-4 lg:h-5 lg:w-5 text-primary" />
           <div>
-            <h3 className="font-semibold text-foreground">Attendance Calendar</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="font-semibold text-sm md:text-xs lg:text-sm text-foreground">Attendance Calendar</h3>
+            <p className="text-xs text-muted-foreground hidden lg:block">
               Dashboard: {months[selectedMonth]} {selectedYear}
             </p>
           </div>
         </div>
       </div>
       
-      <CardContent className="p-4 space-y-4">
+      <CardContent className="p-3 md:p-2 lg:p-4 space-y-3 md:space-y-2 lg:space-y-4">
         {/* Search Input */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 md:gap-1 lg:gap-2">
           <div className="relative flex-1">
             <Input
               placeholder="PP5000039084"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pr-8 h-10 font-mono text-sm border-2"
+              className="pr-8 h-9 md:h-8 lg:h-10 font-mono text-xs md:text-[11px] lg:text-sm border-2"
             />
             {search && (
               <button
                 onClick={handleClearSearch}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
@@ -178,94 +178,90 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
             variant="outline"
             size="icon"
             onClick={handleClearSearch}
-            className="h-10 w-10 shrink-0"
+            className="h-9 w-9 md:h-8 md:w-8 lg:h-10 lg:w-10 shrink-0"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </Button>
           <Button
             size="icon"
             onClick={handleSearch}
-            className="h-10 w-10 shrink-0 bg-primary hover:bg-primary/90"
+            className="h-9 w-9 md:h-8 md:w-8 lg:h-10 lg:w-10 shrink-0 bg-primary hover:bg-primary/90"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-3.5 w-3.5" />
           </Button>
         </div>
 
         {/* Month Navigation */}
-        <div className="flex items-center justify-between bg-muted/30 rounded-lg px-2 py-1">
-          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-8 w-8">
-            <ChevronLeft className="h-4 w-4" />
+        <div className="flex items-center justify-between bg-muted/30 rounded-lg px-1.5 md:px-1 lg:px-2 py-1">
+          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-7 w-7 md:h-6 md:w-6 lg:h-8 lg:w-8">
+            <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
-              <SelectTrigger className="w-auto h-8 text-sm px-3 border-0 bg-transparent font-medium">
+              <SelectTrigger className="w-auto h-7 md:h-6 lg:h-8 text-xs md:text-[11px] lg:text-sm px-2 border-0 bg-transparent font-medium">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {months.map((month, idx) => (
-                  <SelectItem key={month} value={String(idx)} className="text-sm">{month}</SelectItem>
+                  <SelectItem key={month} value={String(idx)} className="text-xs">{month.substring(0, 3)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <span className="text-sm font-medium">,</span>
             <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
-              <SelectTrigger className="w-auto h-8 text-sm px-2 border-0 bg-transparent font-medium">
+              <SelectTrigger className="w-auto h-7 md:h-6 lg:h-8 text-xs md:text-[11px] lg:text-sm px-1.5 border-0 bg-transparent font-medium">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {years.map((year) => (
-                  <SelectItem key={year} value={String(year)} className="text-sm">{year}</SelectItem>
+                  <SelectItem key={year} value={String(year)} className="text-xs">{year}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <CalendarIcon className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-8 w-8">
-            <ChevronRight className="h-4 w-4" />
+          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-7 w-7 md:h-6 md:w-6 lg:h-8 lg:w-8">
+            <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         </div>
 
         {/* Employee Name */}
         {selectedEmployee && (
-          <div className="flex items-center gap-2 py-2 border-b">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold text-sm uppercase tracking-wide">
+          <div className="flex items-center gap-2 py-1.5 md:py-1 lg:py-2 border-b">
+            <User className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-semibold text-xs md:text-[11px] lg:text-sm uppercase tracking-wide truncate">
               {selectedEmployee.name}
             </span>
           </div>
         )}
 
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-2 text-center">
+        <div className="grid grid-cols-4 gap-1 md:gap-0.5 lg:gap-2 text-center">
           <div>
-            <p className="text-xl font-bold text-emerald-600">{calendarData.stats.present}</p>
-            <p className="text-xs text-muted-foreground">Present</p>
+            <p className="text-lg md:text-base lg:text-xl font-bold text-emerald-600">{calendarData.stats.present}</p>
+            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Present</p>
           </div>
           <div>
-            <p className="text-xl font-bold text-red-500">{calendarData.stats.absent}</p>
-            <p className="text-xs text-muted-foreground">Absent</p>
+            <p className="text-lg md:text-base lg:text-xl font-bold text-red-500">{calendarData.stats.absent}</p>
+            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Absent</p>
           </div>
           <div>
-            <p className="text-xl font-bold text-amber-500">{calendarData.stats.exceptions}</p>
-            <p className="text-xs text-muted-foreground">Exceptions</p>
+            <p className="text-lg md:text-base lg:text-xl font-bold text-amber-500">{calendarData.stats.exceptions}</p>
+            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Exc</p>
           </div>
           <div>
-            <p className="text-xl font-bold text-muted-foreground">{calendarData.stats.total}</p>
-            <p className="text-xs text-muted-foreground">Total</p>
+            <p className="text-lg md:text-base lg:text-xl font-bold text-muted-foreground">{calendarData.stats.total}</p>
+            <p className="text-[10px] md:text-[9px] lg:text-xs text-muted-foreground">Total</p>
           </div>
         </div>
 
         {/* Calendar Grid */}
-        <div className="space-y-2">
+        <div className="space-y-1 md:space-y-0.5 lg:space-y-2">
           {/* Weekday Headers */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5">
             {weekDays.map((day, idx) => (
               <div 
                 key={idx} 
                 className={cn(
-                  "text-center text-xs font-semibold py-2",
+                  "text-center text-[10px] md:text-[9px] lg:text-xs font-semibold py-1 md:py-0.5 lg:py-2",
                   idx === 0 || idx === 6 ? "text-muted-foreground" : "text-foreground"
                 )}
               >
@@ -275,7 +271,7 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
           </div>
           
           {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5">
             {/* Empty cells for offset */}
             {Array.from({ length: calendarData.firstDayOffset }).map((_, idx) => (
               <div key={`empty-${idx}`} className="aspect-square" />
@@ -293,7 +289,7 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
                 >
                   <div
                     className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-transform hover:scale-110 cursor-pointer",
+                      "w-6 h-6 md:w-5 md:h-5 lg:w-7 lg:h-7 rounded-full flex items-center justify-center text-[11px] md:text-[10px] lg:text-sm font-medium transition-transform hover:scale-110 cursor-pointer",
                       hasStatus ? colorClass : (isWeekend ? "text-muted-foreground" : "text-foreground hover:bg-muted")
                     )}
                     title={status ? `Day ${day}: ${status}` : `Day ${day}`}
