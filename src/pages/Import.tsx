@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, BarChart3, Timer, Calendar, Edit, Search, ClipboardList, FileText, CheckSquare, Lightbulb, ArrowLeft, Info } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, BarChart3, Timer, Calendar, Edit, ClipboardList, FileText, CheckSquare, Lightbulb, ArrowLeft, Info } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,12 +52,6 @@ const formatRequirements: Record<string, FormatRequirements> = {
     optional: ['REASON', 'APPROVED BY', 'STATUS', 'REMARKS'],
     rules: ['Date: DD/MM/YYYY or YYYY-MM-DD', 'Time: HH:MM format', 'EIC Code must be valid', 'Status: Pending, Approved, Rejected'],
     tip: 'Regularization requests correct incorrect or missing punch entries.'
-  },
-  'auto-detect': {
-    required: ['File headers will be analyzed automatically'],
-    optional: ['System will match columns to known templates'],
-    rules: ['Ensure first row contains column headers', 'Use consistent date/time formats', 'File must be under 20MB'],
-    tip: 'Auto-detect works best with files following standard templates.'
   },
 };
 
@@ -112,16 +106,6 @@ const uploadTypes = [
     iconBg: 'bg-orange-50',
     iconColor: 'text-orange-500'
   },
-  { 
-    id: 'auto-detect', 
-    name: 'Auto-Detect', 
-    description: 'Let the system detect file type automatically',
-    icon: Search,
-    badge: 'SMART',
-    badgeVariant: 'secondary' as const,
-    iconBg: 'bg-violet-50',
-    iconColor: 'text-violet-500'
-  },
 ];
 
 const uploadHistory = [
@@ -133,11 +117,11 @@ const uploadHistory = [
 ];
 
 const templates = [
-  { name: 'Attendance Template', description: 'Daily attendance records with punch times', format: 'xlsx' },
-  { name: 'Employee Master Template', description: 'Employee details with EP number, contractor, etc.', format: 'xlsx' },
-  { name: 'Overtime Request Template', description: 'Overtime request data for bulk import', format: 'csv' },
-  { name: 'Punch Records Template', description: 'Raw punch data from biometric devices', format: 'csv' },
-  { name: 'Contractor List Template', description: 'Contractor master data', format: 'xlsx' },
+  { name: 'Punchrecord Template', description: 'Upload punch time records with in/out times', format: 'xlsx' },
+  { name: 'ARC Summary Template', description: 'Upload attendance summary reports by contractor', format: 'xlsx' },
+  { name: 'Overtime Template', description: 'Upload overtime records for approval workflow', format: 'xlsx' },
+  { name: 'Partial Day Template', description: 'Upload partial day attendance records', format: 'xlsx' },
+  { name: 'Regularization Template', description: 'Upload attendance regularization requests', format: 'xlsx' },
 ];
 
 export default function Import() {
