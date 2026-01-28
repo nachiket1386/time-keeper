@@ -48,9 +48,9 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-muted/30">
-      {/* Top Banner for Mobile/Tablet */}
-      <div className="lg:hidden relative h-44 sm:h-52 flex-shrink-0 overflow-hidden">
+    <div className="min-h-screen flex flex-col xl:flex-row bg-muted/30">
+      {/* Top Banner for Mobile/Tablet (below xl breakpoint) */}
+      <div className="xl:hidden relative h-44 sm:h-56 md:h-64 flex-shrink-0 overflow-hidden">
         <img 
           src={loginHero} 
           alt="Office building" 
@@ -59,19 +59,28 @@ export default function Login() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/85 via-primary/75 to-primary/90" />
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-primary-foreground px-6">
           <div className="flex items-center gap-3 mb-3">
-            <div className="h-11 w-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Clock className="h-6 w-6" />
+            <div className="h-11 w-11 md:h-14 md:w-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Clock className="h-6 w-6 md:h-8 md:w-8" />
             </div>
-            <span className="text-xl font-bold">AttendanceMS</span>
+            <span className="text-xl md:text-2xl font-bold">AttendanceMS</span>
           </div>
-          <p className="text-primary-foreground/90 text-center text-sm">
+          <p className="text-primary-foreground/90 text-center text-sm md:text-base max-w-md">
             Streamline Your Workforce Management
           </p>
+          {/* Features for tablet */}
+          <div className="hidden md:flex gap-6 mt-4">
+            {features.map((feature, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-white/90" />
+                <span className="text-white/90 text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Left Side - Hero Image (Desktop only) */}
-      <div className="hidden lg:flex lg:w-1/2 relative">
+      {/* Left Side - Hero Image (Desktop xl+ only) */}
+      <div className="hidden xl:flex xl:w-1/2 relative">
         <img 
           src={loginHero} 
           alt="Office building" 
@@ -114,11 +123,11 @@ export default function Login() {
       </div>
       
       {/* Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12 bg-muted/30 lg:bg-background">
-        <div className="w-full max-w-sm sm:max-w-md -mt-8 lg:mt-0">
-          <div className="bg-card rounded-2xl shadow-xl border p-5 sm:p-8">
-            <div className="text-center lg:text-left mb-6">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 xl:p-12 bg-muted/30 xl:bg-background">
+        <div className="w-full max-w-sm sm:max-w-md md:max-w-lg -mt-8 md:-mt-12 xl:mt-0">
+          <div className="bg-card rounded-2xl shadow-xl border p-5 sm:p-8 md:p-10">
+            <div className="text-center xl:text-left mb-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Welcome back
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base">
@@ -191,7 +200,7 @@ export default function Login() {
           </div>
           
           {/* Footer */}
-          <p className="lg:hidden text-center text-xs text-muted-foreground mt-6">
+          <p className="xl:hidden text-center text-xs text-muted-foreground mt-6">
             © 2024 Attendance Management System
           </p>
         </div>
