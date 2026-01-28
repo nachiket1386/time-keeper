@@ -82,30 +82,30 @@ export function ARCSummaryTable({ companyId, dateRange }: ARCSummaryTableProps) 
 
   return (
     <Card className="h-full overflow-hidden">
-      <CardHeader className="py-3 px-4 bg-muted/30">
-        <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <FileSpreadsheet className="h-5 w-5 text-primary" />
-          ARC Summary - Mandays by Trade
+      <CardHeader className="py-2 md:py-2 lg:py-3 px-3 md:px-3 lg:px-4 bg-muted/30">
+        <CardTitle className="text-sm md:text-xs lg:text-base font-semibold flex items-center gap-2">
+          <FileSpreadsheet className="h-4 w-4 md:h-3.5 md:w-3.5 lg:h-5 lg:w-5 text-primary" />
+          <span className="truncate">ARC Summary - Mandays</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      <CardContent className="p-2 md:p-2 lg:p-3">
+        <div className="overflow-x-auto -mx-2 px-2">
+          <table className="w-full text-xs md:text-[10px] lg:text-sm">
             <thead>
               <tr className="border-b-2 border-primary/30">
-                <th className="text-left p-2 font-semibold bg-muted/50 sticky left-0 z-10 min-w-[100px]">
+                <th className="text-left p-1.5 md:p-1 lg:p-2 font-semibold bg-muted/50 sticky left-0 z-10 min-w-[70px] md:min-w-[60px] lg:min-w-[100px]">
                   Trade
                 </th>
                 {summaryData.contractors.map((contractor) => (
                   <th 
                     key={contractor} 
-                    className="text-center p-2 font-semibold bg-muted/50 whitespace-nowrap min-w-[80px]"
+                    className="text-center p-1.5 md:p-1 lg:p-2 font-semibold bg-muted/50 whitespace-nowrap min-w-[50px] md:min-w-[45px] lg:min-w-[80px]"
                   >
-                    {contractor.split(' ')[0].substring(0, 8)}
+                    {contractor.split(' ')[0].substring(0, 5)}
                   </th>
                 ))}
-                <th className="text-center p-2 font-bold bg-primary/15 text-primary min-w-[70px]">
-                  Total
+                <th className="text-center p-1.5 md:p-1 lg:p-2 font-bold bg-primary/15 text-primary min-w-[45px] md:min-w-[40px] lg:min-w-[70px]">
+                  Tot
                 </th>
               </tr>
             </thead>
@@ -118,8 +118,8 @@ export function ARCSummaryTable({ companyId, dateRange }: ARCSummaryTableProps) 
                     idx % 2 === 0 ? 'bg-card' : 'bg-muted/10'
                   )}
                 >
-                  <td className="p-2 font-medium sticky left-0 bg-inherit z-10 border-r border-border/30">
-                    {trade.length > 12 ? trade.substring(0, 12) + '…' : trade}
+                  <td className="p-1.5 md:p-1 lg:p-2 font-medium sticky left-0 bg-inherit z-10 border-r border-border/30 truncate max-w-[70px] md:max-w-[60px] lg:max-w-[100px]">
+                    {trade.length > 8 ? trade.substring(0, 8) + '…' : trade}
                   </td>
                   {summaryData.contractors.map((contractor) => {
                     const value = summaryData.data[trade][contractor];
@@ -127,7 +127,7 @@ export function ARCSummaryTable({ companyId, dateRange }: ARCSummaryTableProps) 
                       <td 
                         key={contractor} 
                         className={cn(
-                          'text-center p-2 transition-colors',
+                          'text-center p-1.5 md:p-1 lg:p-2 transition-colors',
                           getHeatmapColor(value, maxValue)
                         )}
                       >
@@ -135,22 +135,22 @@ export function ARCSummaryTable({ companyId, dateRange }: ARCSummaryTableProps) 
                       </td>
                     );
                   })}
-                  <td className="text-center p-2 font-semibold bg-primary/10 text-primary">
+                  <td className="text-center p-1.5 md:p-1 lg:p-2 font-semibold bg-primary/10 text-primary">
                     {summaryData.tradeTotals[trade].toFixed(1)}
                   </td>
                 </tr>
               ))}
               {/* Totals Row */}
               <tr className="bg-primary/15 font-bold border-t-2 border-primary/30">
-                <td className="p-2 sticky left-0 bg-primary/15 z-10">
+                <td className="p-1.5 md:p-1 lg:p-2 sticky left-0 bg-primary/15 z-10">
                   Total
                 </td>
                 {summaryData.contractors.map((contractor) => (
-                  <td key={contractor} className="text-center p-2 text-primary">
+                  <td key={contractor} className="text-center p-1.5 md:p-1 lg:p-2 text-primary">
                     {summaryData.contractorTotals[contractor].toFixed(1)}
                   </td>
                 ))}
-                <td className="text-center p-2 bg-primary text-primary-foreground text-base">
+                <td className="text-center p-1.5 md:p-1 lg:p-2 bg-primary text-primary-foreground">
                   {summaryData.grandTotal.toFixed(1)}
                 </td>
               </tr>
