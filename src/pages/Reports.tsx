@@ -300,6 +300,7 @@ const arcSummaryColumns = [
   { key: 'contractor', label: 'CONTRACTOR', align: 'center' as const },
   { key: 'trade', label: 'TRADE', align: 'center' as const },
   { key: 'contract', label: 'CONTRACT', align: 'center' as const },
+  { key: 'status', label: 'STATUS', align: 'center' as const },
   { key: 'mandays', label: 'MANDAYS', align: 'center' as const },
   { key: 'regularHr', label: 'REGULAR HR', align: 'center' as const },
   { key: 'ot', label: 'OT', align: 'center' as const },
@@ -599,13 +600,19 @@ export default function Reports() {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       'Present': 'bg-emerald-500 text-white',
+      'P': 'bg-emerald-500 text-white',
       'Absent': 'bg-red-500 text-white',
+      'A': 'bg-red-500 text-white',
       'Partial Day': 'bg-amber-400 text-amber-900',
+      '.05': 'bg-amber-400 text-amber-900',
+      '-1': 'bg-orange-500 text-white',
       'On Leave': 'bg-violet-500 text-white',
+      'L': 'bg-violet-500 text-white',
       'Holiday': 'bg-blue-500 text-white',
+      'PH': 'bg-blue-500 text-white',
     };
     return (
-      <Badge className={cn('font-medium text-[10px] px-1.5 py-0 whitespace-nowrap', styles[status] || '')}>
+      <Badge className={cn('font-medium text-[10px] px-1.5 py-0 whitespace-nowrap', styles[status] || 'bg-gray-400 text-white')}>
         {status}
       </Badge>
     );
@@ -654,7 +661,7 @@ export default function Reports() {
         </div>
       );
     }
-    // Time pair columns with IN/OUT color coding
+    // Time pair columns with IN/OUT color coding - IN is red, OUT is green
     if (colKey.startsWith('timePair')) {
       if (!value || value === '-') {
         return <span className="text-muted-foreground">-</span>;
@@ -663,14 +670,13 @@ export default function Reports() {
       const parts = value.includes(' - ') ? value.split(' - ') : value.split(' / ');
       const inTime = parts[0]?.trim();
       const outTime = parts[1]?.trim();
-      const isNight = value.includes('(N)');
       
       return (
         <div className="flex items-center justify-center gap-1">
           <span className={cn(
             'px-1.5 py-0.5 rounded text-xs font-medium',
             inTime && inTime !== '-' 
-              ? (isNight ? 'text-indigo-600 bg-indigo-50' : 'text-emerald-700 bg-emerald-50')
+              ? 'text-red-600 bg-red-50'
               : 'text-muted-foreground'
           )}>
             {inTime || '-'}
@@ -679,7 +685,7 @@ export default function Reports() {
           <span className={cn(
             'px-1.5 py-0.5 rounded text-xs font-medium',
             outTime && outTime !== '-'
-              ? (isNight || outTime.includes('(N)') ? 'text-purple-600 bg-purple-50' : 'text-blue-700 bg-blue-50')
+              ? 'text-emerald-600 bg-emerald-50'
               : 'text-muted-foreground'
           )}>
             {outTime || '-'}
