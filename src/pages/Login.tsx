@@ -48,7 +48,7 @@ export default function Login() {
   ];
 
   return (
-    <div className="min-h-screen h-screen flex flex-col xl:flex-row bg-muted/30 overflow-hidden">
+    <div className="min-h-screen h-screen flex flex-col xl:flex-row bg-background overflow-hidden">
       {/* Top Banner for Mobile/Tablet (below xl breakpoint) */}
       <div className="xl:hidden relative h-44 sm:h-56 md:h-64 flex-shrink-0 overflow-hidden">
         <img 
@@ -123,7 +123,7 @@ export default function Login() {
       </div>
       
       {/* Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 xl:p-12 bg-muted/30 xl:bg-background xl:h-screen xl:overflow-auto">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8 xl:p-12 bg-background xl:h-screen xl:overflow-auto">
         <div className="w-full max-w-sm sm:max-w-md md:max-w-lg -mt-8 md:-mt-12 xl:mt-0 xl:max-w-md">
           <div className="bg-card rounded-2xl shadow-xl border p-5 sm:p-8 md:p-10">
             <div className="text-center xl:text-left mb-6">
