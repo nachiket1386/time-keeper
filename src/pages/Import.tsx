@@ -63,8 +63,8 @@ const uploadTypes = [
     icon: Timer,
     badge: 'MOST COMMON',
     badgeVariant: 'default' as const,
-    iconBg: 'bg-slate-100',
-    iconColor: 'text-slate-600'
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-600'
   },
   { 
     id: 'arc-summary', 
@@ -73,7 +73,7 @@ const uploadTypes = [
     icon: BarChart3,
     badge: null,
     badgeVariant: null,
-    iconBg: 'bg-emerald-50',
+    iconBg: 'bg-emerald-100',
     iconColor: 'text-emerald-600'
   },
   { 
@@ -83,8 +83,8 @@ const uploadTypes = [
     icon: Clock,
     badge: null,
     badgeVariant: null,
-    iconBg: 'bg-rose-50',
-    iconColor: 'text-rose-500'
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600'
   },
   { 
     id: 'partial-day', 
@@ -93,8 +93,8 @@ const uploadTypes = [
     icon: Calendar,
     badge: null,
     badgeVariant: null,
-    iconBg: 'bg-sky-50',
-    iconColor: 'text-sky-500'
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600'
   },
   { 
     id: 'regularization', 
@@ -103,8 +103,8 @@ const uploadTypes = [
     icon: Edit,
     badge: null,
     badgeVariant: null,
-    iconBg: 'bg-orange-50',
-    iconColor: 'text-orange-500'
+    iconBg: 'bg-rose-100',
+    iconColor: 'text-rose-600'
   },
 ];
 
