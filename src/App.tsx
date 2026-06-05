@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { MainLayout } from "./components/layout/MainLayout";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
 import Reports from "./pages/Reports";
@@ -30,6 +31,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
               path="/dashboard"
