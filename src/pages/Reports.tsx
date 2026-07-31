@@ -664,38 +664,35 @@ export default function Reports() {
         </div>
       );
     }
-    // Time pair columns with IN/OUT color coding - IN is red, OUT is green
-    if (colKey.startsWith('timePair')) {
-      if (!value || value === '-') {
+    // IN / OUT punch pairs — wraps instead of forcing horizontal scroll
+    if (colKey === 'timePairs' || colKey.startsWith('timePair')) {
+      if (!value || value === '-' || value === '--') {
         return <span className="text-muted-foreground">-</span>;
       }
-      // Parse the time pair (format: "IN - OUT" or "IN / -" or "- / OUT")
-      const parts = value.includes(' - ') ? value.split(' - ') : value.split(' / ');
-      const inTime = parts[0]?.trim();
-      const outTime = parts[1]?.trim();
-      
+      const pairs = value.split('|').map((p) => p.trim()).filter(Boolean);
       return (
-        <div className="flex items-center justify-center gap-1">
-          <span className={cn(
-            'px-1.5 py-0.5 rounded text-xs font-medium',
-            inTime && inTime !== '-' 
-              ? 'text-red-600 bg-red-50'
-              : 'text-muted-foreground'
-          )}>
-            {inTime || '-'}
-          </span>
-          <span className="text-muted-foreground text-xs">-</span>
-          <span className={cn(
-            'px-1.5 py-0.5 rounded text-xs font-medium',
-            outTime && outTime !== '-'
-              ? 'text-emerald-600 bg-emerald-50'
-              : 'text-muted-foreground'
-          )}>
-            {outTime || '-'}
-          </span>
+        <div className="flex flex-wrap items-center justify-center gap-1">
+          {pairs.map((pair, i) => {
+            const [inTime, outTime] = pair.split('-').map((p) => p.trim());
+            return (
+              <span
+                key={i}
+                className="inline-flex items-center gap-0.5 rounded-md bg-muted/60 px-1 py-0.5 text-[11px] font-medium leading-none"
+              >
+                <span className={inTime && inTime !== '--' ? 'text-red-600' : 'text-muted-foreground'}>
+                  {inTime || '--'}
+                </span>
+                <span className="text-muted-foreground">›</span>
+                <span className={outTime && outTime !== '--' ? 'text-emerald-600' : 'text-muted-foreground'}>
+                  {outTime || '--'}
+                </span>
+              </span>
+            );
+          })}
         </div>
       );
     }
+
     return value;
   };
 
