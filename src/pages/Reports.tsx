@@ -716,38 +716,35 @@ export default function Reports() {
   const headerContent = getHeaderContent();
 
   return (
-    <div className="animate-fade-in space-y-3 pb-6 relative">
-      {/* Hide/Show Button - Positioned top right below navbar */}
-      <Button 
-        size="sm" 
-        variant={isHeaderHidden ? "default" : "outline"}
-        onClick={() => setIsHeaderHidden(!isHeaderHidden)} 
-        className="absolute right-0 top-0 gap-1.5 h-8 text-xs z-10"
-        title={isHeaderHidden ? "Show Header & Tabs" : "Hide Header & Tabs"}
-      >
-        {isHeaderHidden ? (
-          <>
-            <PanelLeft className="h-3 w-3" />
-            <span className="hidden sm:inline">Show</span>
-          </>
-        ) : (
-          <>
-            <PanelLeftClose className="h-3 w-3" />
-            <span className="hidden sm:inline">Hide</span>
-          </>
-        )}
-      </Button>
+    <div className="animate-fade-in w-full max-w-full space-y-4 overflow-x-hidden pb-6">
+      {/* ---------- Header ---------- */}
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="truncate font-heading text-lg font-semibold tracking-tight text-foreground sm:text-2xl">
+              {headerContent.title}
+            </h1>
+            {!isHeaderHidden && (
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                {headerContent.description}
+              </p>
+            )}
+          </div>
+          <Button
+            size="sm"
+            variant={isHeaderHidden ? 'default' : 'outline'}
+            onClick={() => setIsHeaderHidden(!isHeaderHidden)}
+            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-xs"
+            title={isHeaderHidden ? 'Show tabs & actions' : 'Hide tabs & actions'}
+          >
+            {isHeaderHidden ? <PanelLeft className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">{isHeaderHidden ? 'Show' : 'Hide'}</span>
+          </Button>
+        </div>
 
-      {/* Collapsible Header Section */}
-      {!isHeaderHidden && (
-        <>
-          <PageHeader
-            title={headerContent.title}
-            description={headerContent.description}
-          />
-
-          {/* Report Type Tabs */}
-          <div className="flex flex-wrap gap-2">
+        {/* Report type tabs — wrap on every screen size, never scroll sideways */}
+        {!isHeaderHidden && (
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">
             {reportTabs.map((tab) => {
               const IconComponent = tab.icon;
               const isActive = activeTab === tab.id;
@@ -760,51 +757,47 @@ export default function Reports() {
                     setCurrentPage(1);
                   }}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all',
+                    'flex min-w-0 items-center justify-center gap-2 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-all sm:text-sm lg:justify-start lg:px-4',
                     isActive ? tabStyles.active : tabStyles.inactive
                   )}
                 >
-                  <IconComponent className={cn('h-4 w-4', tabStyles.icon)} />
-                  {tab.label}
+                  <IconComponent className={cn('h-4 w-4 shrink-0', tabStyles.icon)} />
+                  <span className="truncate">{tab.label}</span>
                 </button>
               );
             })}
           </div>
-        </>
-      )}
+        )}
+      </div>
 
-      {/* Actions Bar - Always visible */}
+      {/* ---------- Toolbar ---------- */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {/* Show current tab when header is hidden */}
-          {isHeaderHidden && (
-            <span className="text-xs font-medium text-muted-foreground">
-              {reportTabs.find(t => t.id === activeTab)?.label}
-            </span>
-          )}
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium">
+            {totalRecords} records
+            {hasActiveFilters && <span className="ml-1 text-primary">(filtered)</span>}
+          </Badge>
           {hasActiveFilters && (
-            <Button size="sm" variant="outline" onClick={clearAllFilters} className="gap-1.5 h-7 text-xs">
+            <Button size="sm" variant="outline" onClick={clearAllFilters} className="h-8 gap-1.5 rounded-full text-xs">
               <FilterX className="h-3 w-3" />
               Clear All
             </Button>
           )}
         </div>
+
         {!isHeaderHidden && (
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Delete Buttons */}
-            <Button 
-              size="sm" 
-              className="gap-1.5 h-8 text-xs bg-foreground hover:bg-foreground/90 text-background rounded-full px-4"
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              className="h-8 gap-1.5 rounded-full bg-foreground px-4 text-xs text-background hover:bg-foreground/90"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              Delete {activeTab === 'arc' ? 'ARC Summary' : reportTabs.find(t => t.id === activeTab)?.label} Data
+              <span className="truncate">
+                Delete {activeTab === 'arc' ? 'ARC Summary' : reportTabs.find((t) => t.id === activeTab)?.label} Data
+              </span>
             </Button>
             {activeTab === 'attendance' && (
-              <Button 
-                size="sm" 
-                variant="destructive"
-                className="gap-1.5 h-8 text-xs rounded-full px-4"
-              >
+              <Button size="sm" variant="destructive" className="h-8 gap-1.5 rounded-full px-4 text-xs">
                 <Trash2 className="h-3.5 w-3.5" />
                 Delete All Reports
               </Button>
@@ -813,23 +806,17 @@ export default function Reports() {
         )}
       </div>
 
-      {/* Records Count */}
-      <p className="text-xs text-muted-foreground">
-        <span className="font-medium text-foreground">{totalRecords}</span> records
-        {hasActiveFilters && <span className="text-primary ml-1">(filtered)</span>}
-      </p>
-
-      {/* Mobile/Tablet Card View */}
+      {/* ---------- Data ---------- */}
       {isMobile ? (
         <div className="space-y-3">
-      {/* Mobile Filter Button */}
+          {/* Mobile Filter Sheet */}
           <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="w-full gap-2 h-10 text-sm font-medium">
+              <Button variant="outline" size="sm" className="h-10 w-full gap-2 rounded-xl text-sm font-medium">
                 <SlidersHorizontal className="h-4 w-4" />
                 Filters & Sort
                 {hasActiveFilters && (
-                  <Badge className="ml-1 bg-primary text-primary-foreground h-5 px-2 text-xs">
+                  <Badge className="ml-1 h-5 bg-primary px-2 text-xs text-primary-foreground">
                     {Object.entries(filters).filter(([key, filter]) => {
                       const allVals = uniqueValues[key] || [];
                       return filter.selectedValues.size < allVals.length;
@@ -838,16 +825,19 @@ export default function Reports() {
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl p-0">
-              <SheetHeader className="px-4 py-3 border-b border-border bg-muted/30">
+            <SheetContent side="bottom" className="h-[85vh] rounded-t-2xl p-0">
+              <SheetHeader className="border-b border-border bg-muted/30 px-4 py-3">
                 <SheetTitle className="flex items-center justify-between">
                   <span className="text-base font-semibold">Filters & Sort</span>
                   {hasActiveFilters && (
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      onClick={() => { clearAllFilters(); setMobileFilterOpen(false); }} 
-                      className="text-destructive gap-1.5 h-8"
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        clearAllFilters();
+                        setMobileFilterOpen(false);
+                      }}
+                      className="h-8 gap-1.5 text-destructive"
                     >
                       <FilterX className="h-4 w-4" />
                       Clear All
@@ -855,152 +845,98 @@ export default function Reports() {
                   )}
                 </SheetTitle>
               </SheetHeader>
-              
-              {/* Sort Section */}
-              <div className="px-4 py-3 border-b border-border bg-background">
-                <div className="text-xs font-medium text-muted-foreground mb-2">SORT BY</div>
+
+              {/* Sort */}
+              <div className="border-b border-border bg-background px-4 py-3">
+                <div className="mb-2 text-xs font-medium text-muted-foreground">SORT BY</div>
                 <div className="flex flex-wrap gap-2">
-                  {columns.slice(0, 6).map((col) => (
+                  {columns.filter((c) => c.key !== 'actions').slice(0, 6).map((col) => (
                     <Button
                       key={col.key}
                       size="sm"
-                      variant={sortColumn === col.key ? "default" : "outline"}
-                      className={cn(
-                        "h-8 px-3 text-xs gap-1.5 rounded-full",
-                        sortColumn === col.key && "bg-primary text-primary-foreground"
-                      )}
+                      variant={sortColumn === col.key ? 'default' : 'outline'}
+                      className="h-8 gap-1.5 rounded-full px-3 text-xs"
                       onClick={() => {
                         if (sortColumn === col.key) {
-                          setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+                          setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
                         } else {
                           handleSort(col.key, 'asc');
                         }
                       }}
                     >
                       {col.label}
-                      {sortColumn === col.key && (
-                        sortDirection === 'asc' ? <ArrowUpAZ className="h-3 w-3" /> : <ArrowDownAZ className="h-3 w-3" />
-                      )}
+                      {sortColumn === col.key &&
+                        (sortDirection === 'asc' ? (
+                          <ArrowUpAZ className="h-3 w-3" />
+                        ) : (
+                          <ArrowDownAZ className="h-3 w-3" />
+                        ))}
                     </Button>
                   ))}
                 </div>
               </div>
 
-              {/* Filter Section with Accordion */}
-              <ScrollArea className="h-[calc(80vh-180px)]">
+              {/* Filters */}
+              <ScrollArea className="h-[calc(85vh-190px)]">
                 <Accordion type="single" collapsible className="px-4">
-                  {columns.map((col) => {
+                  {columns.filter((c) => c.key !== 'actions').map((col) => {
                     const allVals = uniqueValues[col.key] || [];
                     const selectedCount = filters[col.key]?.selectedValues.size || 0;
                     const isFiltered = selectedCount < allVals.length && selectedCount > 0;
-                    
+
                     return (
                       <AccordionItem key={col.key} value={col.key} className="border-b border-border/50">
                         <AccordionTrigger className="py-3 hover:no-underline">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">{col.label}</span>
                             {isFiltered && (
-                              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary">
+                              <Badge variant="secondary" className="h-5 bg-primary/10 px-1.5 text-[10px] text-primary">
                                 {selectedCount}/{allVals.length}
                               </Badge>
                             )}
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="pb-3">
-                          {/* Search Input with Auto-Select */}
-                          <div className="mb-3 space-y-2">
-                            <Input
-                              placeholder={`Search ${col.label.toLowerCase()}...`}
-                              className="h-9 text-sm"
-                              onChange={(e) => {
-                                const searchTerm = e.target.value.toLowerCase();
-                                // Filter visibility - find sibling chips container
-                                const accordionContent = e.target.closest('[data-state]');
-                                if (accordionContent) {
-                                  accordionContent.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
-                                    const value = chip.getAttribute('data-filter-value')?.toLowerCase() || '';
-                                    (chip as HTMLElement).style.display = value.includes(searchTerm) ? '' : 'none';
-                                  });
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  const searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
-                                  if (searchTerm) {
-                                    // Auto-select all matching values
-                                    const matchingValues = allVals.filter(v => 
-                                      v.toLowerCase().includes(searchTerm)
-                                    );
-                                    if (matchingValues.length > 0) {
-                                      const newSelected = new Set(filters[col.key]?.selectedValues || []);
-                                      matchingValues.forEach(v => newSelected.add(v));
-                                      updateFilter(col.key, { selectedValues: newSelected });
-                                      (e.target as HTMLInputElement).value = '';
-                                      // Reset visibility
-                                      const accordionContent = (e.target as HTMLElement).closest('[data-state]');
-                                      if (accordionContent) {
-                                        accordionContent.querySelectorAll('[data-filter-value]').forEach((chip: Element) => {
-                                          (chip as HTMLElement).style.display = '';
-                                        });
-                                      }
-                                    }
-                                  }
-                                }
-                              }}
-                            />
-                            <p className="text-[10px] text-muted-foreground">Press Enter to auto-select matching options</p>
-                          </div>
-
-                          {/* Quick Actions */}
-                          <div className="flex gap-2 mb-3">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="h-7 text-xs flex-1"
-                              onClick={() => {
-                                updateFilter(col.key, { selectedValues: new Set(allVals) });
-                              }}
+                          <div className="mb-3 flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 flex-1 text-xs"
+                              onClick={() => updateFilter(col.key, { selectedValues: new Set(allVals) })}
                             >
                               Select All
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="h-7 text-xs flex-1"
-                              onClick={() => {
-                                updateFilter(col.key, { selectedValues: new Set() });
-                              }}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 flex-1 text-xs"
+                              onClick={() => updateFilter(col.key, { selectedValues: new Set() })}
                             >
                               Clear All
                             </Button>
                           </div>
-                          
-                          {/* Filter Chips */}
-                          <div className="accordion-content-wrapper flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+
+                          <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto">
                             {allVals.map((value) => {
                               const isSelected = filters[col.key]?.selectedValues.has(value);
                               return (
                                 <button
                                   key={value}
-                                  data-filter-value={value}
                                   className={cn(
-                                    "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all border",
-                                    isSelected 
-                                      ? "bg-primary text-primary-foreground border-primary shadow-sm" 
-                                      : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
+                                    'flex max-w-full items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+                                    isSelected
+                                      ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                                      : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted'
                                   )}
                                   onClick={() => {
                                     const newSelected = new Set(filters[col.key]?.selectedValues || []);
-                                    if (isSelected) {
-                                      newSelected.delete(value);
-                                    } else {
-                                      newSelected.add(value);
-                                    }
+                                    if (isSelected) newSelected.delete(value);
+                                    else newSelected.add(value);
                                     updateFilter(col.key, { selectedValues: newSelected });
                                   }}
                                 >
-                                  {isSelected && <Check className="h-3 w-3" />}
-                                  {value || '(Blank)'}
+                                  {isSelected && <Check className="h-3 w-3 shrink-0" />}
+                                  <span className="truncate">{value || '(Blank)'}</span>
                                 </button>
                               );
                             })}
@@ -1012,90 +948,75 @@ export default function Reports() {
                 </Accordion>
               </ScrollArea>
 
-              {/* Apply Button */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border">
-                <Button 
-                  className="w-full h-11 text-sm font-medium"
-                  onClick={() => setMobileFilterOpen(false)}
-                >
+              <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-background p-4">
+                <Button className="h-11 w-full text-sm font-medium" onClick={() => setMobileFilterOpen(false)}>
                   Apply Filters ({totalRecords} results)
                 </Button>
               </div>
             </SheetContent>
           </Sheet>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 gap-3">
+          {/* Cards */}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {paginatedRecords.length === 0 ? (
-              <Card className="p-8 text-center text-muted-foreground">
-                No records found
-              </Card>
+              <Card className="p-8 text-center text-sm text-muted-foreground md:col-span-2">No records found</Card>
             ) : (
               paginatedRecords.map((record, index) => {
                 const recordAny = record as Record<string, string>;
                 const displayName = recordAny.employeeName || recordAny.name || '-';
+                const detailCols = columns.filter(
+                  (c) => !['epNumber', 'employeeName', 'name', 'status', 'actions', 'timePairs'].includes(c.key)
+                );
+                const hasPunches = 'timePairs' in recordAny;
+
                 return (
-                  <Card 
-                    key={`${record.epNumber}-${record.date}-${index}`} 
-                    className="overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                  <Card
+                    key={`${record.epNumber}-${recordAny.date}-${index}`}
+                    className="overflow-hidden rounded-2xl border-border shadow-sm transition-shadow hover:shadow-md"
                   >
-                    {/* Card Header */}
-                    <div className="bg-gradient-to-r from-[#1a4480] to-[#2c5aa0] text-white px-4 py-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-bold text-base">{record.epNumber}</span>
-                        {getStatusBadge(record.status)}
+                    <div className="flex items-start justify-between gap-2 bg-gradient-to-r from-[#1a4480] to-[#2c5aa0] px-4 py-3 text-white">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-bold">{record.epNumber}</div>
+                        <div className="truncate text-xs text-white/85">{displayName}</div>
                       </div>
-                      <span className="text-sm text-white/90 truncate block">{displayName}</span>
+                      <div className="shrink-0">{getStatusBadge(recordAny.status)}</div>
                     </div>
-                    
-                    {/* Card Body - Improved Layout */}
-                    <div className="p-4 space-y-3">
-                      {/* Date & Shift Row */}
-                      <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Date:</span>
-                          <span className="text-sm font-medium">{recordAny.date || '-'}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">Shift:</span>
-                          <Badge variant="outline" className="text-xs font-semibold">
-                            {recordAny.shift || '-'}
-                          </Badge>
-                        </div>
-                      </div>
 
-                      {/* Time Pairs Section */}
-                      <div className="space-y-2">
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Punch Times</span>
-                        <div className="grid grid-cols-3 gap-2">
-                          {['timePair1', 'timePair2', 'timePair3'].map((key, idx) => (
-                            <div key={key} className="bg-muted/30 rounded-lg p-2 text-center">
-                              <div className="text-[10px] text-muted-foreground mb-1">Pair {idx + 1}</div>
-                              <div className="text-xs font-medium">{recordAny[key] || '-'}</div>
+                    <div className="space-y-3 p-4">
+                      {hasPunches && (
+                        <div>
+                          <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                            Punch Times
+                          </div>
+                          {renderCell(record, 'timePairs')}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-3">
+                        {detailCols.map((col) => (
+                          <div key={col.key} className="min-w-0 text-center">
+                            <div className="truncate text-[10px] uppercase text-muted-foreground">{col.label}</div>
+                            <div className="truncate text-xs font-semibold text-foreground" title={recordAny[col.key]}>
+                              {recordAny[col.key] || '-'}
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
 
-                      {/* Hours & OT Section */}
-                      <div className="grid grid-cols-4 gap-2 pt-2 border-t border-border/50">
-                        <div className="text-center">
-                          <div className="text-[10px] text-muted-foreground">HRS</div>
-                          <div className="text-sm font-semibold text-emerald-600">{recordAny.hrs || '-'}</div>
+                      {columns.some((c) => c.key === 'actions') && (
+                        <div className="flex justify-end gap-1 border-t border-border/60 pt-2">
+                          <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-xs">
+                            <FileText className="h-3.5 w-3.5" /> View
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 gap-1.5 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" /> Delete
+                          </Button>
                         </div>
-                        <div className="text-center">
-                          <div className="text-[10px] text-muted-foreground">OVERSTAY</div>
-                          <div className="text-sm font-semibold text-amber-600">{recordAny.overstay || '-'}</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-[10px] text-muted-foreground">OT</div>
-                          <div className="text-sm font-semibold text-blue-600">{recordAny.ot || '-'}</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-[10px] text-muted-foreground">OT DAYS</div>
-                          <div className="text-sm font-semibold text-purple-600">{recordAny.otDays || '-'}</div>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </Card>
                 );
@@ -1104,77 +1025,57 @@ export default function Reports() {
           </div>
 
           {/* Mobile Pagination */}
-          {totalPages >= 1 && (
-            <Card className="p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">
-                  {startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
+          <Card className="rounded-2xl p-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">
+                {totalRecords === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
+              </span>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="px-2 text-sm font-medium">
+                  {currentPage}/{Math.max(totalPages, 1)}
                 </span>
-                <div className="flex items-center gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 w-8 p-0" 
-                    onClick={() => setCurrentPage(1)} 
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" /><ChevronLeft className="h-4 w-4 -ml-2.5" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 w-8 p-0" 
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm px-2 font-medium">{currentPage}/{totalPages}</span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 w-8 p-0" 
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
-                    disabled={currentPage === totalPages}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 w-8 p-0" 
-                    onClick={() => setCurrentPage(totalPages)} 
-                    disabled={currentPage === totalPages}
-                  >
-                    <ChevronRight className="h-4 w-4" /><ChevronRight className="h-4 w-4 -ml-2.5" />
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            </Card>
-          )}
+            </div>
+          </Card>
         </div>
       ) : (
-        /* Desktop Table View */
-        <Card className="border-border shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs border-collapse min-w-[1100px]">
-              <thead>
-                <tr className="bg-[#1a4480] text-white">
-                  {columns.map((col, idx) => (
-                    <th 
-                      key={col.key}
-                      className={cn(
-                        "px-2 py-2 font-semibold whitespace-nowrap",
-                        idx < columns.length - 1 && "border-r border-white/20",
-                        col.align === 'center' && "text-center",
-                        col.align === 'left' && "text-left"
-                      )}
-                    >
-                      <div className={cn(
-                        "flex items-center",
-                        col.align === 'center' && "justify-center"
-                      )}>
-                        {col.label}
+        /* Desktop Table — fixed layout, always fits the viewport */
+        <Card className="w-full max-w-full overflow-hidden rounded-2xl border-border shadow-sm">
+          <table className="w-full table-fixed border-collapse text-xs">
+            <thead>
+              <tr className="bg-[#1a4480] text-white">
+                {columns.map((col, idx) => (
+                  <th
+                    key={col.key}
+                    className={cn(
+                      'px-2 py-2.5 font-semibold',
+                      col.width,
+                      col.responsive,
+                      idx < columns.length - 1 && 'border-r border-white/15',
+                      col.align === 'center' ? 'text-center' : 'text-left'
+                    )}
+                  >
+                    <div className={cn('flex min-w-0 items-center', col.align === 'center' && 'justify-center')}>
+                      <span className="truncate">{col.label}</span>
+                      {col.key !== 'actions' && (
                         <FilterDropdown
                           column={col.key}
                           label={col.label}
@@ -1186,88 +1087,130 @@ export default function Reports() {
                           onSort={(dir) => handleSort(col.key, dir)}
                           onClearSort={() => handleClearSort(col.key)}
                         />
-                      </div>
-                    </th>
-                  ))}
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="py-10 text-center text-muted-foreground">
+                    No records found
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {paginatedRecords.length === 0 ? (
-                  <tr>
-                    <td colSpan={columns.length} className="text-center py-8 text-muted-foreground">
-                      No records found
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedRecords.map((record, index) => {
-                    const isEven = index % 2 === 0;
-                    return (
-                      <tr 
-                        key={`${record.epNumber}-${record.date}-${index}`} 
-                        className={cn(
-                          'hover:bg-blue-50 transition-colors border-b border-border/30',
-                          isEven ? 'bg-white' : 'bg-slate-50'
-                        )}
-                      >
-                        {columns.map((col, idx) => (
-                          <td 
-                            key={col.key}
-                            className={cn(
-                              "px-2 py-1.5 whitespace-nowrap",
-                              idx < columns.length - 1 && "border-r border-border/50",
-                              col.align === 'center' && "text-center",
-                              col.key === 'epNumber' && "font-medium"
-                            )}
-                          >
-                            {renderCell(record, col.key)}
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+              ) : (
+                paginatedRecords.map((record, index) => {
+                  const recordAny = record as Record<string, string>;
+                  return (
+                    <tr
+                      key={`${record.epNumber}-${recordAny.date}-${index}`}
+                      className={cn(
+                        'border-b border-border/40 transition-colors hover:bg-primary/5',
+                        index % 2 === 0 ? 'bg-card' : 'bg-muted/30'
+                      )}
+                    >
+                      {columns.map((col, idx) => (
+                        <td
+                          key={col.key}
+                          title={col.key === 'timePairs' ? recordAny[col.key] : undefined}
+                          className={cn(
+                            'px-2 py-2 align-middle',
+                            col.width,
+                            col.responsive,
+                            idx < columns.length - 1 && 'border-r border-border/40',
+                            col.align === 'center' ? 'text-center' : 'text-left',
+                            col.key === 'epNumber' && 'font-medium'
+                          )}
+                        >
+                          {['status', 'actions', 'timePairs'].includes(col.key) ? (
+                            renderCell(record, col.key)
+                          ) : (
+                            <span className="block truncate" title={recordAny[col.key]}>
+                              {recordAny[col.key] || '-'}
+                            </span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
 
           {/* Pagination Footer */}
-          {totalPages >= 1 && (
-            <div className="flex items-center justify-between border-t border-border px-3 py-1.5 bg-muted/30">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-muted-foreground">
-                  {startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
-                </span>
-                <Select value={pageSize.toString()} onValueChange={(v) => { setPageSize(Number(v)); setCurrentPage(1); }}>
-                  <SelectTrigger className="h-5 w-12 text-[10px] px-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover z-50">
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="20">20</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                    <SelectItem value="100">100</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-                  <ChevronLeft className="h-3 w-3" /><ChevronLeft className="h-3 w-3 -ml-2" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
-                  <ChevronLeft className="h-3 w-3" />
-                </Button>
-                <span className="text-[10px] px-1.5">{currentPage}/{totalPages}</span>
-                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
-                  <ChevronRight className="h-3 w-3" /><ChevronRight className="h-3 w-3 -ml-2" />
-                </Button>
-              </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/30 px-3 py-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-muted-foreground">
+                {totalRecords === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + pageSize, totalRecords)} of {totalRecords}
+              </span>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={(v) => {
+                  setPageSize(Number(v));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="h-7 w-16 px-2 text-[11px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="z-50 bg-popover">
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          )}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <ChevronLeft className="-ml-2 h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+              <span className="px-1.5 text-[11px] font-medium">
+                {currentPage}/{Math.max(totalPages, 1)}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage >= totalPages}
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+                <ChevronRight className="-ml-2 h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
         </Card>
       )}
     </div>
   );
 }
+
