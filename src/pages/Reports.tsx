@@ -278,33 +278,36 @@ function FilterDropdown({
   );
 }
 
-// Column definitions per report type
+// Column definitions per report type.
+// `width` keeps the table fixed-layout so it always fits the viewport (no horizontal scroll),
+// `responsive` progressively reveals lower-priority columns on wider screens.
 const attendanceColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const },
-  { key: 'employeeName', label: 'NAME', align: 'left' as const },
-  { key: 'date', label: 'DATE', align: 'center' as const },
-  { key: 'shift', label: 'SHIFT', align: 'center' as const },
-  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const },
-  { key: 'hrs', label: 'HRS', align: 'center' as const },
-  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const },
-  { key: 'status', label: 'STATUS', align: 'center' as const },
-  { key: 'ot', label: 'OT', align: 'center' as const },
-  { key: 'otDays', label: 'OT DAYS', align: 'center' as const },
-  { key: 'actions', label: 'ACTIONS', align: 'center' as const },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[12%]', responsive: '' },
+  { key: 'employeeName', label: 'NAME', align: 'left' as const, width: 'w-[16%]', responsive: '' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[10%]', responsive: '' },
+  { key: 'shift', label: 'SHIFT', align: 'center' as const, width: 'w-[6%]', responsive: 'hidden xl:table-cell' },
+  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const, width: 'w-[22%]', responsive: '' },
+  { key: 'hrs', label: 'HRS', align: 'center' as const, width: 'w-[8%]', responsive: '' },
+  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const, width: 'w-[9%]', responsive: 'hidden 2xl:table-cell' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[8%]', responsive: '' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[7%]', responsive: 'hidden xl:table-cell' },
+  { key: 'otDays', label: 'OT DAYS', align: 'center' as const, width: 'w-[8%]', responsive: 'hidden 2xl:table-cell' },
+  { key: 'actions', label: 'ACTIONS', align: 'center' as const, width: 'w-[8%]', responsive: '' },
 ];
 
 const arcSummaryColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const },
-  { key: 'name', label: 'NAME', align: 'center' as const },
-  { key: 'date', label: 'DATE', align: 'center' as const },
-  { key: 'contractor', label: 'CONTRACTOR', align: 'center' as const },
-  { key: 'trade', label: 'TRADE', align: 'center' as const },
-  { key: 'contract', label: 'CONTRACT', align: 'center' as const },
-  { key: 'status', label: 'STATUS', align: 'center' as const },
-  { key: 'mandays', label: 'MANDAYS', align: 'center' as const },
-  { key: 'regularHr', label: 'REGULAR HR', align: 'center' as const },
-  { key: 'ot', label: 'OT', align: 'center' as const },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[13%]', responsive: '' },
+  { key: 'name', label: 'NAME', align: 'left' as const, width: 'w-[15%]', responsive: '' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[10%]', responsive: '' },
+  { key: 'contractor', label: 'CONTRACTOR', align: 'left' as const, width: 'w-[16%]', responsive: '' },
+  { key: 'trade', label: 'TRADE', align: 'center' as const, width: 'w-[11%]', responsive: '' },
+  { key: 'contract', label: 'CONTRACT', align: 'center' as const, width: 'w-[10%]', responsive: 'hidden 2xl:table-cell' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[10%]', responsive: '' },
+  { key: 'mandays', label: 'MANDAYS', align: 'center' as const, width: 'w-[9%]', responsive: '' },
+  { key: 'regularHr', label: 'REG HR', align: 'center' as const, width: 'w-[9%]', responsive: 'hidden xl:table-cell' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[7%]', responsive: 'hidden xl:table-cell' },
 ];
+
 
 // Dummy ARC Summary data
 const arcSummaryData = [
