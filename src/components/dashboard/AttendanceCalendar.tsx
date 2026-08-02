@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, X, User } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { attendanceRecords, employees } from '@/data/mockData';
 import { cn } from '@/lib/utils';
@@ -121,94 +121,91 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
     }
   };
 
-  const getStatusColor = (status: AttendanceStatus | null, isWeekend: boolean) => {
-    if (!status) {
-      return isWeekend ? 'text-muted-foreground' : 'text-foreground';
-    }
-    switch (status) {
-      case 'Present':
-        return 'bg-emerald-500 text-white';
-      case 'Absent':
-        return 'bg-red-500 text-white';
-      case 'Partial Day':
-      case 'On Leave':
-        return 'bg-amber-500 text-white';
-      case 'Holiday':
-        return 'bg-blue-500 text-white';
-      default:
-        return isWeekend ? 'text-muted-foreground' : 'text-foreground';
-    }
+  const statusStyles: Record<AttendanceStatus, { tile: string; dot: string; label: string }> = {
+    'Present': { tile: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200', dot: 'bg-emerald-500', label: 'Present' },
+    'Absent': { tile: 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200', dot: 'bg-red-500', label: 'Absent' },
+    'Partial Day': { tile: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200', dot: 'bg-amber-500', label: 'Partial' },
+    'On Leave': { tile: 'bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200', dot: 'bg-violet-500', label: 'Leave' },
+    'Holiday': { tile: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200', dot: 'bg-blue-500', label: 'Holiday' },
   };
 
+  const legend: AttendanceStatus[] = ['Present', 'Absent', 'Partial Day', 'On Leave', 'Holiday'];
+
   return (
-    <Card className="overflow-hidden w-full md:w-[280px] lg:w-[320px] xl:w-[360px]">
+    <Card className="w-full overflow-hidden rounded-2xl border-border shadow-sm md:w-[300px] lg:w-[340px] xl:w-[372px]">
       {/* Header */}
-      <div className="bg-primary/5 border-b px-3 md:px-2 lg:px-4 py-2 md:py-2 lg:py-3">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="h-4 w-4 md:h-4 md:w-4 lg:h-5 lg:w-5 text-primary" />
-          <div>
-            <h3 className="font-semibold text-sm md:text-xs lg:text-sm text-foreground">Attendance Calendar</h3>
-            <p className="text-xs text-muted-foreground hidden lg:block">
-              Dashboard: {months[selectedMonth]} {selectedYear}
+      <div className="border-b border-border bg-gradient-to-r from-primary/10 to-primary/[0.03] px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <CalendarIcon className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <h3 className="font-heading text-sm font-semibold tracking-tight text-foreground">Attendance Calendar</h3>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {months[selectedMonth]} {selectedYear}
             </p>
           </div>
         </div>
       </div>
-      
-      <CardContent className="p-3 md:p-2 lg:p-4 space-y-3 md:space-y-2 lg:space-y-4">
-        {/* Search Input */}
-        <div className="flex gap-1.5 md:gap-1 lg:gap-2">
+
+      <CardContent className="space-y-3 p-3 lg:p-4">
+        {/* Search */}
+        <div className="flex gap-2">
           <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="PP5000039084"
+              placeholder="Search EP no or name"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pr-8 h-9 md:h-8 lg:h-10 font-mono text-xs md:text-[11px] lg:text-sm border-2"
+              className="h-9 rounded-lg pl-8 pr-8 text-xs"
+              aria-label="Search employee"
             />
             {search && (
               <button
                 onClick={handleClearSearch}
+                aria-label="Clear"
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleClearSearch}
-            className="h-9 w-9 md:h-8 md:w-8 lg:h-10 lg:w-10 shrink-0"
-          >
-            <X className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            size="icon"
-            onClick={handleSearch}
-            className="h-9 w-9 md:h-8 md:w-8 lg:h-10 lg:w-10 shrink-0 bg-primary hover:bg-primary/90"
-          >
+          <Button size="icon" onClick={handleSearch} className="h-9 w-9 shrink-0 rounded-lg" aria-label="Search">
             <Search className="h-3.5 w-3.5" />
           </Button>
         </div>
 
-        {/* Month Navigation */}
-        <div className="flex items-center justify-between bg-muted/30 rounded-lg px-1.5 md:px-1 lg:px-2 py-1">
-          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-7 w-7 md:h-6 md:w-6 lg:h-8 lg:w-8">
-            <ChevronLeft className="h-3.5 w-3.5" />
+        {/* Employee */}
+        {selectedEmployee && (
+          <div className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">
+              {selectedEmployee.name.charAt(0)}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold text-foreground">{selectedEmployee.name}</p>
+              <p className="truncate font-mono text-[10px] text-muted-foreground">{selectedEmployee.epNumber}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Month navigation */}
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-1 py-1">
+          <Button variant="ghost" size="icon" onClick={handlePrevMonth} className="h-7 w-7 rounded-lg" aria-label="Previous month">
+            <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-1">
             <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
-              <SelectTrigger className="w-auto h-7 md:h-6 lg:h-8 text-xs md:text-[11px] lg:text-sm px-2 border-0 bg-transparent font-medium">
+              <SelectTrigger className="h-7 w-auto border-0 bg-transparent px-2 text-xs font-semibold">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {months.map((month, idx) => (
-                  <SelectItem key={month} value={String(idx)} className="text-xs">{month.substring(0, 3)}</SelectItem>
+                  <SelectItem key={month} value={String(idx)} className="text-xs">{month}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
-              <SelectTrigger className="w-auto h-7 md:h-6 lg:h-8 text-xs md:text-[11px] lg:text-sm px-1.5 border-0 bg-transparent font-medium">
+              <SelectTrigger className="h-7 w-auto border-0 bg-transparent px-1.5 text-xs font-semibold">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -218,90 +215,82 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
               </SelectContent>
             </Select>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-7 w-7 md:h-6 md:w-6 lg:h-8 lg:w-8">
-            <ChevronRight className="h-3.5 w-3.5" />
+          <Button variant="ghost" size="icon" onClick={handleNextMonth} className="h-7 w-7 rounded-lg" aria-label="Next month">
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Employee Name */}
-        {selectedEmployee && (
-          <div className="flex items-center gap-2 py-1.5 md:py-1 lg:py-2 border-b">
-            <User className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-semibold text-xs md:text-[11px] lg:text-sm uppercase tracking-wide truncate">
-              {selectedEmployee.name}
-            </span>
-          </div>
-        )}
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-1 md:gap-1 lg:gap-2 text-center">
-          <div>
-            <p className="text-lg md:text-lg lg:text-xl font-bold text-emerald-600">{calendarData.stats.present}</p>
-            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Present</p>
-          </div>
-          <div>
-            <p className="text-lg md:text-lg lg:text-xl font-bold text-red-500">{calendarData.stats.absent}</p>
-            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Absent</p>
-          </div>
-          <div>
-            <p className="text-lg md:text-lg lg:text-xl font-bold text-amber-500">{calendarData.stats.exceptions}</p>
-            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Exc</p>
-          </div>
-          <div>
-            <p className="text-lg md:text-lg lg:text-xl font-bold text-muted-foreground">{calendarData.stats.total}</p>
-            <p className="text-[10px] md:text-xs lg:text-xs text-muted-foreground">Total</p>
-          </div>
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {[
+            { value: calendarData.stats.present, label: 'Present', cls: 'text-emerald-600 bg-emerald-50' },
+            { value: calendarData.stats.absent, label: 'Absent', cls: 'text-red-600 bg-red-50' },
+            { value: calendarData.stats.exceptions, label: 'Exc', cls: 'text-amber-600 bg-amber-50' },
+            { value: calendarData.stats.total, label: 'Total', cls: 'text-slate-600 bg-muted' },
+          ].map((s) => (
+            <div key={s.label} className={cn('rounded-xl px-1 py-2 text-center', s.cls)}>
+              <p className="text-base font-bold leading-none tabular-nums">{s.value}</p>
+              <p className="mt-1 text-[10px] font-medium opacity-80">{s.label}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Calendar Grid */}
-        <div className="space-y-1 md:space-y-0.5 lg:space-y-2">
-          {/* Weekday Headers */}
-          <div className="grid grid-cols-7 gap-0.5">
+        {/* Calendar grid */}
+        <div className="space-y-1.5">
+          <div className="grid grid-cols-7 gap-1">
             {weekDays.map((day, idx) => (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className={cn(
-                  "text-center text-[10px] md:text-xs lg:text-xs font-semibold py-1 md:py-1 lg:py-2",
-                  idx === 0 || idx === 6 ? "text-muted-foreground" : "text-foreground"
+                  'text-center text-[10px] font-semibold uppercase tracking-wide',
+                  idx === 0 || idx === 6 ? 'text-muted-foreground/70' : 'text-muted-foreground'
                 )}
               >
                 {day}
               </div>
             ))}
           </div>
-          
-          {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-0.5">
-            {/* Empty cells for offset */}
+
+          <div className="grid grid-cols-7 gap-1">
             {Array.from({ length: calendarData.firstDayOffset }).map((_, idx) => (
               <div key={`empty-${idx}`} className="aspect-square" />
             ))}
-            
-            {/* Day cells */}
+
             {calendarData.days.map(({ day, status, isWeekend }) => {
-              const hasStatus = status !== null;
-              const colorClass = getStatusColor(status, isWeekend);
-              
+              const style = status ? statusStyles[status] : null;
               return (
-                <div
+                <button
                   key={day}
-                  className="aspect-square flex items-center justify-center"
+                  type="button"
+                  title={status ? `${day} ${months[selectedMonth]} — ${status}` : `${day} ${months[selectedMonth]}`}
+                  className={cn(
+                    'relative flex aspect-square flex-col items-center justify-center rounded-lg text-[11px] font-semibold transition-all hover:ring-2 hover:ring-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                    style
+                      ? style.tile
+                      : isWeekend
+                        ? 'bg-muted/40 text-muted-foreground/70'
+                        : 'bg-card text-foreground ring-1 ring-inset ring-border'
+                  )}
                 >
-                  <div
-                    className={cn(
-                      "w-6 h-6 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded-full flex items-center justify-center text-[11px] md:text-xs lg:text-sm font-medium transition-transform hover:scale-110 cursor-pointer",
-                      hasStatus ? colorClass : (isWeekend ? "text-muted-foreground" : "text-foreground hover:bg-muted")
-                    )}
-                    title={status ? `Day ${day}: ${status}` : `Day ${day}`}
-                  >
-                    {day}
-                  </div>
-                </div>
+                  <span className="leading-none">{day}</span>
+                  {style && <span className={cn('mt-1 h-1 w-1 rounded-full', style.dot)} />}
+                </button>
               );
             })}
           </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-x-3 gap-y-1.5 border-t border-border pt-3">
+          {legend.map((s) => (
+            <span key={s} className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+              <span className={cn('h-2 w-2 rounded-sm', statusStyles[s].dot)} />
+              {statusStyles[s].label}
+            </span>
+          ))}
         </div>
       </CardContent>
     </Card>
   );
 }
+
