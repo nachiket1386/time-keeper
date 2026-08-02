@@ -564,8 +564,9 @@ export default function Reports() {
     setCurrentPage(1);
   };
 
-  // Filter records
+  // Filter records (column filters + global search)
   const filteredRecords = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return enrichedRecords.filter(record => {
       for (const col of columns) {
         const filter = filters[col.key];
@@ -573,9 +574,14 @@ export default function Reports() {
           return false;
         }
       }
+      if (q) {
+        const haystack = Object.values(record as Record<string, string>).join(' ').toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
       return true;
     });
-  }, [enrichedRecords, filters]);
+  }, [enrichedRecords, filters, columns, searchQuery]);
+
 
   // Sort records
   const sortedRecords = useMemo(() => {
