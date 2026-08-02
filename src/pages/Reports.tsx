@@ -337,6 +337,8 @@ export default function Reports() {
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   // Get columns based on active tab
   const columns = useMemo(() => {
