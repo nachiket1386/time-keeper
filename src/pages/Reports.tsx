@@ -279,34 +279,34 @@ function FilterDropdown({
 }
 
 // Column definitions per report type.
-// `width` keeps the table fixed-layout so it always fits the viewport (no horizontal scroll),
-// `responsive` progressively reveals lower-priority columns on wider screens.
+// Excel-like fixed pixel widths; the grid scrolls horizontally inside its own container.
 const attendanceColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[12%]', responsive: '' },
-  { key: 'employeeName', label: 'NAME', align: 'left' as const, width: 'w-[16%]', responsive: '' },
-  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[10%]', responsive: '' },
-  { key: 'shift', label: 'SHIFT', align: 'center' as const, width: 'w-[6%]', responsive: 'hidden xl:table-cell' },
-  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const, width: 'w-[22%]', responsive: '' },
-  { key: 'hrs', label: 'HRS', align: 'center' as const, width: 'w-[8%]', responsive: '' },
-  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const, width: 'w-[9%]', responsive: 'hidden 2xl:table-cell' },
-  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[8%]', responsive: '' },
-  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[7%]', responsive: 'hidden xl:table-cell' },
-  { key: 'otDays', label: 'OT DAYS', align: 'center' as const, width: 'w-[8%]', responsive: 'hidden 2xl:table-cell' },
-  { key: 'actions', label: 'ACTIONS', align: 'center' as const, width: 'w-[8%]', responsive: '' },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[130px] min-w-[130px]' },
+  { key: 'employeeName', label: 'NAME', align: 'left' as const, width: 'w-[170px] min-w-[170px]' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
+  { key: 'shift', label: 'SHIFT', align: 'center' as const, width: 'w-[70px] min-w-[70px]' },
+  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const, width: 'w-[280px] min-w-[280px]' },
+  { key: 'hrs', label: 'HRS', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
+  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
+  { key: 'otDays', label: 'OT DAYS', align: 'center' as const, width: 'w-[90px] min-w-[90px]' },
+  { key: 'actions', label: 'ACTIONS', align: 'center' as const, width: 'w-[90px] min-w-[90px]' },
 ];
 
 const arcSummaryColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[13%]', responsive: '' },
-  { key: 'name', label: 'NAME', align: 'left' as const, width: 'w-[15%]', responsive: '' },
-  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[10%]', responsive: '' },
-  { key: 'contractor', label: 'CONTRACTOR', align: 'left' as const, width: 'w-[16%]', responsive: '' },
-  { key: 'trade', label: 'TRADE', align: 'center' as const, width: 'w-[11%]', responsive: '' },
-  { key: 'contract', label: 'CONTRACT', align: 'center' as const, width: 'w-[10%]', responsive: 'hidden 2xl:table-cell' },
-  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[10%]', responsive: '' },
-  { key: 'mandays', label: 'MANDAYS', align: 'center' as const, width: 'w-[9%]', responsive: '' },
-  { key: 'regularHr', label: 'REG HR', align: 'center' as const, width: 'w-[9%]', responsive: 'hidden xl:table-cell' },
-  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[7%]', responsive: 'hidden xl:table-cell' },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[130px] min-w-[130px]' },
+  { key: 'name', label: 'NAME', align: 'left' as const, width: 'w-[170px] min-w-[170px]' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
+  { key: 'contractor', label: 'CONTRACTOR', align: 'left' as const, width: 'w-[180px] min-w-[180px]' },
+  { key: 'trade', label: 'TRADE', align: 'center' as const, width: 'w-[120px] min-w-[120px]' },
+  { key: 'contract', label: 'CONTRACT', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
+  { key: 'mandays', label: 'MANDAYS', align: 'center' as const, width: 'w-[100px] min-w-[100px]' },
+  { key: 'regularHr', label: 'REG HR', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
 ];
+
 
 
 // Dummy ARC Summary data
