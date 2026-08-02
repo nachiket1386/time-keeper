@@ -778,20 +778,53 @@ export default function Reports() {
         )}
       </div>
 
+      {/* ---------- Search ---------- */}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1);
+          }}
+          placeholder="Search records by EP no, name, date, status…"
+          className="h-11 rounded-xl border-border bg-card pl-10 pr-10 text-sm shadow-sm"
+          aria-label="Search records"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            aria-label="Clear search"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
       {/* ---------- Toolbar ---------- */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium">
             {totalRecords} records
-            {hasActiveFilters && <span className="ml-1 text-primary">(filtered)</span>}
+            {(hasActiveFilters || searchQuery) && <span className="ml-1 text-primary">(filtered)</span>}
           </Badge>
-          {hasActiveFilters && (
-            <Button size="sm" variant="outline" onClick={clearAllFilters} className="h-8 gap-1.5 rounded-full text-xs">
+          {(hasActiveFilters || searchQuery) && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                clearAllFilters();
+                setSearchQuery('');
+              }}
+              className="h-8 gap-1.5 rounded-full text-xs"
+            >
               <FilterX className="h-3 w-3" />
               Clear All
             </Button>
           )}
         </div>
+
 
         {!isHeaderHidden && (
           <div className="flex flex-wrap items-center gap-2">
