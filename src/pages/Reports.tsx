@@ -1100,88 +1100,107 @@ export default function Reports() {
           </Card>
         </div>
       ) : (
-        /* Desktop Table — fixed layout, always fits the viewport */
+        /* Desktop — Excel-like spreadsheet grid: sticky header, sticky row gutter, horizontal scroll */
         <Card className="w-full max-w-full overflow-hidden rounded-2xl border-border shadow-sm">
-          <table className="w-full table-fixed border-collapse text-xs">
-            <thead>
-              <tr className="bg-[#1a4480] text-white">
-                {columns.map((col, idx) => (
-                  <th
-                    key={col.key}
-                    className={cn(
-                      'px-2 py-2.5 font-semibold',
-                      col.width,
-                      col.responsive,
-                      idx < columns.length - 1 && 'border-r border-white/15',
-                      col.align === 'center' ? 'text-center' : 'text-left'
-                    )}
-                  >
-                    <div className={cn('flex min-w-0 items-center', col.align === 'center' && 'justify-center')}>
-                      <span className="truncate">{col.label}</span>
-                      {col.key !== 'actions' && (
-                        <FilterDropdown
-                          column={col.key}
-                          label={col.label}
-                          allValues={uniqueValues[col.key] || []}
-                          filter={filters[col.key] || { selectedValues: new Set() }}
-                          onFilterChange={(f) => updateFilter(col.key, f)}
-                          sortColumn={sortColumn}
-                          sortDirection={sortDirection}
-                          onSort={(dir) => handleSort(col.key, dir)}
-                          onClearSort={() => handleClearSort(col.key)}
-                        />
-                      )}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedRecords.length === 0 ? (
+          <div className="max-h-[calc(100vh-330px)] w-full overflow-auto">
+            <table className="w-max min-w-full border-separate border-spacing-0 text-xs">
+              <thead>
                 <tr>
-                  <td colSpan={columns.length} className="py-10 text-center text-muted-foreground">
-                    No records found
-                  </td>
+                  <th className="sticky left-0 top-0 z-30 w-[46px] min-w-[46px] border-b border-r border-white/20 bg-[#1a4480] px-2 py-2.5 text-center text-[11px] font-semibold text-white/80">
+                    #
+                  </th>
+                  {columns.map((col) => {
+                    const isSorted = sortColumn === col.key;
+                    return (
+                      <th
+                        key={col.key}
+                        className={cn(
+                          'sticky top-0 z-20 border-b border-r border-white/15 bg-[#1a4480] px-3 py-2.5 font-semibold uppercase tracking-wide text-white',
+                          col.width,
+                          col.align === 'center' ? 'text-center' : 'text-left',
+                          isSorted && 'bg-[#245699]'
+                        )}
+                      >
+                        <div className={cn('flex min-w-0 items-center gap-1', col.align === 'center' && 'justify-center')}>
+                          <span className="truncate text-[11px]">{col.label}</span>
+                          {isSorted &&
+                            (sortDirection === 'asc' ? (
+                              <ArrowUpAZ className="h-3 w-3 shrink-0 text-yellow-300" />
+                            ) : (
+                              <ArrowDownAZ className="h-3 w-3 shrink-0 text-yellow-300" />
+                            ))}
+                          {col.key !== 'actions' && (
+                            <FilterDropdown
+                              column={col.key}
+                              label={col.label}
+                              allValues={uniqueValues[col.key] || []}
+                              filter={filters[col.key] || { selectedValues: new Set() }}
+                              onFilterChange={(f) => updateFilter(col.key, f)}
+                              sortColumn={sortColumn}
+                              sortDirection={sortDirection}
+                              onSort={(dir) => handleSort(col.key, dir)}
+                              onClearSort={() => handleClearSort(col.key)}
+                            />
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
                 </tr>
-              ) : (
-                paginatedRecords.map((record, index) => {
-                  const recordAny = record as Record<string, string>;
-                  return (
-                    <tr
-                      key={`${record.epNumber}-${recordAny.date}-${index}`}
-                      className={cn(
-                        'border-b border-border/40 transition-colors hover:bg-primary/5',
-                        index % 2 === 0 ? 'bg-card' : 'bg-muted/30'
-                      )}
-                    >
-                      {columns.map((col, idx) => (
+              </thead>
+              <tbody>
+                {paginatedRecords.length === 0 ? (
+                  <tr>
+                    <td colSpan={columns.length + 1} className="py-12 text-center text-muted-foreground">
+                      No records found
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedRecords.map((record, index) => {
+                    const recordAny = record as Record<string, string>;
+                    const zebra = index % 2 === 0 ? 'bg-card' : 'bg-muted/40';
+                    return (
+                      <tr key={`${record.epNumber}-${recordAny.date}-${index}`} className="group">
                         <td
-                          key={col.key}
-                          title={col.key === 'timePairs' ? recordAny[col.key] : undefined}
                           className={cn(
-                            'px-2 py-2 align-middle',
-                            col.width,
-                            col.responsive,
-                            idx < columns.length - 1 && 'border-r border-border/40',
-                            col.align === 'center' ? 'text-center' : 'text-left',
-                            col.key === 'epNumber' && 'font-medium'
+                            'sticky left-0 z-10 w-[46px] min-w-[46px] border-b border-r border-border px-2 py-2 text-center text-[11px] font-medium text-muted-foreground',
+                            zebra,
+                            'group-hover:bg-primary/10'
                           )}
                         >
-                          {['status', 'actions', 'timePairs'].includes(col.key) ? (
-                            renderCell(record, col.key)
-                          ) : (
-                            <span className="block truncate" title={recordAny[col.key]}>
-                              {recordAny[col.key] || '-'}
-                            </span>
-                          )}
+                          {startIndex + index + 1}
                         </td>
-                      ))}
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                        {columns.map((col) => (
+                          <td
+                            key={col.key}
+                            title={col.key === 'timePairs' ? recordAny[col.key] : undefined}
+                            className={cn(
+                              'border-b border-r border-border px-3 py-2 align-middle tabular-nums transition-colors',
+                              zebra,
+                              'group-hover:bg-primary/5',
+                              col.width,
+                              col.align === 'center' ? 'text-center' : 'text-left',
+                              col.key === 'epNumber' && 'font-medium',
+                              sortColumn === col.key && 'bg-primary/[0.04]'
+                            )}
+                          >
+                            {['status', 'actions', 'timePairs'].includes(col.key) ? (
+                              renderCell(record, col.key)
+                            ) : (
+                              <span className="block truncate" title={recordAny[col.key]}>
+                                {recordAny[col.key] || '-'}
+                              </span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
 
           {/* Pagination Footer */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/30 px-3 py-2">
