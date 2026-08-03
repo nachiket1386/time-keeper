@@ -281,33 +281,34 @@ function FilterDropdown({
 }
 
 // Column definitions per report type.
-// Excel-like fixed pixel widths; the grid scrolls horizontally inside its own container.
+// Excel-like compact fixed pixel widths; the grid scrolls horizontally inside its own container.
 const attendanceColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[130px] min-w-[130px]' },
-  { key: 'employeeName', label: 'NAME', align: 'left' as const, width: 'w-[170px] min-w-[170px]' },
-  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'shift', label: 'SHIFT', align: 'center' as const, width: 'w-[70px] min-w-[70px]' },
-  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const, width: 'w-[280px] min-w-[280px]' },
-  { key: 'hrs', label: 'HRS', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
-  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
-  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
-  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
-  { key: 'otDays', label: 'OT DAYS', align: 'center' as const, width: 'w-[90px] min-w-[90px]' },
-  { key: 'actions', label: 'ACTIONS', align: 'center' as const, width: 'w-[90px] min-w-[90px]' },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[104px] min-w-[104px]' },
+  { key: 'employeeName', label: 'NAME', align: 'left' as const, width: 'w-[132px] min-w-[132px]' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[86px] min-w-[86px]' },
+  { key: 'shift', label: 'SHIFT', align: 'center' as const, width: 'w-[54px] min-w-[54px]' },
+  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const, width: 'w-[220px] min-w-[220px]' },
+  { key: 'hrs', label: 'HRS', align: 'center' as const, width: 'w-[58px] min-w-[58px]' },
+  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const, width: 'w-[74px] min-w-[74px]' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[78px] min-w-[78px]' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[52px] min-w-[52px]' },
+  { key: 'otDays', label: 'OT DAYS', align: 'center' as const, width: 'w-[68px] min-w-[68px]' },
+  { key: 'actions', label: 'ACTIONS', align: 'center' as const, width: 'w-[72px] min-w-[72px]' },
 ];
 
 const arcSummaryColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[130px] min-w-[130px]' },
-  { key: 'name', label: 'NAME', align: 'left' as const, width: 'w-[170px] min-w-[170px]' },
-  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'contractor', label: 'CONTRACTOR', align: 'left' as const, width: 'w-[180px] min-w-[180px]' },
-  { key: 'trade', label: 'TRADE', align: 'center' as const, width: 'w-[120px] min-w-[120px]' },
-  { key: 'contract', label: 'CONTRACT', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'mandays', label: 'MANDAYS', align: 'center' as const, width: 'w-[100px] min-w-[100px]' },
-  { key: 'regularHr', label: 'REG HR', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
-  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[104px] min-w-[104px]' },
+  { key: 'name', label: 'NAME', align: 'left' as const, width: 'w-[132px] min-w-[132px]' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[86px] min-w-[86px]' },
+  { key: 'contractor', label: 'CONTRACTOR', align: 'left' as const, width: 'w-[140px] min-w-[140px]' },
+  { key: 'trade', label: 'TRADE', align: 'center' as const, width: 'w-[92px] min-w-[92px]' },
+  { key: 'contract', label: 'CONTRACT', align: 'center' as const, width: 'w-[88px] min-w-[88px]' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[86px] min-w-[86px]' },
+  { key: 'mandays', label: 'MANDAYS', align: 'center' as const, width: 'w-[76px] min-w-[76px]' },
+  { key: 'regularHr', label: 'REG HR', align: 'center' as const, width: 'w-[70px] min-w-[70px]' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[52px] min-w-[52px]' },
 ];
+
 
 
 
