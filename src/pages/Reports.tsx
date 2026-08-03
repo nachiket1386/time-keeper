@@ -13,13 +13,11 @@ import {
   ArrowUpAZ,
   ArrowDownAZ,
   Filter,
-  X,
   Check,
   SlidersHorizontal,
   PanelLeftClose,
   PanelLeft,
   Trash2,
-  Search,
 
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
