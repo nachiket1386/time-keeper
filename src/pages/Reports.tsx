@@ -13,13 +13,11 @@ import {
   ArrowUpAZ,
   ArrowDownAZ,
   Filter,
-  X,
   Check,
   SlidersHorizontal,
   PanelLeftClose,
   PanelLeft,
   Trash2,
-  Search,
 
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -281,33 +279,34 @@ function FilterDropdown({
 }
 
 // Column definitions per report type.
-// Excel-like fixed pixel widths; the grid scrolls horizontally inside its own container.
+// Excel-like compact fixed pixel widths; the grid scrolls horizontally inside its own container.
 const attendanceColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[130px] min-w-[130px]' },
-  { key: 'employeeName', label: 'NAME', align: 'left' as const, width: 'w-[170px] min-w-[170px]' },
-  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'shift', label: 'SHIFT', align: 'center' as const, width: 'w-[70px] min-w-[70px]' },
-  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const, width: 'w-[280px] min-w-[280px]' },
-  { key: 'hrs', label: 'HRS', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
-  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
-  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
-  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
-  { key: 'otDays', label: 'OT DAYS', align: 'center' as const, width: 'w-[90px] min-w-[90px]' },
-  { key: 'actions', label: 'ACTIONS', align: 'center' as const, width: 'w-[90px] min-w-[90px]' },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[104px] min-w-[104px]' },
+  { key: 'employeeName', label: 'NAME', align: 'left' as const, width: 'w-[132px] min-w-[132px]' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[86px] min-w-[86px]' },
+  { key: 'shift', label: 'SHIFT', align: 'center' as const, width: 'w-[54px] min-w-[54px]' },
+  { key: 'timePairs', label: 'IN - OUT', align: 'center' as const, width: 'w-[220px] min-w-[220px]' },
+  { key: 'hrs', label: 'HRS', align: 'center' as const, width: 'w-[58px] min-w-[58px]' },
+  { key: 'overstay', label: 'OVERSTAY', align: 'center' as const, width: 'w-[74px] min-w-[74px]' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[78px] min-w-[78px]' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[52px] min-w-[52px]' },
+  { key: 'otDays', label: 'OT DAYS', align: 'center' as const, width: 'w-[68px] min-w-[68px]' },
+  { key: 'actions', label: 'ACTIONS', align: 'center' as const, width: 'w-[72px] min-w-[72px]' },
 ];
 
 const arcSummaryColumns = [
-  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[130px] min-w-[130px]' },
-  { key: 'name', label: 'NAME', align: 'left' as const, width: 'w-[170px] min-w-[170px]' },
-  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'contractor', label: 'CONTRACTOR', align: 'left' as const, width: 'w-[180px] min-w-[180px]' },
-  { key: 'trade', label: 'TRADE', align: 'center' as const, width: 'w-[120px] min-w-[120px]' },
-  { key: 'contract', label: 'CONTRACT', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[110px] min-w-[110px]' },
-  { key: 'mandays', label: 'MANDAYS', align: 'center' as const, width: 'w-[100px] min-w-[100px]' },
-  { key: 'regularHr', label: 'REG HR', align: 'center' as const, width: 'w-[95px] min-w-[95px]' },
-  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[80px] min-w-[80px]' },
+  { key: 'epNumber', label: 'EP NO', align: 'left' as const, width: 'w-[104px] min-w-[104px]' },
+  { key: 'name', label: 'NAME', align: 'left' as const, width: 'w-[132px] min-w-[132px]' },
+  { key: 'date', label: 'DATE', align: 'center' as const, width: 'w-[86px] min-w-[86px]' },
+  { key: 'contractor', label: 'CONTRACTOR', align: 'left' as const, width: 'w-[140px] min-w-[140px]' },
+  { key: 'trade', label: 'TRADE', align: 'center' as const, width: 'w-[92px] min-w-[92px]' },
+  { key: 'contract', label: 'CONTRACT', align: 'center' as const, width: 'w-[88px] min-w-[88px]' },
+  { key: 'status', label: 'STATUS', align: 'center' as const, width: 'w-[86px] min-w-[86px]' },
+  { key: 'mandays', label: 'MANDAYS', align: 'center' as const, width: 'w-[76px] min-w-[76px]' },
+  { key: 'regularHr', label: 'REG HR', align: 'center' as const, width: 'w-[70px] min-w-[70px]' },
+  { key: 'ot', label: 'OT', align: 'center' as const, width: 'w-[52px] min-w-[52px]' },
 ];
+
 
 
 
@@ -339,7 +338,7 @@ export default function Reports() {
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  
 
 
   // Get columns based on active tab
@@ -566,9 +565,8 @@ export default function Reports() {
     setCurrentPage(1);
   };
 
-  // Filter records (column filters + global search)
+  // Filter records (column filters)
   const filteredRecords = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
     return enrichedRecords.filter(record => {
       for (const col of columns) {
         const filter = filters[col.key];
@@ -576,13 +574,10 @@ export default function Reports() {
           return false;
         }
       }
-      if (q) {
-        const haystack = Object.values(record as Record<string, string>).join(' ').toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
       return true;
     });
-  }, [enrichedRecords, filters, columns, searchQuery]);
+  }, [enrichedRecords, filters, columns]);
+
 
 
   // Sort records
@@ -780,48 +775,24 @@ export default function Reports() {
         )}
       </div>
 
-      {/* ---------- Search ---------- */}
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setCurrentPage(1);
-          }}
-          placeholder="Search records by EP no, name, date, status…"
-          className="h-11 rounded-xl border-border bg-card pl-10 pr-10 text-sm shadow-sm"
-          aria-label="Search records"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => setSearchQuery('')}
-            aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-
       {/* ---------- Toolbar ---------- */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium">
             {totalRecords} records
-            {(hasActiveFilters || searchQuery) && <span className="ml-1 text-primary">(filtered)</span>}
+            {hasActiveFilters && <span className="ml-1 text-primary">(filtered)</span>}
           </Badge>
-          {(hasActiveFilters || searchQuery) && (
+          {hasActiveFilters && (
             <Button
               size="sm"
               variant="outline"
               onClick={() => {
                 clearAllFilters();
-                setSearchQuery('');
               }}
               className="h-8 gap-1.5 rounded-full text-xs"
             >
               <FilterX className="h-3 w-3" />
+
               Clear All
             </Button>
           )}
@@ -1101,12 +1072,12 @@ export default function Reports() {
         </div>
       ) : (
         /* Desktop — Excel-like spreadsheet grid: sticky header, sticky row gutter, horizontal scroll */
-        <Card className="w-full max-w-full overflow-hidden rounded-2xl border-border shadow-sm">
-          <div className="max-h-[calc(100vh-330px)] w-full overflow-auto">
-            <table className="w-max min-w-full border-separate border-spacing-0 text-xs">
+        <Card className="w-full max-w-full overflow-hidden rounded-lg border-border shadow-sm">
+          <div className="max-h-[calc(100vh-300px)] w-full overflow-auto">
+            <table className="w-max min-w-full border-separate border-spacing-0 text-[11px] leading-tight">
               <thead>
                 <tr>
-                  <th className="sticky left-0 top-0 z-30 w-[46px] min-w-[46px] border-b border-r border-white/20 bg-[#1a4480] px-2 py-2.5 text-center text-[11px] font-semibold text-white/80">
+                  <th className="sticky left-0 top-0 z-30 w-[36px] min-w-[36px] border-b border-r border-white/20 bg-[#1a4480] px-1 py-1 text-center text-[10px] font-semibold text-white/80">
                     #
                   </th>
                   {columns.map((col) => {
@@ -1115,14 +1086,14 @@ export default function Reports() {
                       <th
                         key={col.key}
                         className={cn(
-                          'sticky top-0 z-20 border-b border-r border-white/15 bg-[#1a4480] px-3 py-2.5 font-semibold uppercase tracking-wide text-white',
+                          'sticky top-0 z-20 h-7 border-b border-r border-white/15 bg-[#1a4480] px-1.5 py-1 font-semibold uppercase tracking-wide text-white',
                           col.width,
                           col.align === 'center' ? 'text-center' : 'text-left',
                           isSorted && 'bg-[#245699]'
                         )}
                       >
                         <div className={cn('flex min-w-0 items-center gap-1', col.align === 'center' && 'justify-center')}>
-                          <span className="truncate text-[11px]">{col.label}</span>
+                          <span className="truncate text-[10px]">{col.label}</span>
                           {isSorted &&
                             (sortDirection === 'asc' ? (
                               <ArrowUpAZ className="h-3 w-3 shrink-0 text-yellow-300" />
@@ -1163,7 +1134,7 @@ export default function Reports() {
                       <tr key={`${record.epNumber}-${recordAny.date}-${index}`} className="group">
                         <td
                           className={cn(
-                            'sticky left-0 z-10 w-[46px] min-w-[46px] border-b border-r border-border px-2 py-2 text-center text-[11px] font-medium text-muted-foreground',
+                            'sticky left-0 z-10 w-[36px] min-w-[36px] border-b border-r border-border px-1 py-0.5 text-center text-[10px] font-medium text-muted-foreground',
                             zebra,
                             'group-hover:bg-primary/10'
                           )}
@@ -1175,7 +1146,7 @@ export default function Reports() {
                             key={col.key}
                             title={col.key === 'timePairs' ? recordAny[col.key] : undefined}
                             className={cn(
-                              'border-b border-r border-border px-3 py-2 align-middle tabular-nums transition-colors',
+                              'h-[26px] border-b border-r border-border px-1.5 py-0.5 align-middle tabular-nums transition-colors',
                               zebra,
                               'group-hover:bg-primary/5',
                               col.width,
