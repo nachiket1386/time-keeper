@@ -1074,12 +1074,12 @@ export default function Reports() {
         </div>
       ) : (
         /* Desktop — Excel-like spreadsheet grid: sticky header, sticky row gutter, horizontal scroll */
-        <Card className="w-full max-w-full overflow-hidden rounded-2xl border-border shadow-sm">
-          <div className="max-h-[calc(100vh-330px)] w-full overflow-auto">
-            <table className="w-max min-w-full border-separate border-spacing-0 text-xs">
+        <Card className="w-full max-w-full overflow-hidden rounded-lg border-border shadow-sm">
+          <div className="max-h-[calc(100vh-300px)] w-full overflow-auto">
+            <table className="w-max min-w-full border-separate border-spacing-0 text-[11px] leading-tight">
               <thead>
                 <tr>
-                  <th className="sticky left-0 top-0 z-30 w-[46px] min-w-[46px] border-b border-r border-white/20 bg-[#1a4480] px-2 py-2.5 text-center text-[11px] font-semibold text-white/80">
+                  <th className="sticky left-0 top-0 z-30 w-[36px] min-w-[36px] border-b border-r border-white/20 bg-[#1a4480] px-1 py-1 text-center text-[10px] font-semibold text-white/80">
                     #
                   </th>
                   {columns.map((col) => {
@@ -1088,14 +1088,14 @@ export default function Reports() {
                       <th
                         key={col.key}
                         className={cn(
-                          'sticky top-0 z-20 border-b border-r border-white/15 bg-[#1a4480] px-3 py-2.5 font-semibold uppercase tracking-wide text-white',
+                          'sticky top-0 z-20 h-7 border-b border-r border-white/15 bg-[#1a4480] px-1.5 py-1 font-semibold uppercase tracking-wide text-white',
                           col.width,
                           col.align === 'center' ? 'text-center' : 'text-left',
                           isSorted && 'bg-[#245699]'
                         )}
                       >
                         <div className={cn('flex min-w-0 items-center gap-1', col.align === 'center' && 'justify-center')}>
-                          <span className="truncate text-[11px]">{col.label}</span>
+                          <span className="truncate text-[10px]">{col.label}</span>
                           {isSorted &&
                             (sortDirection === 'asc' ? (
                               <ArrowUpAZ className="h-3 w-3 shrink-0 text-yellow-300" />
@@ -1136,7 +1136,7 @@ export default function Reports() {
                       <tr key={`${record.epNumber}-${recordAny.date}-${index}`} className="group">
                         <td
                           className={cn(
-                            'sticky left-0 z-10 w-[46px] min-w-[46px] border-b border-r border-border px-2 py-2 text-center text-[11px] font-medium text-muted-foreground',
+                            'sticky left-0 z-10 w-[36px] min-w-[36px] border-b border-r border-border px-1 py-0.5 text-center text-[10px] font-medium text-muted-foreground',
                             zebra,
                             'group-hover:bg-primary/10'
                           )}
@@ -1148,7 +1148,7 @@ export default function Reports() {
                             key={col.key}
                             title={col.key === 'timePairs' ? recordAny[col.key] : undefined}
                             className={cn(
-                              'border-b border-r border-border px-3 py-2 align-middle tabular-nums transition-colors',
+                              'h-[26px] border-b border-r border-border px-1.5 py-0.5 align-middle tabular-nums transition-colors',
                               zebra,
                               'group-hover:bg-primary/5',
                               col.width,
