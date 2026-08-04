@@ -74,52 +74,57 @@
 
 
   .dark {
-    --background: 215 28% 17%;
+    --background: 212 23% 14%;
     --foreground: 210 40% 96%;
 
-    --card: 215 25% 24%;
+    --card: 212 23% 19%;
     --card-foreground: 210 40% 96%;
 
-    --popover: 215 25% 24%;
+    --popover: 212 23% 19%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 213 94% 68%;
-    --primary-foreground: 215 28% 17%;
+    --primary: 240 74% 69%; /* #7978E9 */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 100% 80%;
 
-    --secondary: 215 20% 32%;
+    --secondary: 212 23% 28%;
     --secondary-foreground: 210 40% 96%;
 
-    --muted: 215 25% 24%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 212 23% 22%;
+    --muted-foreground: 209 23% 66%;
 
-    --accent: 215 25% 24%;
+    --accent: 209 23% 32%;
     --accent-foreground: 210 40% 96%;
 
-    --destructive: 0 62% 45%;
+    --destructive: 357 70% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 60% 40%;
+    --success: 160 55% 38%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 80% 45%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 80% 52%;
+    --warning-foreground: 212 23% 14%;
 
-    --info: 199 80% 45%;
-    --info-foreground: 0 0% 100%;
+    --info: 210 82% 66%;
+    --info-foreground: 212 23% 14%;
 
-    --border: 215 20% 28%;
-    --input: 215 20% 28%;
-    --ring: 213 94% 68%;
+    --border: 209 23% 28%;
+    --input: 209 23% 28%;
+    --ring: 240 74% 69%;
 
-    --sidebar-background: 215 32% 12%;
-    --sidebar-foreground: 213 33% 95%;
-    --sidebar-primary: 213 94% 68%;
-    --sidebar-primary-foreground: 215 28% 17%;
-    --sidebar-accent: 215 25% 20%;
-    --sidebar-accent-foreground: 213 33% 95%;
-    --sidebar-border: 215 25% 22%;
-    --sidebar-ring: 213 94% 68%;
+    --grid-header: 212 23% 20%;
+    --grid-header-foreground: 0 0% 100%;
+
+    --sidebar-background: 212 23% 12%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 240 74% 69%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 209 23% 22%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 209 23% 24%;
+    --sidebar-ring: 240 74% 69%;
   }
+
 }
 
 @layer base {
