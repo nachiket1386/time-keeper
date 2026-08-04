@@ -2,67 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Attendance Management System - Cloud White Professional Design System */
+/* Attendance Management System - Skydash x Stormy Morning Design System */
 
 @layer base {
   :root {
-    /* Cloud White Color Palette */
-    --background: 213 33% 98%; /* #fafbfc */
-    --foreground: 215 28% 17%; /* slate-900 */
+    /* Base surfaces */
+    --background: 210 40% 99%; /* near-white with cool tint */
+    --foreground: 212 23% 21%; /* #2c3947 (deep stormy) */
 
     --card: 0 0% 100%;
-    --card-foreground: 215 28% 17%;
+    --card-foreground: 212 23% 21%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 28% 17%;
+    --popover-foreground: 212 23% 21%;
 
-    --primary: 217 91% 60%; /* #3b82f6 */
+    /* Skydash violet-blue */
+    --primary: 241 40% 48%; /* #4B49AC */
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 240 74% 69%; /* #7978E9 */
 
-    --secondary: 213 20% 93%; /* #e8ecf1 */
-    --secondary-foreground: 215 25% 24%;
+    /* Sail blue */
+    --secondary: 210 91% 87%; /* #BDDDFC */
+    --secondary-foreground: 212 23% 28%; /* #384959 */
 
-    --muted: 213 20% 93%;
-    --muted-foreground: 215 20% 65%; /* #94a3b8 */
+    --muted: 210 50% 96%;
+    --muted-foreground: 209 23% 54%; /* #6A89A7 */
 
-    --accent: 213 100% 96%;
-    --accent-foreground: 215 28% 17%;
+    --accent: 217 100% 80%; /* #98BDFF */
+    --accent-foreground: 212 23% 21%;
 
-    --destructive: 0 84% 60%;
+    /* Tonys pink */
+    --destructive: 357 84% 71%; /* #F3797E */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 45%;
+    --success: 160 62% 40%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 212 23% 21%;
 
-    --info: 199 89% 48%;
-    --info-foreground: 0 0% 100%;
+    --info: 210 82% 74%; /* #88BDF2 */
+    --info-foreground: 212 23% 21%;
 
-    --border: 213 20% 93%;
-    --input: 213 20% 93%;
-    --ring: 217 91% 60%;
+    --border: 210 45% 90%;
+    --input: 210 45% 90%;
+    --ring: 241 40% 48%;
 
     --radius: 0.75rem;
 
-    /* Sidebar - Cloud White Theme */
-    --sidebar-background: 215 28% 17%;
-    --sidebar-foreground: 213 33% 95%;
-    --sidebar-primary: 217 91% 60%;
+    /* Sidebar - stormy blue-gray */
+    --sidebar-background: 212 23% 28%; /* #384959 */
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 241 40% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 24%;
-    --sidebar-accent-foreground: 213 33% 95%;
-    --sidebar-border: 215 25% 28%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-accent: 209 23% 38%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 209 23% 36%;
+    --sidebar-ring: 217 100% 80%;
+
+    /* Data grid */
+    --grid-header: 212 23% 28%;
+    --grid-header-foreground: 0 0% 100%;
 
     /* Chart Colors */
-    --chart-1: 217 91% 60%;
-    --chart-2: 213 20% 65%;
-    --chart-3: 142 71% 45%;
-    --chart-4: 38 92% 50%;
-    --chart-5: 0 84% 60%;
+    --chart-1: 241 40% 48%;
+    --chart-2: 217 100% 80%;
+    --chart-3: 357 84% 71%;
+    --chart-4: 209 23% 54%;
+    --chart-5: 210 82% 74%;
   }
+
 
   .dark {
     --background: 215 28% 17%;
