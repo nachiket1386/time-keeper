@@ -723,14 +723,14 @@ export default function Reports() {
   return (
     <div className="animate-fade-in w-full max-w-full space-y-4 overflow-x-hidden pb-6">
       {/* ---------- Header ---------- */}
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-          <div className="min-w-0 space-y-1">
-            <h1 className="truncate font-heading text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+      <div className="rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-0.5">
+            <h1 className="truncate font-heading text-base font-bold tracking-tight text-foreground sm:text-2xl">
               {headerContent.title}
             </h1>
             {!isHeaderHidden && (
-              <p className="text-xs text-muted-foreground sm:text-sm">
+              <p className="line-clamp-2 text-[11px] text-muted-foreground sm:text-sm">
                 {headerContent.description}
               </p>
             )}
@@ -739,17 +739,17 @@ export default function Reports() {
             size="sm"
             variant={isHeaderHidden ? 'default' : 'outline'}
             onClick={() => setIsHeaderHidden(!isHeaderHidden)}
-            className="h-9 shrink-0 gap-2 self-start rounded-xl px-4 text-sm font-semibold sm:self-auto"
+            className="h-9 w-9 shrink-0 gap-2 rounded-xl p-0 text-sm font-semibold sm:h-9 sm:w-auto sm:px-4"
             title={isHeaderHidden ? 'Show tabs & actions' : 'Hide tabs & actions'}
           >
             {isHeaderHidden ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-            {isHeaderHidden ? 'Show tabs' : 'Hide tabs'}
+            <span className="hidden sm:inline">{isHeaderHidden ? 'Show tabs' : 'Hide tabs'}</span>
           </Button>
         </div>
 
         {/* Report type tabs — single segmented track */}
         {!isHeaderHidden && (
-          <div className="no-scrollbar mt-5 flex items-center gap-1 overflow-x-auto rounded-xl border border-border bg-muted/40 p-1">
+          <div className="no-scrollbar -mx-1 mt-3 flex items-center gap-1 overflow-x-auto rounded-xl border border-border bg-muted/40 p-1 sm:mx-0 sm:mt-5">
             {reportTabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -760,7 +760,7 @@ export default function Reports() {
                     setCurrentPage(1);
                   }}
                   className={cn(
-                    'flex-none whitespace-nowrap rounded-lg px-4 py-2 text-xs font-medium transition-all sm:px-5 sm:py-2.5 sm:text-sm',
+                    'flex-none whitespace-nowrap rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all sm:px-5 sm:py-2.5 sm:text-sm',
                     isActive
                       ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
                       : 'text-muted-foreground hover:bg-card hover:text-primary'
@@ -800,25 +800,26 @@ export default function Reports() {
 
 
         {!isHeaderHidden && (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-1 flex-wrap items-center justify-end gap-2 sm:flex-none">
             <Button
               size="sm"
-              className="h-8 gap-1.5 rounded-full bg-foreground px-4 text-xs text-background hover:bg-foreground/90"
+              className="h-8 flex-1 gap-1.5 rounded-full bg-foreground px-3 text-[11px] text-background hover:bg-foreground/90 sm:flex-none sm:px-4 sm:text-xs"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">
-                Delete {activeTab === 'arc' ? 'ARC Summary' : reportTabs.find((t) => t.id === activeTab)?.label} Data
+                Delete {activeTab === 'arc' ? 'ARC' : reportTabs.find((t) => t.id === activeTab)?.label}
               </span>
             </Button>
             {activeTab === 'attendance' && (
-              <Button size="sm" variant="destructive" className="h-8 gap-1.5 rounded-full px-4 text-xs">
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete All Reports
+              <Button size="sm" variant="destructive" className="h-8 flex-1 gap-1.5 rounded-full px-3 text-[11px] sm:flex-none sm:px-4 sm:text-xs">
+                <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Delete All</span>
               </Button>
             )}
           </div>
         )}
       </div>
+
 
       {/* ---------- Data ---------- */}
       {isMobile ? (
