@@ -988,7 +988,7 @@ export default function Reports() {
                     key={`${record.epNumber}-${recordAny.date}-${index}`}
                     className="overflow-hidden rounded-2xl border-border shadow-sm transition-shadow hover:shadow-md"
                   >
-                    <div className="flex items-start justify-between gap-2 bg-gradient-to-r from-[#1a4480] to-[#2c5aa0] px-4 py-3 text-white">
+                    <div className="flex items-start justify-between gap-2 bg-gradient-to-r from-primary to-[hsl(var(--primary-glow))] px-4 py-3 text-white">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-bold">{record.epNumber}</div>
                         <div className="truncate text-xs text-white/85">{displayName}</div>
@@ -1077,7 +1077,7 @@ export default function Reports() {
             <table className="w-max min-w-full border-separate border-spacing-0 text-[11px] leading-tight">
               <thead>
                 <tr>
-                  <th className="sticky left-0 top-0 z-30 w-[36px] min-w-[36px] border-b border-r border-white/20 bg-[#1a4480] px-1 py-1 text-center text-[10px] font-semibold text-white/80">
+                  <th className="sticky left-0 top-0 z-30 w-[36px] min-w-[36px] border-b border-r border-white/20 bg-[hsl(var(--grid-header))] px-1 py-1 text-center text-[10px] font-semibold text-white/80">
                     #
                   </th>
                   {columns.map((col) => {
@@ -1086,10 +1086,10 @@ export default function Reports() {
                       <th
                         key={col.key}
                         className={cn(
-                          'sticky top-0 z-20 h-7 border-b border-r border-white/15 bg-[#1a4480] px-1.5 py-1 font-semibold uppercase tracking-wide text-white',
+                          'sticky top-0 z-20 h-7 border-b border-r border-white/15 bg-[hsl(var(--grid-header))] px-1.5 py-1 font-semibold uppercase tracking-wide text-white',
                           col.width,
                           col.align === 'center' ? 'text-center' : 'text-left',
-                          isSorted && 'bg-[#245699]'
+                          isSorted && 'bg-primary'
                         )}
                       >
                         <div className={cn('flex min-w-0 items-center gap-1', col.align === 'center' && 'justify-center')}>
