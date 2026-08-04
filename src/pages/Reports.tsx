@@ -724,13 +724,13 @@ export default function Reports() {
     <div className="animate-fade-in w-full max-w-full space-y-4 overflow-x-hidden pb-6">
       {/* ---------- Header ---------- */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="truncate font-heading text-lg font-semibold tracking-tight text-foreground sm:text-2xl">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+          <div className="min-w-0 space-y-1">
+            <h1 className="truncate font-heading text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               {headerContent.title}
             </h1>
             {!isHeaderHidden && (
-              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+              <p className="text-xs text-muted-foreground sm:text-sm">
                 {headerContent.description}
               </p>
             )}
@@ -739,21 +739,19 @@ export default function Reports() {
             size="sm"
             variant={isHeaderHidden ? 'default' : 'outline'}
             onClick={() => setIsHeaderHidden(!isHeaderHidden)}
-            className="h-8 shrink-0 gap-1.5 rounded-full px-3 text-xs"
+            className="h-9 shrink-0 gap-2 self-start rounded-xl px-4 text-sm font-semibold sm:self-auto"
             title={isHeaderHidden ? 'Show tabs & actions' : 'Hide tabs & actions'}
           >
-            {isHeaderHidden ? <PanelLeft className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
-            <span className="hidden sm:inline">{isHeaderHidden ? 'Show' : 'Hide'}</span>
+            {isHeaderHidden ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            {isHeaderHidden ? 'Show tabs' : 'Hide tabs'}
           </Button>
         </div>
 
-        {/* Report type tabs — wrap on every screen size, never scroll sideways */}
+        {/* Report type tabs — single segmented track */}
         {!isHeaderHidden && (
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">
+          <div className="no-scrollbar mt-5 flex items-center gap-1 overflow-x-auto rounded-xl border border-border bg-muted/40 p-1">
             {reportTabs.map((tab) => {
-              const IconComponent = tab.icon;
               const isActive = activeTab === tab.id;
-              const tabStyles = getTabStyles(tab.color, isActive);
               return (
                 <button
                   key={tab.id}
@@ -762,18 +760,20 @@ export default function Reports() {
                     setCurrentPage(1);
                   }}
                   className={cn(
-                    'flex min-w-0 items-center justify-center gap-2 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-all sm:text-sm lg:justify-start lg:px-4',
-                    isActive ? tabStyles.active : tabStyles.inactive
+                    'flex-none whitespace-nowrap rounded-lg px-4 py-2 text-xs font-medium transition-all sm:px-5 sm:py-2.5 sm:text-sm',
+                    isActive
+                      ? 'bg-primary font-semibold text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-card hover:text-primary'
                   )}
                 >
-                  <IconComponent className={cn('h-4 w-4 shrink-0', tabStyles.icon)} />
-                  <span className="truncate">{tab.label}</span>
+                  {tab.label}
                 </button>
               );
             })}
           </div>
         )}
       </div>
+
 
       {/* ---------- Toolbar ---------- */}
       <div className="flex flex-wrap items-center justify-between gap-2">
