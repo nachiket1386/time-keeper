@@ -1,4 +1,5 @@
 import { Bell, Search, ChevronDown, Menu, Sun, Moon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { companies } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
@@ -94,11 +95,18 @@ export function AppHeader() {
       </DropdownMenu>
 
       {/* Notifications */}
-      <Button variant="ghost" size="icon" className="relative">
-        <Bell className="h-5 w-5" />
-        <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground">
-          3
-        </span>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative rounded-full bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary border border-primary/10"
+        asChild
+      >
+        <Link to="/notifications">
+          <Bell className="h-5 w-5" />
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground ring-2 ring-card">
+            3
+          </span>
+        </Link>
       </Button>
 
       {/* User Menu */}
