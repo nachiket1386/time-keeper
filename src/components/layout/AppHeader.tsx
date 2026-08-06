@@ -1,4 +1,5 @@
 import { Bell, Search, ChevronDown, Menu, Sun, Moon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { companies } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
