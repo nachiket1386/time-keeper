@@ -35,13 +35,13 @@ export function MobileHeader() {
         {/* Notifications */}
         <Button
           variant="ghost"
-          size="icon"
-          className="relative h-9 w-9 rounded-full bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary border border-primary/10 overflow-visible"
+          size="sm"
+          className="h-9 min-w-[3.25rem] gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-2.5 text-primary hover:bg-primary/15 hover:text-primary [&_svg]:size-5"
           asChild
         >
-          <Link to="/notifications">
-            <Bell className="h-5 w-5" />
-            <span className="pointer-events-none absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground ring-2 ring-card">
+          <Link to="/notifications" aria-label="Notifications, 3 total">
+            <Bell aria-hidden="true" />
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[11px] font-bold leading-none text-destructive-foreground">
               3
             </span>
           </Link>
