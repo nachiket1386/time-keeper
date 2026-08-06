@@ -33,11 +33,18 @@ export function MobileHeader() {
         )}
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative h-9 w-9">
-          <Bell className="h-5 w-5" />
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-medium text-destructive-foreground">
-            3
-          </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-9 w-9 rounded-full bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary border border-primary/10"
+          asChild
+        >
+          <Link to="/notifications">
+            <Bell className="h-5 w-5" />
+            <span className="absolute -right-0.5 -top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground ring-2 ring-card">
+              3
+            </span>
+          </Link>
         </Button>
 
         {/* User Avatar */}
