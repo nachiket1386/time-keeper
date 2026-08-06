@@ -36,12 +36,12 @@ export function MobileHeader() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-9 w-9 rounded-full bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary border border-primary/10"
+          className="relative h-9 w-9 rounded-full bg-primary/5 text-primary hover:bg-primary/10 hover:text-primary border border-primary/10 overflow-visible"
           asChild
         >
           <Link to="/notifications">
             <Bell className="h-5 w-5" />
-            <span className="absolute -right-0.5 -top-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground ring-2 ring-card">
+            <span className="pointer-events-none absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground ring-2 ring-card">
               3
             </span>
           </Link>
