@@ -355,17 +355,29 @@ export default function Reports() {
 
   // Get columns based on active tab
   const columns = useMemo(() => {
-    if (activeTab === 'arc') {
-      return arcSummaryColumns;
+    switch (activeTab) {
+      case 'arc':
+        return arcSummaryColumns;
+      case 'overtime':
+        return overtimeColumns;
+      case 'regularization':
+        return regularizationColumns;
+      case 'partial':
+        return partialDayColumns;
+      case 'weekoff':
+        return weekOffColumns;
+      default:
+        return attendanceColumns;
     }
-    return attendanceColumns;
   }, [activeTab]);
 
   // Build enriched records with all displayable values
-  const enrichedRecords = useMemo(() => {
-    if (activeTab === 'arc') {
-      return arcSummaryData;
-    }
+  const enrichedRecords = useMemo<Record<string, string>[]>(() => {
+    if (activeTab === 'arc') return arcSummaryData;
+    if (activeTab === 'overtime') return overtimeData;
+    if (activeTab === 'regularization') return regularizationData;
+    if (activeTab === 'partial') return partialDayReportData;
+    if (activeTab === 'weekoff') return weekOffData;
     return attendanceRecords.map((record, index) => {
       const employee = employees.find(e => e.epNumber === record.epNumber);
       
