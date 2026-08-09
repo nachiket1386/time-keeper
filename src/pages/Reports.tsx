@@ -1007,9 +1007,9 @@ export default function Reports() {
             ) : (
               paginatedRecords.map((record, index) => {
                 const recordAny = record as Record<string, string>;
-                const displayName = recordAny.employeeName || recordAny.name || '-';
+                const displayName = recordAny.employeeName || recordAny.name || recordAny.epName || '-';
                 const detailCols = columns.filter(
-                  (c) => !['epNumber', 'employeeName', 'name', 'status', 'actions', 'timePairs'].includes(c.key)
+                  (c) => !['epNumber', 'employeeName', 'name', 'epName', 'status', 'actions', 'timePairs'].includes(c.key)
                 );
                 const hasPunches = 'timePairs' in recordAny;
 
