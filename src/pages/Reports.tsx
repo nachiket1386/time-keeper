@@ -642,6 +642,9 @@ export default function Reports() {
       'L': 'bg-violet-500 text-white',
       'Holiday': 'bg-blue-500 text-white',
       'PH': 'bg-blue-500 text-white',
+      'Approved': 'bg-emerald-500 text-white',
+      'Pending': 'bg-amber-400 text-amber-900',
+      'Rejected': 'bg-red-500 text-white',
     };
     return (
       <Badge className={cn('font-medium text-[10px] px-1.5 py-0 whitespace-nowrap', styles[status] || 'bg-gray-400 text-white')}>
