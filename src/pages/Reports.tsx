@@ -738,6 +738,8 @@ export default function Reports() {
         return { title: 'Partial Day Report', description: 'View and manage partial day attendance records.' };
       case 'regularization':
         return { title: 'Regularization Report', description: 'View and manage attendance regularization requests.' };
+      case 'weekoff':
+        return { title: 'Week-Off Report', description: 'View and manage week-off working records and requests.' };
       case 'comprehensive':
         return { title: 'Comprehensive Report', description: 'Complete attendance data with all metrics combined.' };
       default:
