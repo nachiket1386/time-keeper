@@ -66,6 +66,7 @@ const formatRequirements: Record<string, FormatRequirements> = {
     ],
     tip: 'Week-Off files are exported as .xls (HTML table) reports — the first banner row is ignored and the header row is auto-detected.'
   },
+};
 
 
 const uploadTypes = [
