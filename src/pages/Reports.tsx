@@ -54,9 +54,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
+import {
+  overtimeColumns,
+  overtimeData,
+  regularizationColumns,
+  regularizationData,
+  partialDayColumns,
+  partialDayReportData,
+  weekOffColumns,
+  weekOffData,
+} from '@/data/reportData';
 import { useIsMobileOrTablet } from '@/hooks/use-mobile';
 
-type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'comprehensive';
+type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'weekoff' | 'comprehensive';
 
 const reportTabs = [
   { id: 'attendance' as ReportTab, label: 'Attendance', icon: Clock, color: 'emerald' },
@@ -64,6 +74,7 @@ const reportTabs = [
   { id: 'overtime' as ReportTab, label: 'Overtime', icon: Clock, color: 'amber' },
   { id: 'partial' as ReportTab, label: 'Partial Day', icon: FileText, color: 'sky' },
   { id: 'regularization' as ReportTab, label: 'Regularization', icon: ClipboardList, color: 'violet' },
+  { id: 'weekoff' as ReportTab, label: 'Week-Off', icon: CalendarOff, color: 'sky' },
   { id: 'comprehensive' as ReportTab, label: 'Comprehensive', icon: TrendingUp, color: 'slate' },
 ];
 
