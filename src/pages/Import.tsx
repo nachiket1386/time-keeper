@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, BarChart3, Timer, Calendar, Edit, ClipboardList, FileText, CheckSquare, Lightbulb, ArrowLeft, Info } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, XCircle, Clock, File, Download, BarChart3, Timer, Calendar, CalendarOff, Edit, ClipboardList, FileText, CheckSquare, Lightbulb, ArrowLeft, Info } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,7 +53,20 @@ const formatRequirements: Record<string, FormatRequirements> = {
     rules: ['Date: DD/MM/YYYY or YYYY-MM-DD', 'Time: HH:MM format', 'EIC Code must be valid', 'Status: Pending, Approved, Rejected'],
     tip: 'Regularization requests correct incorrect or missing punch entries.'
   },
-};
+  'week-off': {
+    required: ['EP NO', 'EP NAME', 'WEEK OFF DATE', 'CONTRACTOR CODE', 'CONTRCTOR NAME', 'STATUS'],
+    optional: ['SECTOR NAME', 'AREA OF MOVEMENT', 'PLANT NAME', 'DEPARTMENT NAME', 'TRADE NAME', 'SKILL', 'CARD CATEGORY', 'PUNCH1', 'PUNCH2', 'OVERTIME', 'CONTRACTOR WO REQUEST DATE', 'REQUESTED EIC', 'REQUESTED EIC NAME', 'ACTUAL EIC CODE', 'EIC NAME', 'EIC REQUEST DATE', 'ADMIN AUTHORIZED BY', 'ADMIN REMARKS'],
+    rules: [
+      'Week Off Date: DD/MM/YYYY or YYYY-MM-DD',
+      'Request dates: DD/MM/YYYY hh:mm:ss AM/PM',
+      'Punch1 / Punch2 / Overtime: HH:MM',
+      'Status: Approved, Pending, Rejected',
+      'EP NO may be numeric or alphanumeric (e.g. PP5100029690)',
+      'One row per employee per week-off date; duplicates will be updated',
+    ],
+    tip: 'Week-Off files are exported as .xls (HTML table) reports — the first banner row is ignored and the header row is auto-detected.'
+  },
+
 
 const uploadTypes = [
   { 
@@ -106,6 +119,16 @@ const uploadTypes = [
     iconBg: 'bg-rose-100',
     iconColor: 'text-rose-600'
   },
+  { 
+    id: 'week-off', 
+    name: 'Week-Off', 
+    description: 'Upload week-off records',
+    icon: CalendarOff,
+    badge: null,
+    badgeVariant: null,
+    iconBg: 'bg-sky-100',
+    iconColor: 'text-sky-600'
+  },
 ];
 
 const uploadHistory = [
@@ -122,6 +145,7 @@ const templates = [
   { name: 'Overtime Template', description: 'Upload overtime records for approval workflow', format: 'xlsx' },
   { name: 'Partial Day Template', description: 'Upload partial day attendance records', format: 'xlsx' },
   { name: 'Regularization Template', description: 'Upload attendance regularization requests', format: 'xlsx' },
+  { name: 'Week-Off Template', description: 'Upload week-off records with EIC approval status', format: 'xls' },
 ];
 
 export default function Import() {
