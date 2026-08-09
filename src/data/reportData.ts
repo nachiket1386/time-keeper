@@ -8,8 +8,6 @@ export interface ReportColumn {
   width: string;
 }
 
-const w = (px: number) => `w-[${px}px] min-w-[${px}px]`;
-
 /* ---------------- Overtime ---------------- */
 export const overtimeColumns: ReportColumn[] = [
   { key: 'epNumber', label: 'EP NO', align: 'left', width: 'w-[104px] min-w-[104px]' },
