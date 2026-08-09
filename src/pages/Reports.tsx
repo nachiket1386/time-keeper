@@ -18,6 +18,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Trash2,
+  CalendarOff,
 
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -54,9 +55,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { attendanceRecords, employees } from '@/data/mockData';
+import {
+  overtimeColumns,
+  overtimeData,
+  regularizationColumns,
+  regularizationData,
+  partialDayColumns,
+  partialDayReportData,
+  weekOffColumns,
+  weekOffData,
+} from '@/data/reportData';
 import { useIsMobileOrTablet } from '@/hooks/use-mobile';
 
-type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'comprehensive';
+type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'weekoff' | 'comprehensive';
 
 const reportTabs = [
   { id: 'attendance' as ReportTab, label: 'Attendance', icon: Clock, color: 'emerald' },
@@ -64,6 +75,7 @@ const reportTabs = [
   { id: 'overtime' as ReportTab, label: 'Overtime', icon: Clock, color: 'amber' },
   { id: 'partial' as ReportTab, label: 'Partial Day', icon: FileText, color: 'sky' },
   { id: 'regularization' as ReportTab, label: 'Regularization', icon: ClipboardList, color: 'violet' },
+  { id: 'weekoff' as ReportTab, label: 'Week-Off', icon: CalendarOff, color: 'sky' },
   { id: 'comprehensive' as ReportTab, label: 'Comprehensive', icon: TrendingUp, color: 'slate' },
 ];
 
@@ -343,17 +355,29 @@ export default function Reports() {
 
   // Get columns based on active tab
   const columns = useMemo(() => {
-    if (activeTab === 'arc') {
-      return arcSummaryColumns;
+    switch (activeTab) {
+      case 'arc':
+        return arcSummaryColumns;
+      case 'overtime':
+        return overtimeColumns;
+      case 'regularization':
+        return regularizationColumns;
+      case 'partial':
+        return partialDayColumns;
+      case 'weekoff':
+        return weekOffColumns;
+      default:
+        return attendanceColumns;
     }
-    return attendanceColumns;
   }, [activeTab]);
 
   // Build enriched records with all displayable values
-  const enrichedRecords = useMemo(() => {
-    if (activeTab === 'arc') {
-      return arcSummaryData;
-    }
+  const enrichedRecords = useMemo<Record<string, string>[]>(() => {
+    if (activeTab === 'arc') return arcSummaryData;
+    if (activeTab === 'overtime') return overtimeData;
+    if (activeTab === 'regularization') return regularizationData;
+    if (activeTab === 'partial') return partialDayReportData;
+    if (activeTab === 'weekoff') return weekOffData;
     return attendanceRecords.map((record, index) => {
       const employee = employees.find(e => e.epNumber === record.epNumber);
       
@@ -618,6 +642,9 @@ export default function Reports() {
       'L': 'bg-violet-500 text-white',
       'Holiday': 'bg-blue-500 text-white',
       'PH': 'bg-blue-500 text-white',
+      'Approved': 'bg-emerald-500 text-white',
+      'Pending': 'bg-amber-400 text-amber-900',
+      'Rejected': 'bg-red-500 text-white',
     };
     return (
       <Badge className={cn('font-medium text-[10px] px-1.5 py-0 whitespace-nowrap', styles[status] || 'bg-gray-400 text-white')}>
@@ -711,6 +738,8 @@ export default function Reports() {
         return { title: 'Partial Day Report', description: 'View and manage partial day attendance records.' };
       case 'regularization':
         return { title: 'Regularization Report', description: 'View and manage attendance regularization requests.' };
+      case 'weekoff':
+        return { title: 'Week-Off Report', description: 'View and manage week-off working records and requests.' };
       case 'comprehensive':
         return { title: 'Comprehensive Report', description: 'Complete attendance data with all metrics combined.' };
       default:
@@ -978,9 +1007,9 @@ export default function Reports() {
             ) : (
               paginatedRecords.map((record, index) => {
                 const recordAny = record as Record<string, string>;
-                const displayName = recordAny.employeeName || recordAny.name || '-';
+                const displayName = recordAny.employeeName || recordAny.name || recordAny.epName || '-';
                 const detailCols = columns.filter(
-                  (c) => !['epNumber', 'employeeName', 'name', 'status', 'actions', 'timePairs'].includes(c.key)
+                  (c) => !['epNumber', 'employeeName', 'name', 'epName', 'status', 'actions', 'timePairs'].includes(c.key)
                 );
                 const hasPunches = 'timePairs' in recordAny;
 
