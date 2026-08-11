@@ -310,6 +310,3 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
   );
 }
 
-  );
-}
-
