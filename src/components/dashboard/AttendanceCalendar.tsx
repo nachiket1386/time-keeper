@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { attendanceRecords, employees } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { DayDetailDialog } from './DayDetailDialog';
 
 interface AttendanceCalendarProps {
   companyId?: string;
