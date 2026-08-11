@@ -266,7 +266,11 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
                 <button
                   key={day}
                   type="button"
-                  title={status ? `${day} ${months[selectedMonth]} — ${status}` : `${day} ${months[selectedMonth]}`}
+                  title={`${status ? `${day} ${months[selectedMonth]} — ${status}` : `${day} ${months[selectedMonth]}`} (double-click for details)`}
+                  onDoubleClick={() => {
+                    setDetailDate(`${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+                    setDetailOpen(true);
+                  }}
                   className={cn(
                     'relative flex aspect-square flex-col items-center justify-center rounded-lg text-[11px] font-semibold transition-all hover:ring-2 hover:ring-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     style
