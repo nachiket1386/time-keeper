@@ -298,7 +298,18 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
           ))}
         </div>
       </CardContent>
+
+      <DayDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        epNumber={selectedEmployee?.epNumber}
+        employeeName={selectedEmployee?.name}
+        date={detailDate}
+      />
     </Card>
+  );
+}
+
   );
 }
 
