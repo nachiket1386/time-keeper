@@ -22,6 +22,9 @@ const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: AttendanceCalendarProps) {
   const [search, setSearch] = useState('');
   const [selectedEP, setSelectedEP] = useState<string>('');
+  const [detailDate, setDetailDate] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
   const [selectedMonth, setSelectedMonth] = useState<number>(externalMonth?.getMonth() ?? new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(externalMonth?.getFullYear() ?? new Date().getFullYear());
 
