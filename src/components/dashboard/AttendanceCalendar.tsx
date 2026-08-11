@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { attendanceRecords, employees } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { DayDetailDialog } from './DayDetailDialog';
 
 interface AttendanceCalendarProps {
   companyId?: string;
@@ -21,6 +22,9 @@ const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: AttendanceCalendarProps) {
   const [search, setSearch] = useState('');
   const [selectedEP, setSelectedEP] = useState<string>('');
+  const [detailDate, setDetailDate] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
   const [selectedMonth, setSelectedMonth] = useState<number>(externalMonth?.getMonth() ?? new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(externalMonth?.getFullYear() ?? new Date().getFullYear());
 
@@ -262,7 +266,11 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
                 <button
                   key={day}
                   type="button"
-                  title={status ? `${day} ${months[selectedMonth]} — ${status}` : `${day} ${months[selectedMonth]}`}
+                  title={`${status ? `${day} ${months[selectedMonth]} — ${status}` : `${day} ${months[selectedMonth]}`} (double-click for details)`}
+                  onDoubleClick={() => {
+                    setDetailDate(`${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+                    setDetailOpen(true);
+                  }}
                   className={cn(
                     'relative flex aspect-square flex-col items-center justify-center rounded-lg text-[11px] font-semibold transition-all hover:ring-2 hover:ring-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                     style
@@ -290,6 +298,14 @@ export function AttendanceCalendar({ companyId, selectedMonth: externalMonth }: 
           ))}
         </div>
       </CardContent>
+
+      <DayDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        epNumber={selectedEmployee?.epNumber}
+        employeeName={selectedEmployee?.name}
+        date={detailDate}
+      />
     </Card>
   );
 }
