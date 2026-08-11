@@ -4,7 +4,6 @@ import {
   FileSpreadsheet,
   FileText,
   ClipboardList,
-  TrendingUp,
   Download,
   ChevronLeft,
   ChevronRight,
@@ -19,7 +18,6 @@ import {
   PanelLeft,
   Trash2,
   CalendarOff,
-
 } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card } from '@/components/ui/card';
@@ -67,7 +65,7 @@ import {
 } from '@/data/reportData';
 import { useIsMobileOrTablet } from '@/hooks/use-mobile';
 
-type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'weekoff' | 'comprehensive';
+type ReportTab = 'attendance' | 'arc' | 'overtime' | 'partial' | 'regularization' | 'weekoff';
 
 const reportTabs = [
   { id: 'attendance' as ReportTab, label: 'Attendance', icon: Clock, color: 'emerald' },
@@ -76,7 +74,6 @@ const reportTabs = [
   { id: 'partial' as ReportTab, label: 'Partial Day', icon: FileText, color: 'sky' },
   { id: 'regularization' as ReportTab, label: 'Regularization', icon: ClipboardList, color: 'violet' },
   { id: 'weekoff' as ReportTab, label: 'Week-Off', icon: CalendarOff, color: 'sky' },
-  { id: 'comprehensive' as ReportTab, label: 'Comprehensive', icon: TrendingUp, color: 'slate' },
 ];
 
 const getTabStyles = (color: string, isActive: boolean) => {
@@ -740,8 +737,6 @@ export default function Reports() {
         return { title: 'Regularization Report', description: 'View and manage attendance regularization requests.' };
       case 'weekoff':
         return { title: 'Week-Off Report', description: 'View and manage week-off working records and requests.' };
-      case 'comprehensive':
-        return { title: 'Comprehensive Report', description: 'Complete attendance data with all metrics combined.' };
       default:
         return { title: 'Attendance Data', description: 'View and manage attendance records.' };
     }
