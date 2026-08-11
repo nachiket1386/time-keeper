@@ -5,7 +5,6 @@ import {
   Users,
   Building2,
   ClipboardList,
-  FileSpreadsheet,
   Upload,
   FileText,
   Clock,
@@ -92,12 +91,6 @@ const reportsItems: NavItem[] = [
     title: 'Regularization',
     url: '/reports/regularization',
     icon: RefreshCw,
-    roles: ['root', 'admin'],
-  },
-  {
-    title: 'Comprehensive',
-    url: '/reports/comprehensive',
-    icon: FileSpreadsheet,
     roles: ['root', 'admin'],
   },
 ];
