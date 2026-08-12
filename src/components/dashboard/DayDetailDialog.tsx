@@ -36,7 +36,7 @@ function Tone({ value }: { value: string }) {
   return (
     <Badge
       variant="outline"
-      className={cn('h-5 rounded-md px-2 text-[10px] font-semibold', statusTone[value] ?? 'bg-muted text-muted-foreground border-border')}
+      className={cn('h-6 rounded-md px-2.5 text-xs font-semibold', statusTone[value] ?? 'bg-muted text-muted-foreground border-border')}
     >
       {value}
     </Badge>
@@ -119,38 +119,38 @@ export function DayDetailDialog({ open, onOpenChange, epNumber, employeeName, da
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[520px]">
         <DialogHeader className="space-y-1 text-left">
-          <DialogTitle className="font-heading text-base">Attendance Data</DialogTitle>
-          <p className="text-xs text-muted-foreground">
+          <DialogTitle className="font-heading text-lg">Attendance Data</DialogTitle>
+          <p className="text-sm text-muted-foreground">
             {employeeName} · <span className="font-mono">{epNumber}</span>
             {date && <> · {format(new Date(`${date}T00:00:00`), 'dd MMM yyyy (EEEE)')}</>}
           </p>
         </DialogHeader>
 
         {/* Attendance summary */}
-        <div className="rounded-xl border border-border bg-card p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-              <CalendarDays className="h-3.5 w-3.5 text-primary" /> Attendance
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <CalendarDays className="h-4 w-4 text-primary" /> Attendance
             </span>
             <Tone value={record?.status ?? 'No Record'} />
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { icon: Clock, label: 'Shift', value: 'General' },
               { icon: LogIn, label: 'Punch In', value: record?.punchIn || '--' },
               { icon: LogOut, label: 'Punch Out', value: record?.punchOut || '--' },
               { icon: Timer, label: 'Hours', value: hours },
             ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="rounded-lg bg-muted/50 px-2 py-2">
-                <p className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
-                  <Icon className="h-3 w-3" /> {label}
+              <div key={label} className="rounded-lg bg-muted/50 px-3 py-2.5">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <Icon className="h-3.5 w-3.5" /> {label}
                 </p>
-                <p className="mt-0.5 font-mono text-xs font-semibold text-foreground">{value}</p>
+                <p className="mt-1 font-mono text-sm font-semibold text-foreground">{value}</p>
               </div>
             ))}
           </div>
           {record && (
-            <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-4">
+            <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
               <div><span className="text-muted-foreground">Mandays: </span><span className="font-semibold">{record.mandays}</span></div>
               <div><span className="text-muted-foreground">OT: </span><span className="font-semibold">{record.overtime} hr</span></div>
               <div className="col-span-2"><span className="text-muted-foreground">Contractor: </span><span className="font-semibold">{record.contractor}</span></div>
@@ -159,22 +159,22 @@ export function DayDetailDialog({ open, onOpenChange, epNumber, employeeName, da
         </div>
 
         {/* Requests */}
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-foreground">Request Status</p>
+        <div className="space-y-3">
+          <p className="text-sm font-semibold text-foreground">Request Status</p>
           {requests.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-[11px] text-muted-foreground">
+            <p className="rounded-xl border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">
               No Overtime, Partial Day, Regularization or Week-Off request for this date.
             </p>
           ) : (
             requests.map(r => (
-              <div key={r.type} className="rounded-xl border border-border p-3">
-                <div className="mb-1.5 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-foreground">{r.type}</span>
+              <div key={r.type} className="rounded-xl border border-border p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">{r.type}</span>
                   <Tone value={r.status} />
                 </div>
-                <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {r.details.map(d => (
-                    <div key={d.label} className="flex justify-between gap-2 text-[11px]">
+                    <div key={d.label} className="flex justify-between gap-2 text-sm">
                       <span className="text-muted-foreground">{d.label}</span>
                       <span className="font-medium text-foreground">{d.value}</span>
                     </div>
