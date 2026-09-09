@@ -1,0 +1,3 @@
+- [ ] Add employee linkage and User2 RLS in Lovable Cloud
+- [ ] Update auth profile data and User2 navigation/data filtering
+- [ ] Verify the User2 path and confirm access boundaries
