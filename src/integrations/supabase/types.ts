@@ -170,6 +170,7 @@ export type Database = {
           plant: string | null
           supervisor_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           company_id: string
@@ -183,6 +184,7 @@ export type Database = {
           plant?: string | null
           supervisor_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           company_id?: string
@@ -196,6 +198,7 @@ export type Database = {
           plant?: string | null
           supervisor_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
