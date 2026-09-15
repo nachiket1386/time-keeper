@@ -1,0 +1,1 @@
+ALTER FUNCTION public.link_individual_employee(uuid,uuid) SECURITY INVOKER;
