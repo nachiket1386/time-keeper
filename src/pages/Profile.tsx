@@ -18,12 +18,14 @@ export default function Profile() {
     .toUpperCase();
 
   const roleBadgeStyles = {
+    user2: 'bg-primary/10 text-primary border-primary/20',
     root: 'bg-purple-100 text-purple-700 border-purple-200',
     admin: 'bg-blue-100 text-blue-700 border-blue-200',
     user1: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   };
 
   const roleLabels = {
+    user2: 'Individual (User2)',
     root: 'Root Administrator',
     admin: 'Company Admin',
     user1: 'Supervisor',
@@ -32,7 +34,8 @@ export default function Profile() {
   const profileItems = [
     { icon: User, label: 'Full Name', value: user.name },
     { icon: Mail, label: 'Username', value: user.username },
-    { icon: Building2, label: 'Company', value: user.company || 'All Companies' },
+    { icon: Building2, label: 'Company', value: user.company || (user.role === 'root' ? 'All Companies' : 'Not assigned') },
+    ...(user.role === 'user2' ? [{ icon: User, label: 'Employee', value: user.employeeCode ? `${user.employeeCode} — ${user.employeeName}` : 'Not linked' }] : []),
     { icon: Shield, label: 'Role', value: roleLabels[user.role], badge: true },
     ...(user.accessFromDate
       ? [

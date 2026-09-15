@@ -51,7 +51,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
 
   const filteredItems = menuItems.filter((item) => {
     if (item.rootOnly && user.role !== 'root') return false;
-    if (item.adminOnly && user.role === 'user1') return false;
+    if (item.adminOnly && user.role !== 'root' && user.role !== 'admin') return false;
     return true;
   });
 

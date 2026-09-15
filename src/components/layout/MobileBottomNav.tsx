@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MobileMenu } from './MobileMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -16,6 +17,7 @@ const navItems = [
 ];
 
 export function MobileBottomNav() {
+  const { user } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -30,7 +32,7 @@ export function MobileBottomNav() {
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg lg:hidden">
         <div className="flex items-center justify-around h-16 px-2">
-          {navItems.map((item) => (
+          {navItems.filter((item) => item.href !== '/import' || user?.role === 'root' || user?.role === 'admin').map((item) => (
             <Link
               key={item.href}
               to={item.href === '/reports' ? '/reports/arc-summary' : item.href}
