@@ -1,3 +1,3 @@
 - [x] Add employee linkage and User2 RLS in Lovable Cloud
-- [ ] Complete User2 live own-attendance views, safe navigation, and employee linking
-- [ ] Verify the User2 path and confirm access boundaries
+- [x] Complete User2 live own-attendance views, safe navigation, and employee linking
+- [x] Verify the User2 path and confirm access boundaries

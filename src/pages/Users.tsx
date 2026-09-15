@@ -76,6 +76,7 @@ export default function Users() {
       root: { label: 'Root', className: 'bg-purple-100 text-purple-700 border-purple-200' },
       admin: { label: 'Admin', className: 'bg-blue-100 text-blue-700 border-blue-200' },
       user1: { label: 'Supervisor', className: 'bg-green-100 text-green-700 border-green-200' },
+      user2: { label: 'Individual', className: 'bg-primary/10 text-primary border-primary/20' },
     };
     const variant = variants[role] || variants.user1;
     return <Badge className={variant.className}>{variant.label}</Badge>;
