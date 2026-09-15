@@ -38,7 +38,6 @@ const USERNAME_DOMAIN = 'app.local';
 const toEmail = (username: string) => `${username.trim().toLowerCase()}@${USERNAME_DOMAIN}`;
 
 async function loadProfile(userId: string): Promise<User | null> {
-  const employeeTable = supabase.from('employees') as any;
   const [{ data: profile }, { data: roles }, { data: linkedEmployee }, { data: supervisedEmployees }] = await Promise.all([
     supabase
       .from('profiles')
@@ -46,11 +45,11 @@ async function loadProfile(userId: string): Promise<User | null> {
       .eq('id', userId)
       .maybeSingle(),
     supabase.from('user_roles').select('role').eq('user_id', userId),
-    employeeTable
+    supabase.from('employees')
       .select('id, employee_code, full_name, company_id, user_id')
       .eq('user_id', userId)
       .maybeSingle(),
-    employeeTable
+    supabase.from('employees')
       .select('id, employee_code')
       .eq('supervisor_id', userId),
   ]);

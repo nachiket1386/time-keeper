@@ -40,6 +40,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { companies } from '@/data/mockData';
+import { IndividualEmployeeLink } from '@/components/IndividualEmployeeLink';
 
 const usersData = [
   { id: 1, name: 'System Administrator', email: 'root@ams.com', role: 'root', company: null, status: 'active', lastLogin: '2024-01-15 09:30' },
@@ -88,6 +89,7 @@ export default function Users() {
       />
 
       {/* Stats */}
+      {user?.role === 'root' && <IndividualEmployeeLink />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
