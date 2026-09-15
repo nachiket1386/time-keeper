@@ -25,11 +25,12 @@ export function canViewEmployee(
   );
 }
 
-export function filterEmployeeRecords<T extends { employeeId?: string; epNumber?: string }>(
+export function filterEmployeeRecords<T extends { employeeId?: string; epNumber?: string; companyId?: string }>(
   records: T[],
   user: User | null,
 ): T[] {
-  if (!user || user.role === 'root') return records;
+  if (!user) return [];
+  if (user.role === 'root') return records;
 
   if (user.role === 'admin') {
     return user.companyId

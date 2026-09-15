@@ -40,7 +40,7 @@ const navItems = [
 ];
 
 export function TopNavbar() {
-  const { user, switchRole, logout } = useAuth();
+   const { user, logout } = useAuth();
   const location = useLocation();
 
   if (!user) return null;
@@ -70,7 +70,7 @@ export function TopNavbar() {
 
           {/* Navigation Pills */}
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => (
+            {navItems.filter((item) => item.href !== '/import' || user.role === 'root' || user.role === 'admin').map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
@@ -176,24 +176,9 @@ export function TopNavbar() {
             </DropdownMenu>
           )}
 
-          {/* Role Switcher */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-full text-sm">
-                <span className="capitalize px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                  {user.role}
-                </span>
-                <ChevronDown className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card/95 backdrop-blur-md border border-border/60 shadow-xl z-50">
-              <DropdownMenuLabel>Switch Role (Demo)</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => switchRole('root')}>Root Administrator</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('admin')}>Company Admin</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('user1')}>Supervisor (User1)</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <span className="capitalize px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
+            {user.role === 'user2' ? 'Individual (User2)' : user.role}
+          </span>
 
           {/* Notifications */}
           <Button

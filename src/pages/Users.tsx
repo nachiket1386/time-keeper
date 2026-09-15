@@ -40,6 +40,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { companies } from '@/data/mockData';
+import { IndividualEmployeeLink } from '@/components/IndividualEmployeeLink';
 
 const usersData = [
   { id: 1, name: 'System Administrator', email: 'root@ams.com', role: 'root', company: null, status: 'active', lastLogin: '2024-01-15 09:30' },
@@ -75,6 +76,7 @@ export default function Users() {
       root: { label: 'Root', className: 'bg-purple-100 text-purple-700 border-purple-200' },
       admin: { label: 'Admin', className: 'bg-blue-100 text-blue-700 border-blue-200' },
       user1: { label: 'Supervisor', className: 'bg-green-100 text-green-700 border-green-200' },
+      user2: { label: 'Individual', className: 'bg-primary/10 text-primary border-primary/20' },
     };
     const variant = variants[role] || variants.user1;
     return <Badge className={variant.className}>{variant.label}</Badge>;
@@ -88,6 +90,7 @@ export default function Users() {
       />
 
       {/* Stats */}
+      {user?.role === 'root' && <IndividualEmployeeLink />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">

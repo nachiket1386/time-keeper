@@ -274,7 +274,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      link_individual_employee: {
+        Args: { _employee_id: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "root" | "admin" | "user1" | "user2"
