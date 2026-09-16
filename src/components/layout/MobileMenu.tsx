@@ -96,18 +96,18 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
           </div>
         </DialogHeader>
         
-        <div className="grid grid-cols-3 gap-2.5 mt-3">
+        <div className="flex flex-wrap justify-center gap-2.5 mt-3">
           {filteredItems.map((item) => (
             <MenuCard key={item.href} {...item} />
           ))}
-          
+
           {/* Sign Out Card */}
           <button
             onClick={() => {
               logout();
               onOpenChange(false);
             }}
-            className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all min-h-[90px] bg-destructive/10 border-2 border-transparent hover:bg-destructive/15 active:scale-95"
+            className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all min-h-[90px] w-[calc((100%-1.25rem)/3)] bg-destructive/10 border-2 border-transparent hover:bg-destructive/15 active:scale-95"
           >
             <LogOut className="h-6 w-6 text-destructive" strokeWidth={1.5} />
             <span className="text-xs font-medium text-destructive">Sign Out</span>
