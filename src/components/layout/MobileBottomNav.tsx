@@ -34,6 +34,8 @@ export function MobileBottomNav() {
   const mid = Math.ceil(visibleItems.length / 2);
   const leftItems = visibleItems.slice(0, mid);
   const rightItems = visibleItems.slice(mid);
+  // Odd number of columns keeps the More button exactly centered
+  const totalCols = 2 * mid + 1;
 
   const NavLink = ({ item }: { item: (typeof navItems)[number] }) => (
     <Link
@@ -56,7 +58,7 @@ export function MobileBottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg lg:hidden">
         <div
           className="grid items-center h-16 px-2"
-          style={{ gridTemplateColumns: `repeat(${visibleItems.length + 1}, minmax(0, 1fr))` }}
+          style={{ gridTemplateColumns: `repeat(${totalCols}, minmax(0, 1fr))` }}
         >
           {leftItems.map((item) => (
             <div key={item.href} className="flex justify-center">
