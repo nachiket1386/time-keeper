@@ -55,7 +55,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
     return true;
   });
 
-  const CARD_WIDTH = 'w-[calc((100%-1.25rem)/3)]';
+  const CARD_WIDTH = 'w-full';
 
   const MenuCard = ({ href, icon: Icon, title, hasBadge }: { href: string; icon: any; title: string; hasBadge?: boolean }) => (
     <Link
@@ -96,18 +96,21 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
           </div>
         </DialogHeader>
         
-        <div className="flex flex-wrap justify-center gap-2.5 mt-3">
+        <div className="grid grid-cols-3 gap-2.5 mt-3">
           {filteredItems.map((item) => (
             <MenuCard key={item.href} {...item} />
           ))}
 
-          {/* Sign Out Card */}
+          {/* Sign Out Card — centered when it's alone on the last row */}
           <button
             onClick={() => {
               logout();
               onOpenChange(false);
             }}
-            className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all min-h-[90px] w-[calc((100%-1.25rem)/3)] bg-destructive/10 border-2 border-transparent hover:bg-destructive/15 active:scale-95"
+            className={cn(
+              'flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all min-h-[90px] w-full bg-destructive/10 border-2 border-transparent hover:bg-destructive/15 active:scale-95',
+              (filteredItems.length + 1) % 3 === 1 && 'col-start-2'
+            )}
           >
             <LogOut className="h-6 w-6 text-destructive" strokeWidth={1.5} />
             <span className="text-xs font-medium text-destructive">Sign Out</span>
