@@ -96,7 +96,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
           </div>
         </DialogHeader>
         
-        <div className="flex flex-wrap justify-center gap-2.5 mt-3">
+        <div className="grid grid-cols-3 gap-2.5 mt-3">
           {filteredItems.map((item) => (
             <MenuCard key={item.href} {...item} />
           ))}
