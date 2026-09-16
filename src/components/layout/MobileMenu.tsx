@@ -55,12 +55,15 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
     return true;
   });
 
+  const CARD_WIDTH = 'w-[calc((100%-1.25rem)/3)]';
+
   const MenuCard = ({ href, icon: Icon, title, hasBadge }: { href: string; icon: any; title: string; hasBadge?: boolean }) => (
     <Link
       to={href}
       onClick={() => onOpenChange(false)}
       className={cn(
         'relative flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all min-h-[90px]',
+        CARD_WIDTH,
         isActive(href)
           ? 'bg-primary/15 border-2 border-primary/30 shadow-sm'
           : 'bg-muted/60 border-2 border-transparent hover:bg-muted hover:border-border active:scale-95'
@@ -78,7 +81,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-5 top-auto bottom-16 translate-y-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom rounded-3xl mb-2 mx-3 w-[calc(100%-1.5rem)]">
+      <DialogContent className="sm:max-w-md p-5 top-auto bottom-16 translate-y-0 data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom rounded-3xl w-[calc(100%-1.5rem)]">
         <DialogHeader className="pb-3 border-b">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
@@ -93,18 +96,18 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
           </div>
         </DialogHeader>
         
-        <div className="grid grid-cols-3 gap-2.5 mt-3">
+        <div className="flex flex-wrap justify-center gap-2.5 mt-3">
           {filteredItems.map((item) => (
             <MenuCard key={item.href} {...item} />
           ))}
-          
+
           {/* Sign Out Card */}
           <button
             onClick={() => {
               logout();
               onOpenChange(false);
             }}
-            className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all min-h-[90px] bg-destructive/10 border-2 border-transparent hover:bg-destructive/15 active:scale-95"
+            className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all min-h-[90px] w-[calc((100%-1.25rem)/3)] bg-destructive/10 border-2 border-transparent hover:bg-destructive/15 active:scale-95"
           >
             <LogOut className="h-6 w-6 text-destructive" strokeWidth={1.5} />
             <span className="text-xs font-medium text-destructive">Sign Out</span>
