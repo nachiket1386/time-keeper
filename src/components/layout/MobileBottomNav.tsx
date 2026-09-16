@@ -28,27 +28,40 @@ export function MobileBottomNav() {
     return location.pathname === href;
   };
 
+  const visibleItems = navItems.filter(
+    (item) => item.href !== '/import' || user?.role === 'root' || user?.role === 'admin'
+  );
+  const mid = Math.ceil(visibleItems.length / 2);
+  const leftItems = visibleItems.slice(0, mid);
+  const rightItems = visibleItems.slice(mid);
+
+  const NavLink = ({ item }: { item: (typeof navItems)[number] }) => (
+    <Link
+      to={item.href === '/reports' ? '/reports/arc-summary' : item.href}
+      className={cn(
+        'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
+        isActive(item.href)
+          ? 'text-primary bg-primary/10'
+          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+      )}
+    >
+      <item.icon className="h-5 w-5" />
+      <span className="text-[10px] font-medium">{item.title}</span>
+    </Link>
+  );
+
+
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg lg:hidden">
-        <div className="flex items-center justify-around h-16 px-2">
-          {navItems.filter((item) => item.href !== '/import' || user?.role === 'root' || user?.role === 'admin').map((item) => (
-            <Link
-              key={item.href}
-              to={item.href === '/reports' ? '/reports/arc-summary' : item.href}
-              className={cn(
-                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
-                isActive(item.href)
-                  ? 'text-primary bg-primary/10'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="text-[10px] font-medium">{item.title}</span>
-            </Link>
-          ))}
+        <div className="flex items-center h-16 px-2">
+          <div className="flex flex-1 items-center justify-evenly">
+            {leftItems.map((item) => (
+              <NavLink key={item.href} item={item} />
+            ))}
+          </div>
 
-          {/* More Menu */}
+          {/* More Menu — always dead center */}
           <button
             onClick={() => setMenuOpen(true)}
             className={cn(
@@ -59,6 +72,12 @@ export function MobileBottomNav() {
             <Menu className="h-5 w-5" />
             <span className="text-[10px] font-medium">More</span>
           </button>
+
+          <div className="flex flex-1 items-center justify-evenly">
+            {rightItems.map((item) => (
+              <NavLink key={item.href} item={item} />
+            ))}
+          </div>
         </div>
       </nav>
 
