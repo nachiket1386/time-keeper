@@ -54,30 +54,35 @@ export function MobileBottomNav() {
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card shadow-lg lg:hidden">
-        <div className="flex items-center h-16 px-2">
-          <div className="flex flex-1 items-center justify-evenly">
-            {leftItems.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </div>
+        <div
+          className="grid items-center h-16 px-2"
+          style={{ gridTemplateColumns: `repeat(${visibleItems.length + 1}, minmax(0, 1fr))` }}
+        >
+          {leftItems.map((item) => (
+            <div key={item.href} className="flex justify-center">
+              <NavLink item={item} />
+            </div>
+          ))}
 
           {/* More Menu — always dead center */}
-          <button
-            onClick={() => setMenuOpen(true)}
-            className={cn(
-              'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
-              'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-            )}
-          >
-            <Menu className="h-5 w-5" />
-            <span className="text-[10px] font-medium">More</span>
-          </button>
-
-          <div className="flex flex-1 items-center justify-evenly">
-            {rightItems.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
+          <div className="flex justify-center">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className={cn(
+                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
+                'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              )}
+            >
+              <Menu className="h-5 w-5" />
+              <span className="text-[10px] font-medium">More</span>
+            </button>
           </div>
+
+          {rightItems.map((item) => (
+            <div key={item.href} className="flex justify-center">
+              <NavLink item={item} />
+            </div>
+          ))}
         </div>
       </nav>
 

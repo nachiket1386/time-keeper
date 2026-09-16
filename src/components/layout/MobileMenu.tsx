@@ -55,7 +55,7 @@ export function MobileMenu({ open, onOpenChange }: MobileMenuProps) {
     return true;
   });
 
-  const CARD_WIDTH = 'w-[calc((100%-1.25rem)/3)]';
+  const CARD_WIDTH = 'w-full';
 
   const MenuCard = ({ href, icon: Icon, title, hasBadge }: { href: string; icon: any; title: string; hasBadge?: boolean }) => (
     <Link
